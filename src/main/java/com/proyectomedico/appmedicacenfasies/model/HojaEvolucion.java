@@ -35,7 +35,7 @@ public class HojaEvolucion {
     private String plan; // [cite: 12]
 
     // CONEXIÓN: Muchas hojas pertenecen a UN paciente
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     private Paciente paciente;
 }

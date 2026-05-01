@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!-- VBox Principal: Contiene las dos filas principales -->
+<VBox spacing="20.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.DashboardController">
+
+    <!-- FILA SUPERIOR: Botones y Buscador -->
+    <HBox spacing="20.0" alignment="CENTER_LEFT">
+        <children>
+            <Button fx:id="btnNuevoPaciente" mnemonicParsing="false" styleClass="boton-principal" text="Nuevo Paciente" prefWidth="150.0" />
+
+            <!-- HBox.hgrow="ALWAYS" hace que el buscador ocupe todo el espacio central -->
+            <TextField fx:id="txtBuscar" promptText="Buscador" styleClass="buscador-azul" HBox.hgrow="ALWAYS" />
+
+            <Button fx:id="btnAgendarCita" mnemonicParsing="false" styleClass="boton-principal" text="Agendar cita" prefWidth="150.0"/>
+        </children>
+    </HBox>
+
+    <!-- FILA INFERIOR: Paneles de Contenido (VBox.vgrow="ALWAYS" para ocupar el alto restante) -->
+    <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+        <children>
+
+            <!-- PANEL IZQUIERDO: Lista de Pacientes -->
+            <VBox styleClass="panel-azul" prefWidth="250.0">
+                <children>
+                    <Label text="Lista de pacientes" styleClass="texto-panel" />
+                    <!-- AQUÍ ESTÁ EL COMPONENTE FALTANTE -->
+                    <ListView fx:id="listaPacientes" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-control-inner-background: transparent;" />
+                </children>
+            </VBox>
+
+            <!-- PANEL CENTRAL/DERECHO: Área principal -->
+            <VBox styleClass="panel-azul" HBox.hgrow="ALWAYS" spacing="15.0">
+                <children>
+                    <!-- Contenedor para el botón de Vista alineado a la izquierda -->
+                    <HBox>
+                        <Button mnemonicParsing="false" styleClass="boton-vista" text="Vista" />
+                    </HBox>
+
+                    <!-- Área para centrar el texto "Lista o cuadrícula" -->
+                    <VBox alignment="CENTER" VBox.vgrow="ALWAYS">
+                        <Label text="Lista o cuadricula" styleClass="texto-panel" />
+                    </VBox>
+                </children>
+            </VBox>
+
+        </children>
+    </HBox>
+
+</VBox>
