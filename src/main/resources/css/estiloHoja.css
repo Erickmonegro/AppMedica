@@ -1,0 +1,27 @@
+/* Tarjetas blancas para agrupar campos */
+.panel-blanco-redondeado {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);
+}
+
+/* Títulos de las secciones */
+.texto-panel-oscuro {
+    -fx-text-fill: #2f3640;
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* Campos de texto estilizados */
+.text-field-form, .text-area-form {
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-border-color: #dcdde1;
+    -fx-padding: 8;
+}
+.text-field-form:focused, .text-area-form:focused {
+    -fx-border-color: #0b4a9e; /* El borde se pone azul al escribir */
+    -fx-border-width: 2;
+}
