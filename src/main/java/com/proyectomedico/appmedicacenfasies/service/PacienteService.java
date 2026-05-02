@@ -1,5 +1,6 @@
 package com.proyectomedico.appmedicacenfasies.service;
 
+import com.proyectomedico.appmedicacenfasies.dto.PacienteRegistroDTO;
 import com.proyectomedico.appmedicacenfasies.dto.PacienteResumenDTO;
 import com.proyectomedico.appmedicacenfasies.model.*;
 import com.proyectomedico.appmedicacenfasies.model.HabitosToxicos;
@@ -21,6 +22,7 @@ public class PacienteService {
     private final ExamenFisicoRepository examenFisicoRepository;
     private final HabitosToxicosRepository habitosToxicosRepository;
     private final AntecedentesPacienteRepository antecedentesRepository;
+    private final HojaEvolucionRepository hojaEvolucionRepository;
 
     /**
      * Registra un paciente nuevo junto con su historial base (Examen, Hábitos, Antecedentes).
@@ -116,6 +118,49 @@ public class PacienteService {
                 .orElseThrow(() -> new RuntimeException("Paciente no encontrado con el ID: " + pacienteId));
     }
 
+    // Importante: Asegúrate de importar org.springframework.transaction.annotation.Transactional;
+    @Transactional
+    public void registrarNuevaHistoriaClinica(PacienteRegistroDTO dto) {
+        log.info("Iniciando transacción segura para el paciente: {}", dto.datosPersonales().cedula());
+
+        // 1. EXTRAER Y GUARDAR EL PACIENTE PRINCIPAL
+        Paciente paciente = new Paciente();
+        paciente.setNombreApellidos(dto.datosPersonales().nombreApellidos());
+        paciente.setCedula(dto.datosPersonales().cedula());
+        paciente.setFechaNacimiento(dto.datosPersonales().fechaNacimiento());
+        paciente.setDireccion(dto.datosPersonales().direccion());
+        paciente.setTelefonos(dto.datosPersonales().telefonos());
+        paciente.setSeguro(dto.datosPersonales().seguro());
+        paciente.setOcupacion(dto.datosPersonales().ocupacion());
+        // (Agrega sexo, tipo de sangre, etc., cuando los incluyas en la UI)
+
+        // Guardamos el paciente primero para que PostgreSQL le asigne su UUID
+        paciente = pacienteRepository.save(paciente);
+
+        // 2. EXTRAER Y GUARDAR ANTECEDENTES ASOCIADOS
+        AntecedentesPaciente antecedentes = new AntecedentesPaciente();
+        antecedentes.setPaciente(paciente); // ¡Clave para la relación (Foreign Key)!
+        antecedentes.setAntecedentesFamiliares(dto.antecedentes().antecedentesFamiliares());
+        antecedentes.setAntecedentesPersonales(dto.antecedentes().antecedentesPersonales());
+        antecedentes.setAlergias(dto.antecedentes().alergias());
+        antecedentes.setCirugias(dto.antecedentes().cirugias());
+        antecedentesRepository.save(antecedentes); // Descomenta si tienes este repositorio
+
+        // 3. EXTRAER Y GUARDAR HÁBITOS TÓXICOS
+        HabitosToxicos habitos = new HabitosToxicos();
+        habitos.setPaciente(paciente);
+        habitos.setTabaco(dto.habitos().tabaco());
+        habitos.setAlcohol(dto.habitos().alcohol());
+        habitos.setCafe(dto.habitos().cafe());
+        habitos.setDrogas(dto.habitos().drogas());
+        habitos.setHooka(dto.habitos().hooka());
+        habitos.setCigarroElectronico(dto.habitos().cigarrilloElectronico());
+        habitosToxicosRepository.save(habitos); // Descomenta si tienes este repositorio
+
+
+
+        log.info("Transacción completada. Historia clínica guardada con éxito.");
+    }
 
 
 }

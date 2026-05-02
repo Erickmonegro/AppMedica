@@ -1,7 +1,7 @@
 package com.proyectomedico.appmedicacenfasies.dto;
 
 public record HabitosToxicosDTO(
-        boolean fuma,
+        boolean tabaco,
         boolean alcohol,
         boolean hooka,
         boolean cigarrilloElectronico,

@@ -1,6 +1,7 @@
 package com.proyectomedico.appmedicacenfasies.controller;
 
 import com.proyectomedico.appmedicacenfasies.dto.*;
+import com.proyectomedico.appmedicacenfasies.service.PacienteService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class NuevoPacienteController {
+
+    // Debajo de tus declaraciones de @FXML...
+    private final PacienteService pacienteService;
 
     // --- SECCIÓN 1: DATOS PERSONALES ---
     @FXML private TextField txtNombre;
@@ -135,6 +139,7 @@ public class NuevoPacienteController {
             // Fíjate cómo ahora navegamos al nombre a través de datosPersonales()
             log.info("DTO construido con éxito para el paciente: {}", nuevoRegistro.datosPersonales().nombreApellidos());
 
+            pacienteService.registrarNuevaHistoriaClinica(nuevoRegistro);
             // TODO: Enviar al PacienteService y cerrar la ventana
             cerrarVentana(event);
 
