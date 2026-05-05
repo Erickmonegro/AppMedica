@@ -2,16 +2,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
-        <relativePath/> </parent>
+        <version>3.2.5</version>
+        <relativePath/>
+    </parent>
+
     <groupId>com.proyectomedico</groupId>
     <artifactId>app-medica-cenfasies</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>app-medica-cenfasies</name>
-    <description>app-medica-cenfasies</description>
+    <description>Sistema Médico CENFASIES (Multi-tenant)</description>
 
     <properties>
         <java.version>21</java.version>
@@ -19,19 +22,27 @@
     </properties>
 
     <dependencies>
+        <!-- ========================================== -->
+        <!-- 1. CORE SPRING BOOT Y BASE DE DATOS        -->
+        <!-- ========================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-flyway</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
         </dependency>
+        <!-- Flyway: Migraciones de Base de Datos -->
         <dependency>
             <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
+            <artifactId>flyway-core</artifactId>
         </dependency>
 
+        <!-- ========================================== -->
+        <!-- 2. INTERFAZ GRÁFICA (JAVAFX)               -->
+        <!-- ========================================== -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -43,6 +54,9 @@
             <version>${javafx.version}</version>
         </dependency>
 
+        <!-- ========================================== -->
+        <!-- 3. HERRAMIENTAS Y UTILIDADES               -->
+        <!-- ========================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -50,20 +64,32 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- ========================================== -->
+        <!-- 4. GENERACIÓN DE PDF (Thymeleaf + OpenHTML)-->
+        <!-- ========================================== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-core</artifactId>
+            <version>1.0.10</version>
+        </dependency>
+        <dependency>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-pdfbox</artifactId>
+            <version>1.0.10</version>
         </dependency>
     </dependencies>
 
@@ -81,7 +107,6 @@
                     </excludes>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -96,5 +121,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

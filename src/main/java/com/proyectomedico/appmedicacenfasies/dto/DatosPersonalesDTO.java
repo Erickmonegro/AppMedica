@@ -13,5 +13,6 @@ public record DatosPersonalesDTO(
         String telefonos,
         String contactoEmergencia,
         String seguro,
-        String ocupacion
+        String ocupacion,
+        String rutaPdfHistoria
 ) {}

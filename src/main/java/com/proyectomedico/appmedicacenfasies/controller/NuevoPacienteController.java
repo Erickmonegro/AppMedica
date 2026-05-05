@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class NuevoPacienteController {
 
-    // Debajo de tus declaraciones de @FXML...
+    // Solo inyectamos el PacienteService. ¡El controlador es flaco y limpio!
     private final PacienteService pacienteService;
 
     // --- SECCIÓN 1: DATOS PERSONALES ---
@@ -69,84 +69,63 @@ public class NuevoPacienteController {
         log.info("Empaquetando datos del formulario en DTOs modulares...");
 
         try {
-            // 1. Armamos el bloque de Datos Personales
+            // 1. Armamos los bloques (Exactamente igual que tu lógica original)
             DatosPersonalesDTO datosPersonales = new DatosPersonalesDTO(
-                    txtNombre.getText(),
-                    txtCedula.getText(),
-                    dpFechaNacimiento.getValue(),
-                    "", // sexo (Pendiente en UI MVP)
-                    "", // tipoSangre (Pendiente en UI MVP)
-                    "", // estadoCivil (Pendiente en UI MVP)
-                    txtDireccion.getText(),
-                    txtTelefonos.getText(),
-                    "", // contactoEmergencia (Pendiente en UI MVP)
-                    txtSeguro.getText(),
-                    txtOcupacion.getText()
+                    txtNombre.getText(), txtCedula.getText(), dpFechaNacimiento.getValue(),
+                    "", "", "", txtDireccion.getText(), txtTelefonos.getText(),
+                    "", txtSeguro.getText(), txtOcupacion.getText(),
+                    null
             );
 
-            // 2. Armamos el bloque de Antecedentes
             AntecedentesDTO antecedentes = new AntecedentesDTO(
-                    txtAntecedentesFam.getText(),
-                    txtAntecedentesPers.getText(),
-                    "", // personales no patologicos
-                    "", // transfusiones
-                    txtCirugias.getText(),
-                    txtAlergias.getText()
+                    txtAntecedentesFam.getText(), txtAntecedentesPers.getText(),
+                    "", "", txtCirugias.getText(), txtAlergias.getText()
             );
 
-            // 3. Armamos el bloque de Hábitos Tóxicos
             HabitosToxicosDTO habitos = new HabitosToxicosDTO(
-                    chkFuma.isSelected(),
-                    chkAlcohol.isSelected(),
-                    chkHooka.isSelected(),
-                    chkVape.isSelected(),
-                    chkCafe.isSelected(),
-                    chkDrogas.isSelected()
+                    chkFuma.isSelected(), chkAlcohol.isSelected(), chkHooka.isSelected(),
+                    chkVape.isSelected(), chkCafe.isSelected(), chkDrogas.isSelected()
             );
 
-            // 4. Armamos el bloque de Consulta Médica (Examen Físico)
             ExamenFisicoDTO examenFisico = new ExamenFisicoDTO(
-                    parsearDoble(txtPeso.getText()),
-                    parsearDoble(txtTalla.getText()),
-                    txtTA.getText(),
-                    parsearDoble(txtFC.getText()),
-                    parsearDoble(txtFR.getText()),
-                    parsearDoble(txtTemp.getText()),
-                    txtCabeza.getText(),
-                    txtCuello.getText(),
-                    txtTorax.getText(),
-                    txtCorazon.getText(),
-                    txtPulmones.getText(),
-                    txtAbdomen.getText(),
-                    txtGenitales.getText(),
-                    txtMiembrosSup.getText(),
-                    txtMiembrosInf.getText(),
-                    txtPiel.getText(),
-                    txtHallazgosGen.getText(),
-                    txtEstudios.getText(),
-                    txtDiagnostico.getText(),
-                    txtTratamiento.getText()
+                    parsearDoble(txtPeso.getText()), parsearDoble(txtTalla.getText()), txtTA.getText(),
+                    parsearDoble(txtFC.getText()), parsearDoble(txtFR.getText()), parsearDoble(txtTemp.getText()),
+                    txtCabeza.getText(), txtCuello.getText(), txtTorax.getText(), txtCorazon.getText(),
+                    txtPulmones.getText(), txtAbdomen.getText(), txtGenitales.getText(), txtMiembrosSup.getText(),
+                    txtMiembrosInf.getText(), txtPiel.getText(), txtHallazgosGen.getText(),
+                    txtEstudios.getText(), txtDiagnostico.getText(), txtTratamiento.getText()
             );
 
-            // 5. Unimos todo en el DTO Maestro
             PacienteRegistroDTO nuevoRegistro = new PacienteRegistroDTO(
-                    datosPersonales,
-                    antecedentes,
-                    habitos,
-                    examenFisico
+                    datosPersonales, antecedentes, habitos, examenFisico
             );
 
-            // Fíjate cómo ahora navegamos al nombre a través de datosPersonales()
             log.info("DTO construido con éxito para el paciente: {}", nuevoRegistro.datosPersonales().nombreApellidos());
 
-            pacienteService.registrarNuevaHistoriaClinica(nuevoRegistro);
-            // TODO: Enviar al PacienteService y cerrar la ventana
+            // 2. MAGIA DE ARQUITECTURA: Un solo llamado al Service.
+            // El Service guarda en BD, gestiona carpetas, crea el PDF y nos devuelve la ruta.
+            String rutaPdfGenerado = pacienteService.registrarNuevaHistoriaClinica(nuevoRegistro);
+
+            // 3. RESPUESTA VISUAL: Abrimos el PDF si la ruta es válida
+            if (rutaPdfGenerado != null && !rutaPdfGenerado.trim().isEmpty()) {
+                java.io.File archivoPdf = new java.io.File(rutaPdfGenerado);
+                if (java.awt.Desktop.isDesktopSupported() && archivoPdf.exists()) {
+                    java.awt.Desktop.getDesktop().open(archivoPdf);
+                    log.info("PDF abierto exitosamente en la máquina local.");
+                }
+            } else {
+                log.warn("El paciente se guardó en BD, pero hubo un problema al generar el archivo PDF.");
+            }
+
+            // 4. Cerramos la ventana de registro
             cerrarVentana(event);
 
         } catch (Exception e) {
-            log.error("Error al procesar los datos del formulario: Revisa los campos numéricos.", e);
+            log.error("Error crítico al procesar los datos del formulario.", e);
+            // Aquí puedes agregar un Alert de JavaFX para avisarle al usuario
         }
     }
+
     /**
      * Método utilitario de Senior: Evita que la app explote si el campo de peso/talla está vacío
      */
@@ -154,6 +133,11 @@ public class NuevoPacienteController {
         if (valor == null || valor.trim().isEmpty()) {
             return 0.0;
         }
-        return Double.parseDouble(valor.trim());
+        try {
+            return Double.parseDouble(valor.trim());
+        } catch (NumberFormatException e) {
+            log.warn("No se pudo parsear el valor numérico: {}. Se asignará 0.0", valor);
+            return 0.0;
+        }
     }
 }

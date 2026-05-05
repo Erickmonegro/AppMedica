@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<HBox prefHeight="700.0" prefWidth="1000.0" stylesheets="@../css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.VisorExpedienteController">
+
+    <!-- PANEL IZQUIERDO: 30% - Perfil del Paciente y PDF Inicial -->
+    <VBox prefWidth="300.0" style="-fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-width: 0 1 0 0;" spacing="15.0">
+        <padding>
+            <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+        </padding>
+        <children>
+            <!-- Avatar Placeholder -->
+            <Button text="⬅ Volver al Dashboard" onAction="#volverAlDashboard"
+                    style="-fx-background-color: transparent; -fx-text-fill: #0b4a9e; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 0 0 15 0;"/>
+
+            <!-- Avatar Placeholder (Este ya lo tienes) -->
+            <StackPane style="-fx-background-color: #cbd5e1; -fx-background-radius: 50%;" prefHeight="100.0" prefWidth="100.0" maxWidth="100.0">
+                <Label text="👤" style="-fx-font-size: 40px;"/>
+            </StackPane>
+            <Label fx:id="lblNombrePerfil" text="Cargando Nombre..." style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0b4a9e;" wrapText="true"/>
+            <Label fx:id="lblCedulaPerfil" text="Cédula: ---" style="-fx-text-fill: #475569;"/>
+
+            <Separator />
+
+            <GridPane vgap="10" hgap="10">
+                <Label text="Edad:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblEdad" text="-- años" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Seguro:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblSeguro" text="--" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Teléfono:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblTelefono" text="--" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Region VBox.vgrow="ALWAYS" /> <!-- Empuja el botón hacia abajo -->
+
+            <Button text="Ver Historia Inicial (PDF)" styleClass="boton-principal" maxWidth="Infinity" onAction="#verHistoriaInicialPdf"/>
+        </children>
+    </VBox>
+
+    <!-- PANEL DERECHO: 70% - Motor de Evolución -->
+    <VBox prefWidth="700.0" HBox.hgrow="ALWAYS" spacing="15.0" style="-fx-background-color: #ffffff;">
+        <padding>
+            <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+        </padding>
+        <children>
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Historial de Evolución" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #334155;"/>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="+ Añadir Evolución" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 8 15;" onAction="#abrirModalNuevaEvolucion"/>
+            </HBox>
+
+            <Separator />
+
+            <!-- Aquí se cargarán dinámicamente las tarjetas de las visitas anteriores -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                <VBox fx:id="vboxListaEvoluciones" spacing="10.0">
+                    <padding>
+                        <Insets right="10.0"/>
+                    </padding>
+                    <!-- Las tarjetas se inyectarán desde el controlador -->
+                </VBox>
+            </ScrollPane>
+        </children>
+    </VBox>
+
+</HBox>

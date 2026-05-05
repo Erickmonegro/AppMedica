@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Historia Clínica - CENFASIES</title>
+  <style>
+    @page {
+      size: letter;
+      margin: 1.5cm;
+    }
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      font-size: 11px;
+      color: #000;
+      margin: 0;
+      padding: 0;
+      line-height: 1.3;
+    }
+    /* --- ENCABEZADO --- */
+    .header-table {
+      width: 100%;
+      border-bottom: 2px solid #ce2029; /* Línea roja combinando con el logo */
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    .clinica-titulo {
+      font-size: 22px;
+      font-weight: bold;
+      color: #0b4a9e; /* Azul del logo */
+      margin: 0;
+      letter-spacing: 1px;
+    }
+    .clinica-info {
+      font-size: 10px;
+      color: #333;
+    }
+    .doc-titulo {
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 15px 0;
+      text-decoration: underline;
+    }
+
+    /* --- TABLAS DE FORMULARIO --- */
+    .form-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+    }
+    .form-table td {
+      padding: 4px 2px;
+      vertical-align: bottom;
+    }
+    .label {
+      font-weight: bold;
+      font-size: 10px;
+    }
+    .value {
+      border-bottom: 1px solid #000;
+      padding-left: 5px;
+      color: #222;
+    }
+
+    /* --- BLOQUES DE TEXTO --- */
+    .seccion {
+      margin-bottom: 8px;
+    }
+    .texto-largo {
+      width: 100%;
+      border-bottom: 1px solid #000;
+      min-height: 15px;
+      display: inline-block;
+    }
+
+    /* --- SIGNOS VITALES --- */
+    .vitals-table {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .vitals-table td {
+      padding: 3px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ZONA A: ENCABEZADO Y LOGO -->
+<table class="header-table">
+  <tr>
+    <!-- Espacio para el Logo. En el futuro inyectaremos la ruta exacta aquí -->
+    <td width="20%" style="text-align: left; vertical-align: middle;">
+      <div style="width: 80px; height: 80px; border: 1px solid #ccc; text-align: center; line-height: 80px; color: #999;">LOGO</div>
+    </td>
+    <td width="80%" style="text-align: right; vertical-align: middle;">
+      <h1 class="clinica-titulo">CENFASIES</h1>
+      <div class="clinica-info">Av. Sanchez, próximo a Politécnico San Valero</div>
+      <div class="clinica-info">TELÉFONO 829-405-5486</div>
+    </td>
+  </tr>
+</table>
+
+<div class="doc-titulo">HISTORIA CLÍNICA</div>
+
+<!-- ZONA B: DATOS DEMOGRÁFICOS -->
+<table class="form-table">
+  <tr>
+    <td width="10%"><span class="label">FECHA:</span></td>
+    <td width="30%" class="value" th:text="${fechaActual}"></td>
+    <td width="15%"><span class="label">SEGURO:</span></td>
+    <td width="45%" class="value" th:text="${pacienteSeguro}"></td>
+  </tr>
+</table>
+<table class="form-table">
+  <tr>
+    <td width="18%"><span class="label">NOMBRE Y APELLIDOS:</span></td>
+    <td width="82%" class="value" th:text="${pacienteNombre}"></td>
+  </tr>
+</table>
+<table class="form-table">
+  <tr>
+    <td width="18%"><span class="label">FECHA DE NACIMIENTO:</span></td>
+    <td width="22%" class="value" th:text="${pacienteFechaNac}"></td>
+    <td width="8%"><span class="label">CÉDULA:</span></td>
+    <td width="30%" class="value" th:text="${pacienteCedula}"></td>
+    <td width="7%"><span class="label">EDAD:</span></td>
+    <td width="15%" class="value" th:text="${pacienteEdad}"></td>
+  </tr>
+</table>
+<table class="form-table">
+  <tr>
+    <td width="12%"><span class="label">TELÉFONOS:</span></td>
+    <td width="88%" class="value" th:text="${pacienteTelefonos}"></td>
+  </tr>
+  <tr>
+    <td width="12%"><span class="label">DIRECCIÓN:</span></td>
+    <td width="88%" class="value" th:text="${pacienteDireccion}"></td>
+  </tr>
+  <tr>
+    <td width="12%"><span class="label">OCUPACIÓN:</span></td>
+    <td width="88%" class="value" th:text="${pacienteOcupacion}"></td>
+  </tr>
+</table>
+
+<br/>
+
+<!-- ZONA C: ANTECEDENTES Y HÁBITOS -->
+<div class="seccion"><span class="label">ANTECEDENTES FAMILIARES:</span> <span class="texto-largo" th:text="${antFamiliares}"></span></div>
+<div class="seccion"><span class="label">ANTECEDENTES PERSONALES:</span> <span class="texto-largo" th:text="${antPersonales}"></span></div>
+
+<table class="form-table">
+  <tr>
+    <td width="35%"><span class="label">ANTECEDENTES PERSONALES NO PATOLÓGICO:</span></td>
+    <td width="35%" class="value" th:text="${antNoPatologicos}"></td>
+    <td width="10%"><span class="label">TRANSFUSIÓN:</span></td>
+    <td width="20%" class="value" th:text="${transfusion}"></td>
+  </tr>
+</table>
+
+<div class="seccion"><span class="label">CIRUGÍAS:</span> <span class="texto-largo" th:text="${cirugias}"></span></div>
+<div class="seccion"><span class="label">ALERGIAS:</span> <span class="texto-largo" th:text="${alergias}"></span></div>
+
+<div class="seccion" style="margin-top: 10px;">
+  <span class="label">HÁBITOS TÓXICOS:</span>&#160;&#160;&#160;
+  <span th:text="${habAlcohol ? '☑' : '☐'}"></span> ALCOHOL &#160;&#160;&#160;
+  <span th:text="${habCafe ? '☑' : '☐'}"></span> CAFÉ &#160;&#160;&#160;
+  <span th:text="${habTabaco ? '☑' : '☐'}"></span> TABACO &#160;&#160;&#160;
+  <span th:text="${habVape ? '☑' : '☐'}"></span> CIGARRILLO ELECTRÓNICO
+</div>
+
+<br/>
+
+<!-- ZONA D: CONSULTA ACTUAL Y EXAMEN FÍSICO -->
+<div class="seccion"><span class="label">MOTIVO DE CONSULTA:</span> <span class="texto-largo" th:text="${motivoConsulta}"></span></div>
+<div class="seccion"><span class="label">HISTORIA DE LA ENFERMEDAD ACTUAL:</span> <span class="texto-largo" th:text="${historiaEnfermedad}"></span></div>
+
+<div class="seccion" style="margin-top: 10px;"><span class="label" style="text-decoration: underline;">EXAMEN FÍSICO:</span></div>
+
+<!-- Fila de Signos Vitales -->
+<table class="vitals-table">
+  <tr>
+    <td width="16%"><span class="label">TA:</span> <span class="value" th:text="${ta}"></span></td>
+    <td width="16%"><span class="label">FC:</span> <span class="value" th:text="${fc}"></span></td>
+    <td width="16%"><span class="label">FR:</span> <span class="value" th:text="${fr}"></span></td>
+    <td width="16%"><span class="label">PESO:</span> <span class="value" th:text="${peso}"></span></td>
+    <td width="16%"><span class="label">TALLA:</span> <span class="value" th:text="${talla}"></span></td>
+    <td width="20%"><span class="label">IMC:</span> <span class="value" th:text="${imc}"></span></td>
+  </tr>
+</table>
+
+<!-- Evaluación por Sistemas -->
+<div class="seccion"><span class="label">CABEZA:</span> <span class="texto-largo" th:text="${cabeza}"></span></div>
+<div class="seccion"><span class="label">CUELLO:</span> <span class="texto-largo" th:text="${cuello}"></span></div>
+<div class="seccion"><span class="label">TÓRAX:</span> <span class="texto-largo" th:text="${torax}"></span></div>
+<div class="seccion"><span class="label">CORAZÓN:</span> <span class="texto-largo" th:text="${corazon}"></span></div>
+<div class="seccion"><span class="label">PULMONES:</span> <span class="texto-largo" th:text="${pulmones}"></span></div>
+<div class="seccion"><span class="label">ABDOMEN:</span> <span class="texto-largo" th:text="${abdomen}"></span></div>
+<div class="seccion"><span class="label">GENITALES EXTERNOS:</span> <span class="texto-largo" th:text="${genitales}"></span></div>
+<div class="seccion"><span class="label">MIEMBRO SUPERIOR:</span> <span class="texto-largo" th:text="${miembroSup}"></span></div>
+<div class="seccion"><span class="label">MIEMBRO INFERIOR:</span> <span class="texto-largo" th:text="${miembroInf}"></span></div>
+<div class="seccion"><span class="label">PIEL Y FANERAS:</span> <span class="texto-largo" th:text="${piel}"></span></div>
+
+<br/>
+
+<!-- ZONA E: DIAGNÓSTICO Y PLAN -->
+<div class="seccion"><span class="label">ESTUDIOS COMPLEMENTARIOS:</span> <span class="texto-largo" th:text="${estudios}"></span></div>
+<div class="seccion"><span class="label">DIAGNÓSTICO:</span> <span class="texto-largo" th:text="${diagnostico}"></span></div>
+<div class="seccion"><span class="label">TRATAMIENTO:</span> <span class="texto-largo" th:text="${tratamiento}"></span></div>
+
+</body>
+</html>

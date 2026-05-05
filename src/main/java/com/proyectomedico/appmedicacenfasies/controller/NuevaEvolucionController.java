@@ -1,0 +1,76 @@
+package com.proyectomedico.appmedicacenfasies.controller;
+
+import com.proyectomedico.appmedicacenfasies.dto.HojaEvolucionDTO;
+import com.proyectomedico.appmedicacenfasies.service.PacienteService;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.TextArea;
+import javafx.stage.Stage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.UUID;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class NuevaEvolucionController {
+
+    private final PacienteService pacienteService;
+
+    // Almacenamos el ID del paciente al que le vamos a agregar la nota
+    private UUID pacienteId;
+
+    @FXML private TextArea txtMotivo;
+    @FXML private TextArea txtHistoria;
+    @FXML private TextArea txtDiagnostico;
+    @FXML private TextArea txtTratamiento;
+    @FXML private TextArea txtPlan;
+
+    /**
+     * El VisorExpediente llamará a este método justo antes de mostrar la ventana.
+     */
+    public void inicializarParaPaciente(UUID pacienteId) {
+        this.pacienteId = pacienteId;
+        log.info("Modal de Evolución listo para el paciente ID: {}", pacienteId);
+    }
+
+    @FXML
+    public void guardarEvolucion(ActionEvent event) {
+        try {
+            log.info("Empaquetando datos de la evolución...");
+
+            // 1. Armar el DTO de transporte (La fecha y el ID de la hoja se ignoran aquí, el Service los crea)
+            HojaEvolucionDTO nuevaEvolucion = new HojaEvolucionDTO(
+                    null, // ID nulo porque es nueva
+                    null, // Fecha nula, el backend le pondrá LocalDate.now()
+                    txtMotivo.getText(),
+                    txtHistoria.getText(),
+                    txtDiagnostico.getText(),
+                    txtTratamiento.getText(),
+                    txtPlan.getText(),
+                    null
+            );
+
+            // 2. Enviar a guardar
+            pacienteService.agregarEvolucion(pacienteId, nuevaEvolucion);
+
+            log.info("Evolución guardada con éxito en BD.");
+
+            // 3. Cerrar la ventana modal
+            cerrarVentana(event);
+
+        } catch (Exception e) {
+            log.error("Error al guardar la hoja de evolución", e);
+            // TODO: Agregar una alerta visual (Alert) de JavaFX si falla
+        }
+    }
+
+    @FXML
+    public void cerrarVentana(ActionEvent event) {
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.close();
+    }
+}

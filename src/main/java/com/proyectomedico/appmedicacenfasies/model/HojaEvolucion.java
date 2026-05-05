@@ -34,6 +34,11 @@ public class HojaEvolucion {
     @Column(columnDefinition = "TEXT")
     private String plan; // [cite: 12]
 
+
+    // NUEVO CAMPO: El "bolsillo" para guardar la dirección física del documento
+    @Column(name = "ruta_pdf")
+    private String rutaPdf;
+
     // CONEXIÓN: Muchas hojas pertenecen a UN paciente
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)

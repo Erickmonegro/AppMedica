@@ -5,9 +5,11 @@ import com.proyectomedico.appmedicacenfasies.model.HabitosToxicos;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface HabitosToxicosRepository extends JpaRepository<HabitosToxicos, UUID> {
 
+    Optional<HabitosToxicos> findByPacienteId(UUID pacienteId);
 
 }

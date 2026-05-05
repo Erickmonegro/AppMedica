@@ -8,6 +8,8 @@
 <?import javafx.scene.layout.VBox?>
 
 <!-- VBox Principal: Contiene las dos filas principales -->
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.Region?>
 <VBox spacing="20.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.DashboardController">
 
     <!-- FILA SUPERIOR: Botones y Buscador -->
@@ -35,18 +37,31 @@
                 </children>
             </VBox>
 
-            <!-- PANEL CENTRAL/DERECHO: Área principal -->
+            <!-- PANEL CENTRAL/DERECHO: Área principal de Citas -->
             <VBox styleClass="panel-azul" HBox.hgrow="ALWAYS" spacing="15.0">
                 <children>
-                    <!-- Contenedor para el botón de Vista alineado a la izquierda -->
-                    <HBox>
+                    <!-- Cabecera del panel: Título y botón de Vista -->
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="📅 Próximas Citas" styleClass="texto-panel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;" />
+
+                        <!-- Region actúa como un "resorte" invisible para empujar el botón a la derecha -->
+                        <Region HBox.hgrow="ALWAYS" />
+
                         <Button mnemonicParsing="false" styleClass="boton-vista" text="Vista" />
                     </HBox>
 
-                    <!-- Área para centrar el texto "Lista o cuadrícula" -->
-                    <VBox alignment="CENTER" VBox.vgrow="ALWAYS">
-                        <Label text="Lista o cuadricula" styleClass="texto-panel" />
-                    </VBox>
+                    <!-- ========================================== -->
+                    <!-- WIDGET DINÁMICO DE CITAS (MAGIA DEL BACKEND) -->
+                    <!-- ========================================== -->
+
+                    <!-- fitToWidth="true" obliga a las tarjetas a estirarse a lo ancho del panel -->
+                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+                        <content>
+                            <!-- ESTE ES EL fx:id QUE CONECTAMOS EN EL CONTROLADOR -->
+                            <VBox fx:id="vboxCitasDashboard" spacing="12.0" style="-fx-padding: 5px 15px 15px 5px; -fx-background-color: transparent;" />
+                        </content>
+                    </ScrollPane>
+
                 </children>
             </VBox>
 

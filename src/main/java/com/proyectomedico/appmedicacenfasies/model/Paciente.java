@@ -49,6 +49,9 @@ public class Paciente {
     @Column(name = "creado_en", updatable = false)
     private java.time.LocalDateTime creadoEn;
 
+    @Column(name = "ruta_pdf_historia")
+    private String rutaPdfHistoria;
+
     @PrePersist
     protected void onCreate() {
         creadoEn = java.time.LocalDateTime.now();

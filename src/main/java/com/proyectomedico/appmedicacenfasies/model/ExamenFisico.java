@@ -18,13 +18,15 @@ public class ExamenFisico {
     private UUID id;
 
     // Signos Vitales
-    private String tensionArterial; // TA
-    private String frecuenciaCardiaca; // FC
-    private String frecuenciaRespiratoria; // FR
+// Dentro de tu modelo ExamenFisico.java
     private Double peso;
     private Double talla;
     private Double imc;
-
+    private String tensionArterial;
+    private Double frecuenciaCardiaca; // Cámbialo a Double si lo tenías como String
+    private Double frecuenciaRespiratoria; // Cámbialo a Double si lo tenías como String
+    private Double temperatura; // ¡Asegúrate de agregar este!
+    // ... (Y los demás campos de texto como cabeza, cuello, torax, etc.)
     // Evaluación por sistemas (Usamos TEXT por si el médico detalla mucho)
     @Column(columnDefinition = "TEXT")
     private String cabeza;

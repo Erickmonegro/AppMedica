@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hoja de Evolución</title>
+  <style>
+    body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 12px; line-height: 1.4; color: #333; margin: 30px; }
+    .header { text-align: center; border-bottom: 2px solid #0b4a9e; padding-bottom: 10px; margin-bottom: 20px; }
+    .header h2 { color: #0b4a9e; margin: 0; font-size: 18px; }
+    .header p { margin: 2px 0; font-size: 11px; color: #555; }
+    .paciente-info { display: table; width: 100%; margin-bottom: 20px; background-color: #f8fafc; padding: 10px; border: 1px solid #e2e8f0; }
+    .info-row { display: table-row; }
+    .info-cell { display: table-cell; padding: 5px; font-weight: bold; }
+    .info-value { display: table-cell; padding: 5px; font-weight: normal; }
+    .seccion { margin-bottom: 15px; }
+    .seccion-titulo { background-color: #0b4a9e; color: white; padding: 4px 8px; font-weight: bold; font-size: 12px; margin-bottom: 5px; }
+    .seccion-contenido { padding: 5px; border: 1px solid #e2e8f0; min-height: 40px; }
+  </style>
+</head>
+<body>
+
+<!-- ENCABEZADO INSTITUCIONAL -->
+<div class="header">
+  <h2>CENTRO FAMILIAR DE SALUD INTEGRAL Y ESPECIALIDADES (CENFASIES)</h2>
+  <p>AV. SÁNCHEZ (Principal) #5, Proyecto profesor Juan Bosch, Guaricano, SDN</p>
+  <p>TEL. 829-405-5486 / 806-287-6567</p>
+  <h3 style="margin-top: 15px; text-decoration: underline;">HOJA DE EVOLUCIÓN</h3>
+</div>
+
+<!-- DATOS DEL PACIENTE Y FECHA -->
+<div class="paciente-info">
+  <div class="info-row">
+    <div class="info-cell" style="width: 15%;">FECHA:</div>
+    <div class="info-value" style="width: 35%;" th:text="${fechaEvolucion}">01/01/2026</div>
+    <div class="info-cell" style="width: 15%;">EDAD:</div>
+    <div class="info-value" style="width: 35%;" th:text="${pacienteEdad} + ' años'">30 años</div>
+  </div>
+  <div class="info-row">
+    <div class="info-cell">NOMBRE:</div>
+    <div class="info-value" colspan="3" th:text="${pacienteNombre}">Juan Pérez</div>
+  </div>
+</div>
+
+<!-- CUERPO DE LA EVOLUCIÓN -->
+<div class="seccion">
+  <div class="seccion-titulo">MOTIVO DE SEGUIMIENTO</div>
+  <div class="seccion-contenido" th:text="${motivoSeguimiento}"></div>
+</div>
+
+<div class="seccion">
+  <div class="seccion-titulo">HISTORIA DE LA ENFERMEDAD ACTUAL</div>
+  <div class="seccion-contenido" th:text="${historiaEnfermedad}"></div>
+</div>
+
+<div class="seccion">
+  <div class="seccion-titulo">DIAGNÓSTICO(S)</div>
+  <div class="seccion-contenido" th:text="${diagnostico}"></div>
+</div>
+
+<div class="seccion">
+  <div class="seccion-titulo">TRATAMIENTO</div>
+  <div class="seccion-contenido" th:text="${tratamiento}"></div>
+</div>
+
+<div class="seccion">
+  <div class="seccion-titulo">PLAN</div>
+  <div class="seccion-contenido" th:text="${plan}"></div>
+</div>
+
+</body>
+</html>

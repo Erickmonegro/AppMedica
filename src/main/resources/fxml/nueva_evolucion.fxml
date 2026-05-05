@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox prefWidth="700.0" prefHeight="650.0" spacing="15.0" style="-fx-background-color: #ffffff;" stylesheets="@../css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.NuevaEvolucionController">
+
+    <padding>
+        <Insets top="25.0" right="30.0" bottom="25.0" left="30.0"/>
+    </padding>
+
+    <children>
+        <!-- ENCABEZADO -->
+        <Label text="Añadir Nota de Evolución" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #0b4a9e;"/>
+        <Separator />
+
+        <!-- FORMULARIO SCROLLEABLE -->
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <VBox spacing="15.0">
+                <padding>
+                    <Insets right="10.0"/>
+                </padding>
+                <children>
+
+                    <VBox spacing="5.0">
+                        <Label text="Motivo de Seguimiento" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <TextArea fx:id="txtMotivo" prefRowCount="3" promptText="Ej: Chequeo de rutina, dolor persistente..." wrapText="true"/>
+                    </VBox>
+
+                    <VBox spacing="5.0">
+                        <Label text="Historia de la Enfermedad Actual" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <TextArea fx:id="txtHistoria" prefRowCount="5" promptText="Describa la evolución de los síntomas..." wrapText="true"/>
+                    </VBox>
+
+                    <VBox spacing="5.0">
+                        <Label text="Diagnóstico" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <TextArea fx:id="txtDiagnostico" prefRowCount="3" promptText="Diagnóstico actualizado..." wrapText="true"/>
+                    </VBox>
+
+                    <VBox spacing="5.0">
+                        <Label text="Tratamiento" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <TextArea fx:id="txtTratamiento" prefRowCount="3" promptText="Medicamentos recetados, dosis..." wrapText="true"/>
+                    </VBox>
+
+                    <VBox spacing="5.0">
+                        <Label text="Plan Médico" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <TextArea fx:id="txtPlan" prefRowCount="3" promptText="Próximos pasos, estudios requeridos, fecha de próxima cita..." wrapText="true"/>
+                    </VBox>
+
+                </children>
+            </VBox>
+        </ScrollPane>
+
+        <Separator />
+
+        <!-- BOTONERA -->
+        <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 10 0 0 0;">
+            <Button text="Cancelar" onAction="#cerrarVentana" style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            <Button text="Guardar Evolución" onAction="#guardarEvolucion" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+        </HBox>
+    </children>
+</VBox>

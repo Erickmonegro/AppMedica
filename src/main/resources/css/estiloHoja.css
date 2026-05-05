@@ -14,14 +14,21 @@
     -fx-font-weight: bold;
 }
 
-/* Campos de texto estilizados */
+/* Campos de texto y áreas de texto estilizados */
 .text-field-form, .text-area-form {
-    -fx-background-radius: 5;
-    -fx-border-radius: 5;
-    -fx-border-color: #dcdde1;
-    -fx-padding: 8;
+    -fx-background-color: #ffffff; /* Fondo blanco obligatorio */
+    -fx-border-color: #ced4da; /* Borde gris sutil */
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-padding: 8px;
+    -fx-prompt-text-fill: #6c757d; /* Color gris oscuro para el texto de pista para que se lea bien */
+    -fx-text-fill: #212529; /* Color casi negro para cuando el médico escriba */
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
 }
+
+/* Efecto visual al hacer clic dentro del campo (Focus) */
 .text-field-form:focused, .text-area-form:focused {
-    -fx-border-color: #0b4a9e; /* El borde se pone azul al escribir */
-    -fx-border-width: 2;
+    -fx-border-color: #0b4a9e; /* Se pinta de azul al seleccionarlo */
+    -fx-border-width: 2px;
 }

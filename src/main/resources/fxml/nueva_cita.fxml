@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<!-- Usamos un VBox como contenedor principal para un diseño limpio y vertical -->
+<VBox spacing="15.0" style="-fx-background-color: #f8fafc; -fx-padding: 25;"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.proyectomedico.appmedicacenfasies.controller.NuevaCitaController">
+
+    <!-- Cabecera -->
+    <Label text="Agendar Nueva Cita" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+    <Label text="Complete los datos para registrar una consulta médica." style="-fx-text-fill: #64748b; -fx-font-size: 13px;" />
+    <Separator />
+
+    <!-- SECCIÓN 1: Búsqueda Rápida del Paciente -->
+    <Label text="1. Buscar Paciente por Cédula" style="-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14px;" />
+    <HBox spacing="10.0" alignment="CENTER_LEFT">
+        <TextField fx:id="txtCedulaBuscador" promptText="Ej. 000-0000000-0" prefWidth="220.0"
+                   style="-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-border-radius: 5; -fx-padding: 8;" />
+        <!-- Este botón llama al primer método de tu controlador -->
+        <Button text="🔍 Buscar" onAction="#buscarPacientePorCedula"
+                style="-fx-background-color: #e2e8f0; -fx-text-fill: #1e293b; -fx-cursor: hand; -fx-padding: 8 15;" />
+    </HBox>
+    <!-- Aquí aparecerá el nombre en verde o el error en rojo -->
+    <Label fx:id="lblNombrePacienteEncontrado" text="Esperando búsqueda..." style="-fx-text-fill: #94a3b8; -fx-font-style: italic;" />
+
+    <Separator />
+
+    <!-- SECCIÓN 2: Fecha y Hora (Lógica defensiva: DatePicker y ComboBox) -->
+    <Label text="2. Fecha y Hora" style="-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14px;" />
+    <HBox spacing="20.0">
+        <VBox spacing="5.0">
+            <Label text="Fecha de la cita:" textFill="#475569" />
+            <DatePicker fx:id="dpFechaCita" prefWidth="180.0"
+                        style="-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-border-radius: 5;" />
+        </VBox>
+        <VBox spacing="5.0">
+            <Label text="Hora:" textFill="#475569" />
+            <!-- ComboBox restringe a intervalos de 30 mins, evitando que escriban horas inválidas -->
+            <ComboBox fx:id="cmbHora" prefWidth="140.0" promptText="Seleccione"
+                      style="-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-border-radius: 5;" />
+        </VBox>
+    </HBox>
+
+    <!-- SECCIÓN 3: Médico Asignado -->
+    <Label text="3. Médico Asignado" style="-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14px;" />
+    <ComboBox fx:id="cmbMedico" prefWidth="340.0" promptText="Seleccione el médico"
+              style="-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-border-radius: 5; -fx-padding: 3;" />
+
+    <!-- SECCIÓN 4: Motivo -->
+    <Label text="4. Motivo de la Consulta" style="-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14px;" />
+    <TextArea fx:id="txtMotivo" prefHeight="90.0" prefWidth="340.0" wrapText="true"
+              promptText="Escriba el motivo principal por el cual el paciente solicita la visita..."
+              style="-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-border-radius: 5;" />
+
+    <Region VBox.vgrow="ALWAYS" />
+
+    <!-- SECCIÓN 5: Botones de Acción -->
+    <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 10 0 0 0;">
+        <Button text="Cancelar"
+                style="-fx-background-color: transparent; -fx-border-color: #94a3b8; -fx-border-radius: 5; -fx-text-fill: #64748b; -fx-cursor: hand; -fx-padding: 8 20;" />
+
+        <!-- Este botón llama al segundo método de tu controlador (Guardar en BD) -->
+        <Button text="💾 Agendar Cita" onAction="#guardarCita"
+                style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 8 20;" />
+    </HBox>
+</VBox>

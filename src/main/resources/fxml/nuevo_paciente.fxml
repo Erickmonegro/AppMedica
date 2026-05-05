@@ -17,11 +17,15 @@
 <VBox prefHeight="800.0" prefWidth="1000.0" styleClass="root-pane" stylesheets="@/css/estiloHoja.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.NuevoPacienteController">
 
     <!-- HEADER FIJO: Siempre visible aunque el médico baje por el formulario -->
+    <!-- HEADER FIJO: Siempre visible aunque el médico baje por el formulario -->
     <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="panel-blanco-redondeado">
         <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0b4a9e;" text="NUEVA HISTORIA CLÍNICA" />
         <Region HBox.hgrow="ALWAYS" />
-        <Button mnemonicParsing="false" styleClass="boton-vista" text="Cancelar" />
-        <Button mnemonicParsing="false" styleClass="boton-principal" text="Guardar Paciente" />
+
+        <!-- AQUÍ ESTÁ EL TRUCO: onAction="#cerrarVentana" y onAction="#guardarPaciente" -->
+        <Button mnemonicParsing="false" styleClass="boton-vista" text="Cancelar" onAction="#cerrarVentana" />
+        <Button mnemonicParsing="false" styleClass="boton-principal" text="Guardar Paciente" onAction="#guardarPaciente" />
+
         <VBox.margin>
             <Insets bottom="15.0" />
         </VBox.margin>
