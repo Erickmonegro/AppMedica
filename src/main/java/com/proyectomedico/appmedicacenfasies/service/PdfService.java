@@ -14,6 +14,10 @@ import java.io.File;
 import com.proyectomedico.appmedicacenfasies.model.Paciente;
 import com.proyectomedico.appmedicacenfasies.model.HojaEvolucion;
 import java.time.Period;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
+import java.util.Base64;
+// Tus otros imports...
 
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;

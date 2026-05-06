@@ -75,6 +75,7 @@
                             <TextArea fx:id="txtAntecedentesPers" prefHeight="80.0" promptText="Personales Patológicos (Ej. Asma, Diabetes...)" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                             <TextArea fx:id="txtAlergias" prefHeight="60.0" promptText="Alergias conocidas" styleClass="text-area-form" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                             <TextArea fx:id="txtCirugias" prefHeight="60.0" promptText="Cirugías previas" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <TextArea fx:id="txtCirugia" prefHeight="60.0" promptText="Cirugías previas" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="1" />  <!-- eliminar esto -->
                         </children>
                     </GridPane>
                 </VBox>
