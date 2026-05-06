@@ -86,11 +86,21 @@ public class PdfService {
             context.setVariable("cirugias", pacienteData.antecedentes().cirugias());
             context.setVariable("alergias", pacienteData.antecedentes().alergias());
 
-            // Hábitos Tóxicos (Booleanos)
-            context.setVariable("habAlcohol", pacienteData.habitos().alcohol());
-            context.setVariable("habCafe", pacienteData.habitos().cafe());
-            context.setVariable("habTabaco", pacienteData.habitos().tabaco());
-            context.setVariable("habVape", pacienteData.habitos().cigarrilloElectronico());
+            // --- HÁBITOS TÓXICOS (Lista Dinámica Inteligente) ---
+            java.util.List<String> habitosActivos = new java.util.ArrayList<>();
+
+            if (pacienteData.habitos().tabaco()) habitosActivos.add("Tabaco");
+            if (pacienteData.habitos().alcohol()) habitosActivos.add("Alcohol");
+            if (pacienteData.habitos().cafe()) habitosActivos.add("Café");
+            if (pacienteData.habitos().hooka()) habitosActivos.add("Hooka");
+            if (pacienteData.habitos().cigarrilloElectronico()) habitosActivos.add("Vape");
+            if (pacienteData.habitos().drogas()) habitosActivos.add("Drogas");
+
+            // Si no hay ninguno marcado, ponemos "Ninguno". Si hay, los separamos por comas.
+            String habitosTexto = habitosActivos.isEmpty() ? "Ninguno" : String.join(", ", habitosActivos);
+
+            // Le pasamos la frase ya armada al HTML
+            context.setVariable("habitosToxicos", habitosTexto);
 
             // --- ZONA D: EXAMEN FÍSICO ---
             // Si tienes un campo de motivo de consulta en la UI, mándalo aquí. Por ahora, lo dejamos vacío si no existe en el DTO
@@ -135,7 +145,7 @@ public class PdfService {
 
             builder.useFastMode();
             // Le pasamos el HTML ya lleno de datos y le indicamos la ruta base por si hay imágenes o CSS externos
-            builder.withHtmlContent(htmlProcesado, "src/main/resources/templates/");
+            builder.withHtmlContent(htmlProcesado, "/");
             builder.toStream(outputStream);
 
             // 4. Ejecutar la renderización
@@ -151,7 +161,7 @@ public class PdfService {
     }
 
 
-    /**
+    /*
      * Guarda el PDF en el disco duro local de forma segura y devuelve la ruta.
      */
     /**

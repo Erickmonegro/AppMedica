@@ -86,7 +86,7 @@
                     <Label styleClass="texto-panel-oscuro" text="3. Hábitos Tóxicos" />
                     <HBox spacing="25.0">
                         <children>
-                            <CheckBox fx:id="chkFuma" mnemonicParsing="false" text="Fuma" />
+                            <CheckBox fx:id="chkFuma" mnemonicParsing="false" text="Tabaco" />
                             <CheckBox fx:id="chkAlcohol" mnemonicParsing="false" text="Alcohol" />
                             <CheckBox fx:id="chkCafe" mnemonicParsing="false" text="Café" />
                             <CheckBox fx:id="chkHooka" mnemonicParsing="false" text="Hooka" />
