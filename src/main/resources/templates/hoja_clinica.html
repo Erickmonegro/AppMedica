@@ -86,16 +86,31 @@
 <body>
 
 <!-- ZONA A: ENCABEZADO Y LOGO -->
-<table class="header-table">
+<!-- Cabecera del Documento Médico -->
+<table class="header-table" style="width: 100%; border-bottom: 2px solid #0b4a9e; padding-bottom: 15px; margin-bottom: 25px;">
   <tr>
-    <!-- Espacio para el Logo. En el futuro inyectaremos la ruta exacta aquí -->
+    <!-- COLUMNA IZQUIERDA: Logo incrustado en Base64 (20%) -->
     <td width="20%" style="text-align: left; vertical-align: middle;">
-      <div style="width: 80px; height: 80px; border: 1px solid #ccc; text-align: center; line-height: 80px; color: #999;">LOGO</div>
+      <!-- Thymeleaf inyectará la imagen aquí. Si la imagen falla, no dibujará un cuadro roto gracias al th:if -->
+      <img th:if="${!logoBase64.isEmpty()}" th:src="${logoBase64}" alt="Logo CENFASIES" style="max-width: 110px; height: auto;" />
     </td>
-    <td width="80%" style="text-align: right; vertical-align: middle;">
-      <h1 class="clinica-titulo">CENFASIES</h1>
-      <div class="clinica-info">Av. Sanchez, próximo a Politécnico San Valero</div>
-      <div class="clinica-info">TELÉFONO 829-405-5486</div>
+
+    <!-- COLUMNA CENTRAL: Datos de la clínica perfectamente centrados (60%) -->
+    <td width="60%" style="text-align: center; vertical-align: middle;">
+      <h1 class="clinica-titulo" style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 24px; margin: 0; text-transform: uppercase;">
+        CENFASIES
+      </h1>
+      <div class="clinica-info" style="font-size: 14px; color: #555; margin-top: 5px;">
+        Av. Sanchez, próximo a Politécnico San Valero
+      </div>
+      <div class="clinica-info" style="font-size: 14px; color: #555; margin-top: 3px; font-weight: bold;">
+        TELÉFONO 829-405-5486
+      </div>
+    </td>
+
+    <!-- COLUMNA DERECHA: Contrapeso invisible (20%) -->
+    <td width="20%">
+      <!-- Se deja vacía intencionalmente para balancear el logo y centrar el texto -->
     </td>
   </tr>
 </table>
@@ -148,14 +163,10 @@
 <div class="seccion"><span class="label">ANTECEDENTES FAMILIARES:</span> <span class="texto-largo" th:text="${antFamiliares}"></span></div>
 <div class="seccion"><span class="label">ANTECEDENTES PERSONALES:</span> <span class="texto-largo" th:text="${antPersonales}"></span></div>
 
-<table class="form-table">
-  <tr>
-    <td width="35%"><span class="label">ANTECEDENTES PERSONALES NO PATOLÓGICO:</span></td>
-    <td width="35%" class="value" th:text="${antNoPatologicos}"></td>
-    <td width="10%"><span class="label">TRANSFUSIÓN:</span></td>
-    <td width="20%" class="value" th:text="${transfusion}"></td>
-  </tr>
-</table>
+<div class="seccion"><span class="label">ANTECEDENTES PERSONALES NO PATOLÓGICO:</span> <span class="texto-largo" th:text="${antNoPatologicos}"></span></div>
+<div class="seccion"><span class="label">TRANSFUSION:</span> <span class="texto-largo" th:text="${transfusion}"></span></div>
+
+
 
 <div class="seccion"><span class="label">CIRUGÍAS:</span> <span class="texto-largo" th:text="${cirugias}"></span></div>
 <div class="seccion"><span class="label">ALERGIAS:</span> <span class="texto-largo" th:text="${alergias}"></span></div>

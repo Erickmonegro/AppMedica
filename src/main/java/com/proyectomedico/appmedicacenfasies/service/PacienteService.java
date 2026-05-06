@@ -22,6 +22,7 @@ public class PacienteService {
     private final HabitosToxicosRepository habitosToxicosRepository;
     private final AntecedentesPacienteRepository antecedentesRepository;
     private final HojaEvolucionRepository hojaEvolucionRepository;
+    private final MotivoConsultaRepository motivoConsultaRepository;
     // INYECTAMOS TU NUEVA TABLA
     private final DiagnosticoTratamientoRepository diagnosticoTratamientoRepository;
     private final PdfService pdfService;
@@ -56,6 +57,8 @@ public class PacienteService {
         antecedentes.setAntecedentesPersonales(dto.antecedentes().antecedentesPersonales());
         antecedentes.setAlergias(dto.antecedentes().alergias());
         antecedentes.setCirugias(dto.antecedentes().cirugias());
+        antecedentes.setTransfusion(dto.antecedentes().transfusiones());
+        antecedentes.setAntecedentesPersonalesNoPatologicos(dto.antecedentes().personalesNoPatologicos());
         antecedentesRepository.save(antecedentes);
 
         // 3. HÁBITOS TÓXICOS (Mapeando a tus variables exactas)
@@ -68,6 +71,12 @@ public class PacienteService {
         habitos.setHooka(dto.habitos().hooka());
         habitos.setCigarroElectronico(dto.habitos().cigarrilloElectronico());
         habitosToxicosRepository.save(habitos);
+
+        MotivoConsulta motivo = new MotivoConsulta();
+        motivo.setPaciente(paciente); // Conectamos con el paciente
+        motivo.setMotivoConsulta(dto.historiaEnfermedad().motivoConsulta());
+        motivo.setHistoriaEnfermedadActual(dto.historiaEnfermedad().historiaEnfermedadActual());
+        motivoConsultaRepository.save(motivo);
 
         // 4. EXAMEN FÍSICO (Solo lo físico)
         ExamenFisico examen = new ExamenFisico();
@@ -184,6 +193,13 @@ public class PacienteService {
         // Agregamos también la búsqueda de diagnóstico
         DiagnosticoTratamiento diag = diagnosticoTratamientoRepository.findByPacienteId(pacienteId).orElse(new DiagnosticoTratamiento());
 
+        MotivoConsulta motivo = motivoConsultaRepository.findByPacienteId(pacienteId).orElse(new MotivoConsulta());
+
+
+        HistoriaEnfermedadDTO historiaDTO = new HistoriaEnfermedadDTO(
+                motivo.getMotivoConsulta(),
+                motivo.getHistoriaEnfermedadActual()
+        );
         // Empaquetamos todo en el DTO como la UI lo espera
         ExamenFisicoDTO exDTO = new ExamenFisicoDTO(
                 ex.getPeso(), ex.getTalla(), ex.getTensionArterial(), ex.getFrecuenciaCardiaca(), ex.getFrecuenciaRespiratoria(), ex.getTemperatura(),
@@ -194,7 +210,7 @@ public class PacienteService {
         );
 
         // 4. Ensamblar y devolver
-        return new PacienteRegistroDTO(personalesDTO, antDTO, habDTO, exDTO);
+        return new PacienteRegistroDTO(personalesDTO, historiaDTO, antDTO, habDTO, exDTO);
     }
     // ==========================================
     // 3. MÓDULO DE EVOLUCIÓN MÉDICA

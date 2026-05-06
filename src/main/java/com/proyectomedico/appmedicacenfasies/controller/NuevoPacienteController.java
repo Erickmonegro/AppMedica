@@ -36,6 +36,8 @@ public class NuevoPacienteController {
     @FXML private TextArea txtAntecedentesPers;
     @FXML private TextArea txtAlergias;
     @FXML private TextArea txtCirugias;
+    @FXML private TextArea txtTransfusiones;
+    @FXML private TextArea txtPersonalesNoPatologicos;
 
     // --- SECCIÓN 3: HÁBITOS TÓXICOS ---
     @FXML private CheckBox chkFuma;
@@ -44,6 +46,10 @@ public class NuevoPacienteController {
     @FXML private CheckBox chkHooka;
     @FXML private CheckBox chkVape;
     @FXML private CheckBox chkDrogas;
+
+    @FXML private TextField txtMotivoConsulta;
+    @FXML private TextArea txtHistoriaEnfermedad;
+
 
     // --- SECCIÓN 4: EXAMEN FÍSICO Y SIGNOS VITALES ---
     @FXML private TextField txtPeso, txtTalla, txtTA, txtFC, txtFR, txtTemp;
@@ -69,24 +75,37 @@ public class NuevoPacienteController {
         log.info("Empaquetando datos del formulario en DTOs modulares...");
 
         try {
-            // 1. Armamos los bloques (Exactamente igual que tu lógica original)
+            // =====================================================================
+            // --- 1. CAPTURAR DATOS DE LA INTERFAZ Y CREAR LOS "CAJONES" (DTOs) ---
+            // =====================================================================
+
+            // Sección 1: Datos Personales
             DatosPersonalesDTO datosPersonales = new DatosPersonalesDTO(
                     txtNombre.getText(), txtCedula.getText(), dpFechaNacimiento.getValue(),
                     "", "", "", txtDireccion.getText(), txtTelefonos.getText(),
                     "", txtSeguro.getText(), txtOcupacion.getText(),
-                    null
+                    null // La ruta del PDF se llena más adelante en el Service
             );
 
+            // Sección 2: Motivo y Enfermedad Actual (NUESTRO NUEVO BLOQUE)
+            HistoriaEnfermedadDTO historia = new HistoriaEnfermedadDTO(
+                    txtMotivoConsulta.getText(),
+                    txtHistoriaEnfermedad.getText()
+            );
+
+            // Sección 3: Antecedentes
             AntecedentesDTO antecedentes = new AntecedentesDTO(
                     txtAntecedentesFam.getText(), txtAntecedentesPers.getText(),
-                    "", "", txtCirugias.getText(), txtAlergias.getText()
+                    txtPersonalesNoPatologicos.getText(), txtTransfusiones.getText(), txtCirugias.getText(), txtAlergias.getText()
             );
 
+            // Sección 4: Hábitos Tóxicos
             HabitosToxicosDTO habitos = new HabitosToxicosDTO(
                     chkFuma.isSelected(), chkAlcohol.isSelected(), chkHooka.isSelected(),
                     chkVape.isSelected(), chkCafe.isSelected(), chkDrogas.isSelected()
             );
 
+            // Sección 5 y 6: Examen Físico y Conclusión
             ExamenFisicoDTO examenFisico = new ExamenFisicoDTO(
                     parsearDoble(txtPeso.getText()), parsearDoble(txtTalla.getText()), txtTA.getText(),
                     parsearDoble(txtFC.getText()), parsearDoble(txtFR.getText()), parsearDoble(txtTemp.getText()),
@@ -96,17 +115,27 @@ public class NuevoPacienteController {
                     txtEstudios.getText(), txtDiagnostico.getText(), txtTratamiento.getText()
             );
 
+            // =====================================================================
+            // --- 2. ENSAMBLAR EL DTO MAESTRO ---
+            // =====================================================================
             PacienteRegistroDTO nuevoRegistro = new PacienteRegistroDTO(
-                    datosPersonales, antecedentes, habitos, examenFisico
+                    datosPersonales,
+                    historia,       // <--- Aquí incrustamos el nuevo cajón
+                    antecedentes,
+                    habitos,
+                    examenFisico
             );
 
             log.info("DTO construido con éxito para el paciente: {}", nuevoRegistro.datosPersonales().nombreApellidos());
 
-            // 2. MAGIA DE ARQUITECTURA: Un solo llamado al Service.
-            // El Service guarda en BD, gestiona carpetas, crea el PDF y nos devuelve la ruta.
+            // =====================================================================
+            // --- 3. ENVIAR AL BACKEND (SERVICE) ---
+            // =====================================================================
             String rutaPdfGenerado = pacienteService.registrarNuevaHistoriaClinica(nuevoRegistro);
 
-            // 3. RESPUESTA VISUAL: Abrimos el PDF si la ruta es válida
+            // =====================================================================
+            // --- 4. RESPUESTA VISUAL AL USUARIO ---
+            // =====================================================================
             if (rutaPdfGenerado != null && !rutaPdfGenerado.trim().isEmpty()) {
                 java.io.File archivoPdf = new java.io.File(rutaPdfGenerado);
                 if (java.awt.Desktop.isDesktopSupported() && archivoPdf.exists()) {
@@ -117,12 +146,12 @@ public class NuevoPacienteController {
                 log.warn("El paciente se guardó en BD, pero hubo un problema al generar el archivo PDF.");
             }
 
-            // 4. Cerramos la ventana de registro
+            // Cerramos la ventana de registro
             cerrarVentana(event);
 
         } catch (Exception e) {
             log.error("Error crítico al procesar los datos del formulario.", e);
-            // Aquí puedes agregar un Alert de JavaFX para avisarle al usuario
+            // TODO: En una futura refactorización, pondremos una alerta visual aquí.
         }
     }
 

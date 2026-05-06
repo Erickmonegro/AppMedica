@@ -6,7 +6,9 @@ import java.time.LocalDate;
 // 2. EL DTO MAESTRO (El que recibe el Controlador desde JavaFX)
 public record PacienteRegistroDTO(
         DatosPersonalesDTO datosPersonales,
+        HistoriaEnfermedadDTO historiaEnfermedad,
         AntecedentesDTO antecedentes,
         HabitosToxicosDTO habitos,
+
         ExamenFisicoDTO examenFisico
 ) {}

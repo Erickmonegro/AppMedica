@@ -16,22 +16,20 @@
 
 <VBox prefHeight="800.0" prefWidth="1000.0" styleClass="root-pane" stylesheets="@/css/estiloHoja.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.NuevoPacienteController">
 
-    <!-- HEADER FIJO: Siempre visible aunque el médico baje por el formulario -->
-    <!-- HEADER FIJO: Siempre visible aunque el médico baje por el formulario -->
+    <!-- HEADER FIJO: Siempre visible -->
     <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="panel-blanco-redondeado">
         <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0b4a9e;" text="NUEVA HISTORIA CLÍNICA" />
         <Region HBox.hgrow="ALWAYS" />
 
-        <!-- AQUÍ ESTÁ EL TRUCO: onAction="#cerrarVentana" y onAction="#guardarPaciente" -->
-        <Button mnemonicParsing="false" styleClass="boton-vista" text="Cancelar" onAction="#cerrarVentana" />
-        <Button mnemonicParsing="false" styleClass="boton-principal" text="Guardar Paciente" onAction="#guardarPaciente" />
+        <Button mnemonicParsing="false" onAction="#cerrarVentana" styleClass="boton-vista" text="Cancelar" />
+        <Button mnemonicParsing="false" onAction="#guardarPaciente" styleClass="boton-principal" text="Guardar Paciente" />
 
         <VBox.margin>
             <Insets bottom="15.0" />
         </VBox.margin>
     </HBox>
 
-    <!-- CUERPO DEL FORMULARIO: ScrollPane para navegar por las secciones -->
+    <!-- CUERPO DEL FORMULARIO: ScrollPane recuperado -->
     <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-control-inner-background: transparent;" VBox.vgrow="ALWAYS">
         <content>
             <VBox spacing="20.0">
@@ -39,7 +37,7 @@
                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                 </padding>
 
-                <!-- SECCIÓN 1: DATOS PERSONALES (GridPane para alinear en 3 columnas) -->
+                <!-- SECCIÓN 1: DATOS PERSONALES -->
                 <VBox spacing="15.0" styleClass="panel-blanco-redondeado">
                     <Label styleClass="texto-panel-oscuro" text="1. Datos Personales y Demográficos" />
                     <GridPane hgap="15.0" vgap="15.0">
@@ -62,7 +60,9 @@
                     </GridPane>
                 </VBox>
 
-                <!-- SECCIÓN 2: ANTECEDENTES (TextAreas) -->
+
+
+                <!-- SECCIÓN 3: ANTECEDENTES -->
                 <VBox spacing="15.0" styleClass="panel-blanco-redondeado">
                     <Label styleClass="texto-panel-oscuro" text="2. Antecedentes Médicos" />
                     <GridPane hgap="15.0" vgap="15.0">
@@ -75,12 +75,13 @@
                             <TextArea fx:id="txtAntecedentesPers" prefHeight="80.0" promptText="Personales Patológicos (Ej. Asma, Diabetes...)" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                             <TextArea fx:id="txtAlergias" prefHeight="60.0" promptText="Alergias conocidas" styleClass="text-area-form" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                             <TextArea fx:id="txtCirugias" prefHeight="60.0" promptText="Cirugías previas" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                            <TextArea fx:id="txtCirugia" prefHeight="60.0" promptText="Cirugías previas" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="1" />  <!-- eliminar esto -->
+                            <TextArea fx:id="txtPersonalesNoPatologicos" prefHeight="60.0" promptText="Antecedentes no patologicos" styleClass="text-area-form" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                            <TextArea fx:id="txtTransfusiones" prefHeight="60.0" promptText="Transfusiones" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         </children>
                     </GridPane>
                 </VBox>
 
-                <!-- SECCIÓN 3: HÁBITOS TÓXICOS (HBox con CheckBoxes) -->
+                <!-- SECCIÓN 4: HÁBITOS TÓXICOS -->
                 <VBox spacing="15.0" styleClass="panel-blanco-redondeado">
                     <Label styleClass="texto-panel-oscuro" text="3. Hábitos Tóxicos" />
                     <HBox spacing="25.0">
@@ -95,12 +96,18 @@
                     </HBox>
                 </VBox>
 
-                <!-- La sección 4 (Examen Físico) la agregaremos bajo esta misma lógica de tarjetas -->
-                <!-- SECCIÓN 4: EXAMEN FÍSICO Y SIGNOS VITALES -->
+                <!-- SECCIÓN 2: MOTIVO DE CONSULTA (LOS NUEVOS CAMPOS) -->
                 <VBox spacing="15.0" styleClass="panel-blanco-redondeado">
-                    <Label styleClass="texto-panel-oscuro" text="4. Examen Físico y Signos Vitales" />
+                    <Label styleClass="texto-panel-oscuro" text="4. Motivo de Consulta y Enfermedad Actual" />
+                    <VBox spacing="10.0">
+                        <TextField fx:id="txtMotivoConsulta" promptText="Motivo de Consulta (Ej. Dolor de cabeza, Chequeo de rutina...)" styleClass="text-field-form" />
+                        <TextArea fx:id="txtHistoriaEnfermedad" prefHeight="80.0" promptText="Historia de la Enfermedad Actual (Descripción detallada de síntomas, evolución, etc.)" styleClass="text-area-form" />
+                    </VBox>
+                </VBox>
 
-                    <!-- Signos Vitales -->
+                <!-- SECCIÓN 5: EXAMEN FÍSICO Y SIGNOS VITALES -->
+                <VBox spacing="15.0" styleClass="panel-blanco-redondeado">
+                    <Label styleClass="texto-panel-oscuro" text="5. Examen Físico y Signos Vitales" />
                     <GridPane hgap="10.0" vgap="10.0">
                         <columnConstraints>
                             <ColumnConstraints percentWidth="16.6" />
@@ -120,7 +127,6 @@
                         </children>
                     </GridPane>
 
-                    <!-- Examen Regional (TextAreas pequeños) -->
                     <GridPane hgap="15.0" vgap="15.0">
                         <columnConstraints>
                             <ColumnConstraints percentWidth="33.3" />
@@ -146,13 +152,14 @@
                     </GridPane>
                 </VBox>
 
-                <!-- SECCIÓN 5: CONCLUSIÓN Y TRATAMIENTO -->
+                <!-- SECCIÓN 6: CONCLUSIÓN Y TRATAMIENTO -->
                 <VBox spacing="15.0" styleClass="panel-blanco-redondeado">
-                    <Label styleClass="texto-panel-oscuro" text="5. Conclusión, Diagnóstico y Tratamiento" />
+                    <Label styleClass="texto-panel-oscuro" text="6. Conclusión, Diagnóstico y Tratamiento" />
                     <TextArea fx:id="txtEstudios" prefHeight="60.0" promptText="Estudios Complementarios (Laboratorios, Imágenes...)" styleClass="text-area-form" />
                     <TextArea fx:id="txtDiagnostico" prefHeight="80.0" promptText="Diagnóstico(s) Presuntivo o Definitivo" styleClass="text-area-form" />
                     <TextArea fx:id="txtTratamiento" prefHeight="100.0" promptText="Plan y Tratamiento Médico (Medicamentos, dosis, indicaciones)" styleClass="text-area-form" />
                 </VBox>
+
             </VBox>
         </content>
     </ScrollPane>

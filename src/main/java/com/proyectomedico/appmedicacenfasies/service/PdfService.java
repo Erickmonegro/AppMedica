@@ -39,10 +39,26 @@ public class PdfService {
      */
     public byte[] generarHojaClinicaPdf(PacienteRegistroDTO pacienteData) {
         log.info("Iniciando generación de PDF para el paciente: {}", pacienteData.datosPersonales().nombreApellidos());
+        Context context = new Context();
 
+        // =================================================================
+        // --- MAGIA SENIOR: INYECCIÓN DE LOGO EN BASE64 ---
+        // Leemos la imagen desde el classpath (dentro del .jar compilado)
+        // y la convertimos a Base64 para que el PDF no dependa de rutas físicas.
+        // =================================================================
+        try {
+            org.springframework.core.io.ClassPathResource imgFile = new org.springframework.core.io.ClassPathResource("img/image_3ba2fd.png");
+            byte[] bytesImagen = org.springframework.util.StreamUtils.copyToByteArray(imgFile.getInputStream());
+            String base64Image = java.util.Base64.getEncoder().encodeToString(bytesImagen);
+
+            // Creamos la etiqueta de origen (src) lista para HTML
+            context.setVariable("logoBase64", "data:image/png;base64," + base64Image);
+        } catch (Exception e) {
+            log.warn("No se pudo cargar el membrete image_3ba2fd.png. El PDF se generará sin logo.", e);
+            context.setVariable("logoBase64", ""); // Fallback de seguridad para no romper la app
+        }
         try {
             // 1. Crear el "Contexto" (El puente entre Java y las variables de Thymeleaf)
-            Context context = new Context();
 
             // --- ZONA A: INYECCIÓN MULTI-TENANT ---
             // (En el futuro, esto se extraerá del Login del usuario activo)
@@ -52,7 +68,12 @@ public class PdfService {
             context.setVariable("pacienteNombre", pacienteData.datosPersonales().nombreApellidos());
             context.setVariable("pacienteFechaNac", pacienteData.datosPersonales().fechaNacimiento() != null ? pacienteData.datosPersonales().fechaNacimiento().toString() : "");
             context.setVariable("pacienteCedula", pacienteData.datosPersonales().cedula());
-            context.setVariable("pacienteEdad", "30"); // TODO: Calcular la edad a partir de la fecha de nacimiento
+            // --- CÁLCULO DINÁMICO DE LA EDAD ---
+            String edadStr = "";
+            if (pacienteData.datosPersonales().fechaNacimiento() != null) {
+                edadStr = String.valueOf(Period.between(pacienteData.datosPersonales().fechaNacimiento(), LocalDate.now()).getYears());
+            }
+            context.setVariable("pacienteEdad", edadStr);
             context.setVariable("pacienteTelefonos", pacienteData.datosPersonales().telefonos());
             context.setVariable("pacienteDireccion", pacienteData.datosPersonales().direccion());
             context.setVariable("pacienteOcupacion", pacienteData.datosPersonales().ocupacion());
@@ -60,8 +81,8 @@ public class PdfService {
             // --- ZONA C: ANTECEDENTES Y HÁBITOS ---
             context.setVariable("antFamiliares", pacienteData.antecedentes().antecedentesFamiliares());
             context.setVariable("antPersonales", pacienteData.antecedentes().antecedentesPersonales());
-            context.setVariable("antNoPatologicos", ""); // Añadir a tu UI si es necesario
-            context.setVariable("transfusion", ""); // Añadir a tu UI si es necesario
+            context.setVariable("antNoPatologicos", pacienteData.antecedentes().personalesNoPatologicos()); // Añadir a tu UI si es necesario
+            context.setVariable("transfusion", pacienteData.antecedentes().transfusiones()); // Añadir a tu UI si es necesario
             context.setVariable("cirugias", pacienteData.antecedentes().cirugias());
             context.setVariable("alergias", pacienteData.antecedentes().alergias());
 
@@ -73,12 +94,13 @@ public class PdfService {
 
             // --- ZONA D: EXAMEN FÍSICO ---
             // Si tienes un campo de motivo de consulta en la UI, mándalo aquí. Por ahora, lo dejamos vacío si no existe en el DTO
-            context.setVariable("motivoConsulta", "");
-            context.setVariable("historiaEnfermedad", "");
+            context.setVariable("motivoConsulta", pacienteData.historiaEnfermedad().motivoConsulta());
+            context.setVariable("historiaEnfermedad", pacienteData.historiaEnfermedad().historiaEnfermedadActual());
 
             context.setVariable("ta", pacienteData.examenFisico().tensionArterial());
             context.setVariable("fc", pacienteData.examenFisico().frecuenciaCardiaca());
             context.setVariable("fr", pacienteData.examenFisico().frecuenciaRespiratoria());
+            context.setVariable("temperatura", pacienteData.examenFisico().temperatura() + " °C"); // <--- NUEVO: Faltaba la temperatura
             context.setVariable("peso", pacienteData.examenFisico().peso() + " kg");
             context.setVariable("talla", pacienteData.examenFisico().talla() + " m");
 
@@ -192,7 +214,7 @@ public class PdfService {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
-            builder.withHtmlContent(htmlProcesado, "src/main/resources/templates/");
+            builder.withHtmlContent(htmlProcesado, "/");
             builder.toStream(outputStream);
             builder.run();
 
