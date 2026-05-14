@@ -33,14 +33,17 @@ public class PacienteService {
 
     @Transactional
     public String registrarNuevaHistoriaClinica(PacienteRegistroDTO dto) {
-        log.info("Iniciando transacción segura para el paciente con cédula: {}", dto.datosPersonales().cedula());
+        log.info("Iniciando procesamiento de Historia Clínica para paciente con cédula: {}", dto.datosPersonales().cedula());
 
-        if (pacienteRepository.existsByCedula(dto.datosPersonales().cedula())) {
-            throw new RuntimeException("Ya existe un paciente con la cédula: " + dto.datosPersonales().cedula());
-        }
+        // 1. LÓGICA DE RECUPERACIÓN O CREACIÓN (UPSERT)
+        // En lugar de lanzar error, buscamos si ya existe el registro base de la secretaria
+        Paciente paciente = pacienteRepository.findByCedula(dto.datosPersonales().cedula())
+                .orElseGet(() -> {
+                    log.info("Paciente no encontrado en BD. Creando nuevo registro.");
+                    return new Paciente();
+                });
 
-        // 1. PACIENTE PRINCIPAL
-        Paciente paciente = new Paciente();
+        // Actualizamos/Seteamos los datos personales
         paciente.setNombreApellidos(dto.datosPersonales().nombreApellidos());
         paciente.setCedula(dto.datosPersonales().cedula());
         paciente.setFechaNacimiento(dto.datosPersonales().fechaNacimiento());
@@ -48,23 +51,28 @@ public class PacienteService {
         paciente.setTelefonos(dto.datosPersonales().telefonos());
         paciente.setSeguro(dto.datosPersonales().seguro());
         paciente.setOcupacion(dto.datosPersonales().ocupacion());
+
+        // Guardamos el paciente (Si ya tenía ID, JPA hará un UPDATE; si no, un INSERT)
         paciente = pacienteRepository.save(paciente);
 
-        // 2. ANTECEDENTES
-        AntecedentesPaciente antecedentes = new AntecedentesPaciente();
+        // 2. ANTECEDENTES (Buscamos si ya tiene para actualizar o crear nuevo)
+        AntecedentesPaciente antecedentes = antecedentesRepository.findByPaciente(paciente)
+                .orElse(new AntecedentesPaciente());
+
         antecedentes.setPaciente(paciente);
         antecedentes.setAntecedentesFamiliares(dto.antecedentes().antecedentesFamiliares());
         antecedentes.setAntecedentesPersonales(dto.antecedentes().antecedentesPersonales());
         antecedentes.setAlergias(dto.antecedentes().alergias());
         antecedentes.setCirugias(dto.antecedentes().cirugias());
         antecedentes.setTransfusion(dto.antecedentes().transfusiones());
-        antecedentes.setAntecedentesPersonalesNoPatologicos(dto.antecedentes().personalesNoPatologicos());
         antecedentesRepository.save(antecedentes);
 
-        // 3. HÁBITOS TÓXICOS (Mapeando a tus variables exactas)
-        HabitosToxicos habitos = new HabitosToxicos();
+        // 3. HÁBITOS TÓXICOS
+        HabitosToxicos habitos = habitosToxicosRepository.findByPaciente(paciente)
+                .orElse(new HabitosToxicos());
+
         habitos.setPaciente(paciente);
-        habitos.setTabaco(dto.habitos().tabaco()); // UI manda 'fuma', BD recibe 'tabaco'
+        habitos.setTabaco(dto.habitos().tabaco());
         habitos.setAlcohol(dto.habitos().alcohol());
         habitos.setCafe(dto.habitos().cafe());
         habitos.setDrogas(dto.habitos().drogas());
@@ -72,14 +80,19 @@ public class PacienteService {
         habitos.setCigarroElectronico(dto.habitos().cigarrilloElectronico());
         habitosToxicosRepository.save(habitos);
 
-        MotivoConsulta motivo = new MotivoConsulta();
-        motivo.setPaciente(paciente); // Conectamos con el paciente
+        // 4. MOTIVO DE CONSULTA
+        MotivoConsulta motivo = motivoConsultaRepository.findByPaciente(paciente)
+                .orElse(new MotivoConsulta());
+
+        motivo.setPaciente(paciente);
         motivo.setMotivoConsulta(dto.historiaEnfermedad().motivoConsulta());
         motivo.setHistoriaEnfermedadActual(dto.historiaEnfermedad().historiaEnfermedadActual());
         motivoConsultaRepository.save(motivo);
 
-        // 4. EXAMEN FÍSICO (Solo lo físico)
-        ExamenFisico examen = new ExamenFisico();
+        // 5. EXAMEN FÍSICO
+        ExamenFisico examen = examenFisicoRepository.findByPaciente(paciente)
+                .orElse(new ExamenFisico());
+
         examen.setPaciente(paciente);
         examen.setPeso(dto.examenFisico().peso());
         examen.setTalla(dto.examenFisico().talla());
@@ -88,31 +101,26 @@ public class PacienteService {
         examen.setFrecuenciaRespiratoria(dto.examenFisico().frecuenciaRespiratoria());
         examen.setTemperatura(dto.examenFisico().temperatura());
 
-        // Calcular IMC
         if (examen.getPeso() != null && examen.getTalla() != null && examen.getTalla() > 0) {
             double imc = examen.getPeso() / Math.pow(examen.getTalla(), 2);
             examen.setImc(Math.round(imc * 10.0) / 10.0);
         }
         examenFisicoRepository.save(examen);
 
-        // 5. DIAGNÓSTICO Y TRATAMIENTO (Tu nueva entidad)
-        DiagnosticoTratamiento diagnostico = new DiagnosticoTratamiento();
+        // 6. DIAGNÓSTICO Y TRATAMIENTO
+        DiagnosticoTratamiento diagnostico = diagnosticoTratamientoRepository.findByPaciente(paciente)
+                .orElse(new DiagnosticoTratamiento());
+
         diagnostico.setPaciente(paciente);
         diagnostico.setDiagnostico(dto.examenFisico().diagnostico());
         diagnostico.setTratamiento(dto.examenFisico().tratamiento());
         diagnostico.setEstudioComplementario(dto.examenFisico().estudioComplementarios());
-        // ... (Tu código actual guardando paciente, antecedentes, hábitos, examen físico y diagnóstico) ...
         diagnosticoTratamientoRepository.save(diagnostico);
 
-        // ==========================================
-        // 6. GENERACIÓN Y GUARDADO FÍSICO DEL PDF
-        // ==========================================
-        log.info("Generando documento PDF para el nuevo paciente...");
+        // 7. GENERACIÓN Y GUARDADO DEL PDF
+        log.info("Generando documento PDF...");
         try {
-            // A. Fabricar el PDF en la RAM
             byte[] pdfBytes = pdfService.generarHojaClinicaPdf(dto);
-
-            // B. Guardarlo físicamente en su carpeta unificada
             String rutaFinal = pdfService.guardarPdfEnCarpetaPaciente(
                     pdfBytes,
                     paciente.getCedula(),
@@ -120,20 +128,15 @@ public class PacienteService {
                     "Historia_Clinica_Base"
             );
 
-            // C. Actualizar el paciente con la ruta donde quedó guardado
             if (rutaFinal != null) {
                 paciente.setRutaPdfHistoria(rutaFinal);
-                pacienteRepository.save(paciente); // Guardamos la actualización
+                pacienteRepository.save(paciente);
             }
         } catch (Exception e) {
-            // Nota Senior: Si el PDF falla (ej. disco lleno), atrapamos el error para que
-            // no haga "Rollback" a la base de datos. Es mejor tener los datos en BD y regenerar el PDF luego.
             log.error("Los datos se guardaron, pero ocurrió un error al generar el PDF físico.", e);
         }
 
-        log.info("Transacción completada. Historia clínica guardada con éxito.");
-
-        // Devolvemos la ruta del PDF que se guardó en la entidad
+        log.info("Operación completada con éxito para el paciente: {}", paciente.getNombreApellidos());
         return paciente.getRutaPdfHistoria();
     }
 
@@ -184,7 +187,7 @@ public class PacienteService {
 
         // 3. Buscar dependencias
         AntecedentesPaciente ant = antecedentesRepository.findByPacienteId(pacienteId).orElse(new AntecedentesPaciente());
-        AntecedentesDTO antDTO = new AntecedentesDTO(ant.getAntecedentesFamiliares(), ant.getAntecedentesPersonales(), "", "", ant.getCirugias(), ant.getAlergias());
+        AntecedentesDTO antDTO = new AntecedentesDTO(ant.getAntecedentesFamiliares(), ant.getAntecedentesPersonales(), "", ant.getCirugias(), ant.getAlergias());
 
         HabitosToxicos hab = habitosToxicosRepository.findByPacienteId(pacienteId).orElse(new HabitosToxicos());
         HabitosToxicosDTO habDTO = new HabitosToxicosDTO(hab.isTabaco(), hab.isAlcohol(), hab.isHooka(), hab.isCigarroElectronico(), hab.isCafe(), hab.isDrogas());
@@ -220,78 +223,144 @@ public class PacienteService {
      * Guarda una nueva nota de evolución vinculada a un paciente específico.
      */
     @Transactional
-    public void agregarEvolucion(UUID pacienteId, HojaEvolucionDTO dto) {
-        log.info("Agregando nueva hoja de evolución para el paciente ID: {}", pacienteId);
+    public void agregarEvolucion(UUID pacienteId, HojaEvolucionDTO evolucionDTO) {
+        log.info("Agregando nueva evolución al paciente ID: {}", pacienteId);
 
-        // 1. Verificamos paciente
+        // 1. Buscamos al paciente
         Paciente paciente = pacienteRepository.findById(pacienteId)
                 .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
 
-        // 2. Guardamos en Base de Datos PostgreSQL
-        HojaEvolucion evolucion = new HojaEvolucion();
-        evolucion.setPaciente(paciente);
-        evolucion.setFecha(LocalDate.now());
-        evolucion.setMotivoSeguimiento(dto.motivoSeguimiento());
-        evolucion.setHistoriaEnfermedadActual(dto.historiaEnfermedadActual());
-        evolucion.setDiagnostico(dto.diagnostico());
-        evolucion.setTratamiento(dto.tratamiento());
-        evolucion.setPlan(dto.plan());
-
-        // Guardamos primero para obtener un ID si fuera necesario y confirmar transacción
-        evolucion = hojaEvolucionRepository.save(evolucion);
+        // 2. Creamos la Entidad principal
+        HojaEvolucion nuevaEvolucion = new HojaEvolucion();
+        nuevaEvolucion.setPaciente(paciente);
+        nuevaEvolucion.setFecha(LocalDate.now());
+        nuevaEvolucion.setMotivoSeguimiento(evolucionDTO.motivoSeguimiento());
+        nuevaEvolucion.setHistoriaEnfermedadActual(evolucionDTO.historiaEnfermedadActual());
+        nuevaEvolucion.setDiagnostico(evolucionDTO.diagnostico());
+        nuevaEvolucion.setTratamiento(evolucionDTO.tratamiento());
+        nuevaEvolucion.setPlan(evolucionDTO.plan());
 
         // ==========================================
-        // 3. MAGIA DE ARCHIVOS: Generación y Guardado del PDF
+        // 3. ¡NUEVA MAGIA! DESEMPACAR LABORATORIOS
         // ==========================================
+        if (evolucionDTO.resultados() != null) {
+            ResultadosHojaEvolucion lab = new ResultadosHojaEvolucion();
+            lab.setHb(evolucionDTO.resultados().hb());
+            lab.setHtco(evolucionDTO.resultados().htco());
+            lab.setPlaq(evolucionDTO.resultados().plaq());
+            lab.setGlic(evolucionDTO.resultados().glic());
+            lab.setH1ac(evolucionDTO.resultados().h1ac());
+            lab.setColest(evolucionDTO.resultados().colest());
+            lab.setHdl(evolucionDTO.resultados().hdl());
+            lab.setLdl(evolucionDTO.resultados().ldl());
+            lab.setTrig(evolucionDTO.resultados().trig());
+            lab.setSonografias(evolucionDTO.resultados().sonografias());
+
+            // Vinculamos de forma bidireccional
+            lab.setHojaEvolucion(nuevaEvolucion);
+            nuevaEvolucion.setResultadosLaboratorio(lab);
+        }
+
+        // 4. Guardamos la evolución en la Base de Datos
+        HojaEvolucion evolucionGuardada = hojaEvolucionRepository.save(nuevaEvolucion);
+
+        // 5. Generación Física del PDF
         try {
-            // A. Fabricamos el PDF en memoria
-            byte[] pdfBytes = pdfService.generarEvolucionPdf(paciente, evolucion);
-
-            // B. Formateamos la fecha para el nombre del archivo (Ej: Evolucion_2026-05-04_123456)
-            String prefijo = "Evolucion_" + evolucion.getFecha().toString();
-
-            // C. Lo guardamos en su carpeta unificada
-            String rutaFinal = pdfService.guardarPdfEnCarpetaPaciente(
+            byte[] pdfBytes = pdfService.generarEvolucionPdf(paciente, evolucionGuardada);
+            String rutaFisica = pdfService.guardarPdfEnCarpetaPaciente(
                     pdfBytes,
                     paciente.getCedula(),
                     paciente.getNombreApellidos(),
-                    prefijo
+                    "Evolucion_" + LocalDate.now()
             );
 
-            // D. Actualizamos la evolución en BD con la ruta exacta del PDF
-            if (rutaFinal != null) {
-                evolucion.setRutaPdf(rutaFinal);
-                hojaEvolucionRepository.save(evolucion); // Actualización final
+            // 6. Actualizamos la BD con la ruta física del archivo
+            if (rutaFisica != null) {
+                evolucionGuardada.setRutaPdf(rutaFisica);
+                hojaEvolucionRepository.save(evolucionGuardada);
             }
+
         } catch (Exception e) {
             log.error("La evolución se guardó en BD, pero falló la generación física del PDF.", e);
         }
-
-        log.info("Evolución médica completada y archivada.");
     }
 
     /**
      * Obtiene el historial completo de evoluciones de un paciente para mostrar en la UI.
+     * Incluye los nuevos resultados de laboratorio.
      */
     @Transactional(readOnly = true)
     public List<HojaEvolucionDTO> obtenerEvolucionesPorPaciente(UUID pacienteId) {
         log.info("Recuperando historial de evoluciones del paciente ID: {}", pacienteId);
 
-        // Asumiendo que creaste el método en el repositorio para ordenar por fecha
-        // Solo pasas la variable 'pacienteId', sin el prefijo 'UUID'
-                List<HojaEvolucion> evoluciones = hojaEvolucionRepository.findByPacienteIdOrderByFechaDesc(pacienteId);
+        // 1. Buscamos las entidades en la base de datos
+        List<HojaEvolucion> evoluciones = hojaEvolucionRepository.findByPacienteIdOrderByFechaDesc(pacienteId);
 
-        // Convertimos las entidades a DTOs para la interfaz gráfica
+        // 2. Convertimos las entidades a DTOs usando Stream
         return evoluciones.stream()
-                .map(evo -> new HojaEvolucionDTO(
-                        evo.getId(),
-                        evo.getFecha(),
-                        evo.getMotivoSeguimiento(),
-                        evo.getHistoriaEnfermedadActual(),
-                        evo.getDiagnostico(),
-                        evo.getTratamiento(),
-                        evo.getPlan(),
-                        evo.getRutaPdf()
+                .map(evo -> {
+                    // --- LÓGICA DE MAPEO PARA LABORATORIOS ---
+                    ResultadosEvolucionDTO resultadosDTO = null;
+
+                    // Si la evolución tiene laboratorios, creamos el DTO interno
+                    if (evo.getResultadosLaboratorio() != null) {
+                        var res = evo.getResultadosLaboratorio();
+                        resultadosDTO = new ResultadosEvolucionDTO(
+                                res.getHb(), res.getHtco(), res.getPlaq(),
+                                res.getGlic(), res.getH1ac(), res.getColest(),
+                                res.getHdl(), res.getLdl(), res.getTrig(),
+                                res.getSonografias()
+                        );
+                    }
+
+                    // 3. Creamos el HojaEvolucionDTO con los 9 parámetros requeridos
+                    return new HojaEvolucionDTO(
+                            evo.getId(),
+                            evo.getFecha(),
+                            evo.getMotivoSeguimiento(),
+                            evo.getHistoriaEnfermedadActual(),
+                            evo.getDiagnostico(),
+                            evo.getTratamiento(),
+                            evo.getPlan(),
+                            evo.getRutaPdf(),
+                            resultadosDTO // <--- El 9no parámetro (Laboratorios)
+                    );
+                })
+                .toList();
+    }
+    /**
+     * Módulo Secretaria: Registra a un paciente solo con sus datos básicos o lo recupera si ya existe.
+     */
+    @Transactional
+    public Paciente obtenerOCrearPacienteBasico(String cedula, String nombre, String telefono, String seguro) {
+        return pacienteRepository.findByCedula(cedula).orElseGet(() -> {
+            log.info("Creando nuevo paciente básico desde Recepción: {}", cedula);
+            Paciente nuevoPaciente = new Paciente();
+            nuevoPaciente.setCedula(cedula);
+            nuevoPaciente.setNombreApellidos(nombre);
+            nuevoPaciente.setTelefonos(telefono);
+            nuevoPaciente.setSeguro(seguro);
+            return pacienteRepository.save(nuevoPaciente);
+        });
+    }
+    /**
+     * Verifica si el paciente ya tiene una historia clínica completa cargada.
+     * Lo sabemos porque el médico debió haberle generado su PDF inicial.
+     */
+    public boolean tieneHistoriaClinicaCompleta(UUID pacienteId) {
+        return pacienteRepository.findById(pacienteId)
+                .map(p -> p.getRutaPdfHistoria() != null && !p.getRutaPdfHistoria().trim().isEmpty())
+                .orElse(false);
+    }
+    public List<PacienteResumenDTO> buscarPacientesDelMedico(String filtro, UUID medicoId) {
+        String filtroLimpio = (filtro == null) ? "" : filtro.trim();
+
+        return pacienteRepository.findPacientesPorMedicoYFiltro(medicoId, filtroLimpio)
+                .stream()
+                .map(p -> new PacienteResumenDTO(
+                        p.getId(),
+                        p.getNombreApellidos(),
+                        p.getCedula()
                 ))
                 .toList();
     }

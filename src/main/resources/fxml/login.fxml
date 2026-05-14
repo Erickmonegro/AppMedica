@@ -1,0 +1,21 @@
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: #f8fafc; -fx-padding: 40;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.LoginController">
+
+    <Label text="CENFASIES" textFill="#0b4a9e">
+        <font><Font name="System Bold" size="28.0" /></font>
+    </Label>
+
+    <VBox spacing="10">
+        <TextField fx:id="txtUsername" promptText="Usuario" style="-fx-pref-width: 250; -fx-padding: 10;" />
+        <PasswordField fx:id="txtPassword" promptText="Contraseña" style="-fx-pref-width: 250; -fx-padding: 10;" />
+    </VBox>
+
+    <Button onAction="#handleLogin" text="Iniciar Sesión" style="-fx-background-color: #0b4a9e; -fx-text-fill: white; -fx-pref-width: 250; -fx-padding: 12; -fx-font-weight: bold;" />
+
+    <Label fx:id="lblError" textFill="RED" />
+</VBox>

@@ -53,6 +53,32 @@
         </ScrollPane>
 
         <Separator />
+        <VBox spacing="10.0" style="-fx-background-color: #f8fafc; -fx-padding: 15; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+            <Label text="🔬 Resultados de Laboratorio / Estudios" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.3" />
+                    <ColumnConstraints percentWidth="33.3" />
+                    <ColumnConstraints percentWidth="33.3" />
+                </columnConstraints>
+                <children>
+                    <TextField fx:id="txtHb" promptText="HB (Hemoglobina)" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <TextField fx:id="txtHtco" promptText="HTCO (Hematocrito)" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <TextField fx:id="txtPlaq" promptText="PLAQ (Plaquetas)" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+
+                    <TextField fx:id="txtGlic" promptText="GLIC (Glicemia)" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <TextField fx:id="txtH1ac" promptText="H1AC" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                    <TextField fx:id="txtColest" promptText="Colesterol Total" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                    <TextField fx:id="txtHdl" promptText="HDL" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <TextField fx:id="txtLdl" promptText="LDL" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                    <TextField fx:id="txtTrig" promptText="Triglicéridos" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+
+                    <TextField fx:id="txtSonografias" promptText="Reporte de Sonografías..." GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="3" />
+                </children>
+            </GridPane>
+        </VBox>
 
         <!-- BOTONERA -->
         <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 10 0 0 0;">

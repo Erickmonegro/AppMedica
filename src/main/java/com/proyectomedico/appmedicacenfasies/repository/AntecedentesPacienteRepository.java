@@ -10,5 +10,6 @@ import java.util.UUID;
 public interface AntecedentesPacienteRepository extends JpaRepository<AntecedentesPaciente, UUID> {
 
     Optional<AntecedentesPaciente> findByPacienteId(UUID pacienteId);
-
+    Optional<AntecedentesPaciente> findByPaciente(Paciente paciente);
 }
+

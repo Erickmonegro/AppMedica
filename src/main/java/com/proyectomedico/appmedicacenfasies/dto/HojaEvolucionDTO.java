@@ -11,6 +11,7 @@ public record HojaEvolucionDTO(
         String diagnostico,
         String tratamiento,
         String plan,
-        String rutaPdf
+        String rutaPdf,
+        ResultadosEvolucionDTO resultados
 ) {
 }

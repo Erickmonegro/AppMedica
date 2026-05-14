@@ -1,11 +1,13 @@
 package com.proyectomedico.appmedicacenfasies.controller;
 
 import com.proyectomedico.appmedicacenfasies.dto.HojaEvolucionDTO;
+import com.proyectomedico.appmedicacenfasies.dto.ResultadosEvolucionDTO;
 import com.proyectomedico.appmedicacenfasies.service.PacienteService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,9 @@ public class NuevaEvolucionController {
     @FXML private TextArea txtDiagnostico;
     @FXML private TextArea txtTratamiento;
     @FXML private TextArea txtPlan;
+    // --- RESULTADOS DE LABORATORIO ---
+    @FXML private TextField txtHb, txtHtco, txtPlaq, txtGlic, txtH1ac;
+    @FXML private TextField txtColest, txtHdl, txtLdl, txtTrig, txtSonografias;
 
     /**
      * El VisorExpediente llamará a este método justo antes de mostrar la ventana.
@@ -42,6 +47,14 @@ public class NuevaEvolucionController {
         try {
             log.info("Empaquetando datos de la evolución...");
 
+            // 1. Armamos el sub-cajón de laboratorios
+            ResultadosEvolucionDTO resultadosLab = new ResultadosEvolucionDTO(
+                    txtHb.getText(), txtHtco.getText(), txtPlaq.getText(),
+                    txtGlic.getText(), txtH1ac.getText(), txtColest.getText(),
+                    txtHdl.getText(), txtLdl.getText(), txtTrig.getText(),
+                    txtSonografias.getText()
+            );
+
             // 1. Armar el DTO de transporte (La fecha y el ID de la hoja se ignoran aquí, el Service los crea)
             HojaEvolucionDTO nuevaEvolucion = new HojaEvolucionDTO(
                     null, // ID nulo porque es nueva
@@ -51,7 +64,10 @@ public class NuevaEvolucionController {
                     txtDiagnostico.getText(),
                     txtTratamiento.getText(),
                     txtPlan.getText(),
-                    null
+                    null,
+                    resultadosLab
+
+
             );
 
             // 2. Enviar a guardar

@@ -5,6 +5,7 @@ public enum Especialidad {
     MEDICOFAMILIAR,
     MEDICOGENERAL,
     SONOGRAFISTA,
-    GINECOLOGIA
+    GINECOLOGIA,
+    NUTRICIONISTA
 
 }

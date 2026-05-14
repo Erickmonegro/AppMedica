@@ -4,67 +4,133 @@
   <meta charset="UTF-8" />
   <title>Hoja de Evolución</title>
   <style>
-    body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 12px; line-height: 1.4; color: #333; margin: 30px; }
-    .header { text-align: center; border-bottom: 2px solid #0b4a9e; padding-bottom: 10px; margin-bottom: 20px; }
-    .header h2 { color: #0b4a9e; margin: 0; font-size: 18px; }
-    .header p { margin: 2px 0; font-size: 11px; color: #555; }
-    .paciente-info { display: table; width: 100%; margin-bottom: 20px; background-color: #f8fafc; padding: 10px; border: 1px solid #e2e8f0; }
-    .info-row { display: table-row; }
-    .info-cell { display: table-cell; padding: 5px; font-weight: bold; }
-    .info-value { display: table-cell; padding: 5px; font-weight: normal; }
-    .seccion { margin-bottom: 15px; }
-    .seccion-titulo { background-color: #0b4a9e; color: white; padding: 4px 8px; font-weight: bold; font-size: 12px; margin-bottom: 5px; }
-    .seccion-contenido { padding: 5px; border: 1px solid #e2e8f0; min-height: 40px; }
+    /* Estilos base */
+    body { font-family: 'Helvetica', 'Arial', sans-serif; color: #000; margin: 30px; line-height: 1.4; }
+
+    /* Cabecera idéntica al PDF de referencia */
+    .header-table { width: 100%; margin-bottom: 10px; }
+    .titulo-principal { font-size: 16px; font-weight: bold; margin: 0; text-align: center; text-transform: uppercase; }
+    .subtitulo { font-size: 15px; font-weight: bold; margin: 0; text-align: center; }
+    .texto-header { font-size: 12px; margin: 2px 0; text-align: center; }
+
+    /* Título del documento */
+    .titulo-documento { text-align: center; font-size: 16px; font-weight: bold; text-decoration: underline; margin-top: 15px; margin-bottom: 25px; letter-spacing: 1px; }
+    .subtitulo-seccion { font-size: 13px; font-weight: bold; text-decoration: underline; margin-top: 25px; margin-bottom: 15px; text-transform: uppercase; }
+
+    /* Clases maestras para datos cortos (en la misma línea) */
+    .fila-formulario { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .etiqueta { width: 1%; white-space: nowrap; font-size: 12px; font-weight: bold; padding-right: 8px; vertical-align: bottom; }
+    .dato-subrayado { border-bottom: 1px solid #000; font-size: 13px; vertical-align: bottom; padding-bottom: 2px; }
+
+    /* Espaciador para la fila dividida */
+    .espaciador { width: 1%; white-space: nowrap; padding-left: 30px; padding-right: 8px; font-size: 12px; font-weight: bold; vertical-align: bottom; }
+
+    /* Clases para textos largos (Layout apilado) */
+    .bloque-texto-largo { margin-bottom: 20px; width: 100%; }
+    .etiqueta-bloque { font-size: 12px; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; }
+    .contenido-bloque { border-bottom: 1px solid #000; font-size: 13px; padding-bottom: 4px; min-height: 20px; text-align: justify; line-height: 1.5; }
   </style>
 </head>
 <body>
 
-<!-- ENCABEZADO INSTITUCIONAL -->
-<div class="header">
-  <h2>CENTRO FAMILIAR DE SALUD INTEGRAL Y ESPECIALIDADES (CENFASIES)</h2>
-  <p>AV. SÁNCHEZ (Principal) #5, Proyecto profesor Juan Bosch, Guaricano, SDN</p>
-  <p>TEL. 829-405-5486 / 806-287-6567</p>
-  <h3 style="margin-top: 15px; text-decoration: underline;">HOJA DE EVOLUCIÓN</h3>
+<table class="header-table">
+  <tr>
+    <td width="20%" style="text-align: left; vertical-align: middle;">
+      <img th:if="${logoBase64 != null && !logoBase64.isEmpty()}" th:src="${logoBase64}" alt="Logo CENFASIES" style="max-width: 120px; height: auto;" />
+    </td>
+    <td width="60%">
+      <div class="titulo-principal">CENTRO FAMILIAR DE SALUD INTEGRAL Y ESPECIALIDADES</div>
+      <div class="subtitulo">(CENFASIES)</div>
+      <div class="texto-header">AV. SÁNCHEZ (Principal) #5, Proyecto profesor Juan Bosch, Guaricano, SDN</div>
+      <div class="texto-header">TEL. 829-405-5486 / 806-287-6567</div>
+    </td>
+    <td width="20%"></td>
+  </tr>
+</table>
+
+<div class="titulo-documento">EVOLUCIÓN CLÍNICA</div>
+
+<table class="fila-formulario">
+  <tr>
+    <td class="etiqueta">FECHA:</td>
+    <td class="dato-subrayado" style="width: 50%;" th:text="${fechaEvolucion}"></td>
+    <td class="espaciador">EDAD:</td>
+    <td class="dato-subrayado" style="width: 50%;" th:text="${pacienteEdad}"></td>
+  </tr>
+</table>
+
+<table class="fila-formulario">
+  <tr>
+    <td class="etiqueta">NOMBRE Y APELLIDOS:</td>
+    <td class="dato-subrayado" th:text="${pacienteNombre}"></td>
+  </tr>
+</table>
+
+<div class="bloque-texto-largo">
+  <div class="etiqueta-bloque">MOTIVO DE SEGUIMIENTO:</div>
+  <div class="contenido-bloque" th:text="${motivoSeguimiento}"></div>
 </div>
 
-<!-- DATOS DEL PACIENTE Y FECHA -->
-<div class="paciente-info">
-  <div class="info-row">
-    <div class="info-cell" style="width: 15%;">FECHA:</div>
-    <div class="info-value" style="width: 35%;" th:text="${fechaEvolucion}">01/01/2026</div>
-    <div class="info-cell" style="width: 15%;">EDAD:</div>
-    <div class="info-value" style="width: 35%;" th:text="${pacienteEdad} + ' años'">30 años</div>
-  </div>
-  <div class="info-row">
-    <div class="info-cell">NOMBRE:</div>
-    <div class="info-value" colspan="3" th:text="${pacienteNombre}">Juan Pérez</div>
-  </div>
+<div class="bloque-texto-largo">
+  <div class="etiqueta-bloque">HISTORIA DE LA ENFERMEDAD ACTUAL:</div>
+  <div class="contenido-bloque" th:text="${historiaEnfermedad}"></div>
 </div>
 
-<!-- CUERPO DE LA EVOLUCIÓN -->
-<div class="seccion">
-  <div class="seccion-titulo">MOTIVO DE SEGUIMIENTO</div>
-  <div class="seccion-contenido" th:text="${motivoSeguimiento}"></div>
+<div class="subtitulo-seccion">RESULTADOS DE LABORATORIO / ESTUDIOS</div>
+
+<table class="fila-formulario" style="margin-bottom: 10px;">
+  <tr>
+    <td class="etiqueta">HB:</td>
+    <td class="dato-subrayado" style="width: 33%;" th:text="${hb}"></td>
+    <td class="espaciador">HTCO:</td>
+    <td class="dato-subrayado" style="width: 33%;" th:text="${htco}"></td>
+    <td class="espaciador">PLAQ:</td>
+    <td class="dato-subrayado" style="width: 33%;" th:text="${plaq}"></td>
+  </tr>
+</table>
+
+<table class="fila-formulario" style="margin-bottom: 10px;">
+  <tr>
+    <td class="etiqueta">GLIC:</td>
+    <td class="dato-subrayado" style="width: 50%;" th:text="${glic}"></td>
+    <td class="espaciador">H1AC:</td>
+    <td class="dato-subrayado" style="width: 50%;" th:text="${h1ac}"></td>
+  </tr>
+</table>
+
+<table class="fila-formulario" style="margin-bottom: 25px;">
+  <tr>
+    <td class="etiqueta">COLEST:</td>
+    <td class="dato-subrayado" style="width: 25%;" th:text="${colest}"></td>
+    <td class="espaciador">HDL:</td>
+    <td class="dato-subrayado" style="width: 25%;" th:text="${hdl}"></td>
+    <td class="espaciador">LDL:</td>
+    <td class="dato-subrayado" style="width: 25%;" th:text="${ldl}"></td>
+    <td class="espaciador">TRIG:</td>
+    <td class="dato-subrayado" style="width: 25%;" th:text="${trig}"></td>
+  </tr>
+</table>
+
+<div class="bloque-texto-largo">
+  <div class="etiqueta-bloque">SONOGRAFÍAS / OTROS REPORTES:</div>
+  <div class="contenido-bloque" th:text="${sonografias}"></div>
 </div>
 
-<div class="seccion">
-  <div class="seccion-titulo">HISTORIA DE LA ENFERMEDAD ACTUAL</div>
-  <div class="seccion-contenido" th:text="${historiaEnfermedad}"></div>
+<div class="subtitulo-seccion">CONCLUSIÓN CLÍNICA</div>
+
+<div class="bloque-texto-largo">
+  <div class="etiqueta-bloque">DIAGNÓSTICO(S):</div>
+  <div class="contenido-bloque" th:text="${diagnostico}"></div>
 </div>
 
-<div class="seccion">
-  <div class="seccion-titulo">DIAGNÓSTICO(S)</div>
-  <div class="seccion-contenido" th:text="${diagnostico}"></div>
+<div class="bloque-texto-largo">
+  <div class="etiqueta-bloque">TRATAMIENTO:</div>
+  <div class="contenido-bloque" th:text="${tratamiento}"></div>
 </div>
 
-<div class="seccion">
-  <div class="seccion-titulo">TRATAMIENTO</div>
-  <div class="seccion-contenido" th:text="${tratamiento}"></div>
-</div>
-
-<div class="seccion">
-  <div class="seccion-titulo">PLAN</div>
-  <div class="seccion-contenido" th:text="${plan}"></div>
+<div class="bloque-texto-largo">
+  <div class="etiqueta-bloque">PLAN:</div>
+  <div class="contenido-bloque" th:text="${plan}"></div>
 </div>
 
 </body>

@@ -23,7 +23,7 @@ public class PrimaryStageInitializer implements ApplicationListener<StageReadyEv
     public PrimaryStageInitializer(
             ApplicationContext applicationContext,
             @Value("${spring.application.name}") String applicationTitle,
-            @Value("classpath:/fxml/dashboard.fxml") Resource fxmlResource) {
+            @Value("classpath:/fxml/login.fxml") Resource fxmlResource) {
 
         this.applicationContext = applicationContext;
         this.applicationTitle = applicationTitle;

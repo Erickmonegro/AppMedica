@@ -5,24 +5,23 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.UUID;
-
 @Entity
 @Table(name = "usuarios")
-@Inheritance(strategy = InheritanceType.JOINED) // ESTA ES LA MAGIA SENIOR
+@Inheritance(strategy = InheritanceType.JOINED) // Estrategia para la herencia
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public abstract class Usuario { // Cambiado a singular
-
+public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
-    private String nombre;
+    @Column(unique = true, nullable = false)
+    private String username;
 
     @Column(nullable = false)
     private String password;
 
-    // Aquí más adelante agregaremos el Rol (ADMIN, MEDICO, etc.)
+    private String nombreCompleto;
+
+    @Enumerated(EnumType.STRING)
+    private Rol rol; // Aquí guardaremos si es SECRETARIA o MEDICO
 }

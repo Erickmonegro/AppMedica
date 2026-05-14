@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.DashboardMedicoController">
+
+    <HBox spacing="20.0" alignment="CENTER_LEFT">
+        <children>
+            <MenuButton mnemonicParsing="false" styleClass="boton-principal" text="Menú" prefWidth="150.0">
+                <items>
+                    <MenuItem text="Cerrar Sesión" onAction="#cerrarSesion" />
+                </items>
+            </MenuButton>
+
+            <TextField fx:id="txtBuscar" promptText="Buscador..." styleClass="buscador-azul" HBox.hgrow="ALWAYS" />
+
+            <Button fx:id="btnNuevoPaciente" mnemonicParsing="false" onAction="#abrirNuevoPaciente" styleClass="boton-principal" text="Añadir Paciente" prefWidth="150.0"/>
+        </children>
+    </HBox>
+
+    <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+        <children>
+
+            <VBox styleClass="panel-azul" prefWidth="250.0">
+                <children>
+                    <Label text="Lista de pacientes" styleClass="texto-panel" />
+                    <ListView fx:id="listaPacientes" VBox.vgrow="ALWAYS" style="-fx-background-color: #0b4a9e; -fx-control-inner-background: transparent;" />
+                </children>
+            </VBox>
+
+            <VBox styleClass="panel-azul" HBox.hgrow="ALWAYS" spacing="15.0">
+                <children>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="⏱️ Sala de Espera" styleClass="texto-panel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: black;" />
+
+                        <Region HBox.hgrow="ALWAYS" />
+
+                        <Label fx:id="lblBienvenidaDoctor" styleClass="texto-panel" style="-fx-text-fill: #0b4a9e; -fx-padding: 0 20 0 0;" text="Dr. X" />
+
+                    </HBox>
+
+                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+                        <content>
+                            <VBox fx:id="vboxCitasDashboard" spacing="12.0" style="-fx-padding: 5px 15px 15px 5px; -fx-background-color: transparent;" />
+                        </content>
+                    </ScrollPane>
+
+                </children>
+            </VBox>
+
+        </children>
+    </HBox>
+
+</VBox>

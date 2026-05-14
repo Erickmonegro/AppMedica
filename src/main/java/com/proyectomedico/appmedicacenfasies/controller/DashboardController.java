@@ -202,7 +202,7 @@ public class DashboardController {
         Platform.runLater(() -> {
             vboxCitasDashboard.getChildren().clear(); // Limpiamos la pantalla antes de recargar
 
-            // 1. Pedimos los datos ligeros al Service
+            // 1. Pedimos los Datos ligeros al Service
             List<com.proyectomedico.appmedicacenfasies.dto.CitaDashboardDTO> proximasCitas = citaService.obtenerCitasParaDashboard();
 
             if (proximasCitas.isEmpty()) {

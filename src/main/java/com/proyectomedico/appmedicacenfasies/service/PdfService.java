@@ -81,7 +81,7 @@ public class PdfService {
             // --- ZONA C: ANTECEDENTES Y HÁBITOS ---
             context.setVariable("antFamiliares", pacienteData.antecedentes().antecedentesFamiliares());
             context.setVariable("antPersonales", pacienteData.antecedentes().antecedentesPersonales());
-            context.setVariable("antNoPatologicos", pacienteData.antecedentes().personalesNoPatologicos()); // Añadir a tu UI si es necesario
+
             context.setVariable("transfusion", pacienteData.antecedentes().transfusiones()); // Añadir a tu UI si es necesario
             context.setVariable("cirugias", pacienteData.antecedentes().cirugias());
             context.setVariable("alergias", pacienteData.antecedentes().alergias());
@@ -199,6 +199,14 @@ public class PdfService {
 
         try {
             Context context = new Context();
+            try {
+                org.springframework.core.io.ClassPathResource imgFile = new org.springframework.core.io.ClassPathResource("img/image_3ba2fd.png");
+                byte[] bytesImagen = org.springframework.util.StreamUtils.copyToByteArray(imgFile.getInputStream());
+                String base64Image = java.util.Base64.getEncoder().encodeToString(bytesImagen);
+                context.setVariable("logoBase64", "data:image/png;base64," + base64Image);
+            } catch (Exception e) {
+                context.setVariable("logoBase64", "");
+            }
 
             // 1. Datos del Paciente
             context.setVariable("pacienteNombre", paciente.getNombreApellidos());
@@ -218,7 +226,38 @@ public class PdfService {
             context.setVariable("tratamiento", evolucion.getTratamiento() != null ? evolucion.getTratamiento() : "");
             context.setVariable("plan", evolucion.getPlan() != null ? evolucion.getPlan() : "");
 
-            // 3. Procesamiento y Renderizado (Asegúrate de que el nombre coincida con tu archivo HTML)
+            // ==========================================
+            // 3. NUEVO: RESULTADOS DE LABORATORIO
+            // ==========================================
+            if (evolucion.getResultadosLaboratorio() != null) {
+                var lab = evolucion.getResultadosLaboratorio();
+                context.setVariable("hb", lab.getHb() != null ? lab.getHb() : "");
+                context.setVariable("htco", lab.getHtco() != null ? lab.getHtco() : "");
+                context.setVariable("plaq", lab.getPlaq() != null ? lab.getPlaq() : "");
+                context.setVariable("glic", lab.getGlic() != null ? lab.getGlic() : "");
+                context.setVariable("h1ac", lab.getH1ac() != null ? lab.getH1ac() : "");
+                context.setVariable("colest", lab.getColest() != null ? lab.getColest() : "");
+                context.setVariable("hdl", lab.getHdl() != null ? lab.getHdl() : "");
+                context.setVariable("ldl", lab.getLdl() != null ? lab.getLdl() : "");
+                context.setVariable("trig", lab.getTrig() != null ? lab.getTrig() : "");
+                context.setVariable("sonografias", lab.getSonografias() != null ? lab.getSonografias() : "");
+            } else {
+                // Si no hay laboratorios (evoluciones viejas), mandamos vacío para que no falle el HTML
+                context.setVariable("hb", "");
+                context.setVariable("htco", "");
+                context.setVariable("plaq", "");
+                context.setVariable("glic", "");
+                context.setVariable("h1ac", "");
+                context.setVariable("colest", "");
+                context.setVariable("hdl", "");
+                context.setVariable("ldl", "");
+                context.setVariable("trig", "");
+                context.setVariable("sonografias", "");
+            }
+
+            // 4. Procesamiento y Renderizado (Asegúrate de que el nombre coincida con tu archivo HTML)
+            // NOTA: En tus mensajes anteriores, la plantilla se llamaba "hoja_evolucion.html".
+            // Aquí en tu código original dice "hoja_evolucion_template". Usa el que corresponda a tu archivo físico.
             String htmlProcesado = templateEngine.process("hoja_evolucion_template", context);
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

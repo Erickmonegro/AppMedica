@@ -12,9 +12,11 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="800.0" prefWidth="1000.0" styleClass="root-pane" stylesheets="@/css/estiloHoja.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.NuevoPacienteController">
+<?import javafx.scene.control.ComboBox?>
+<VBox prefHeight="800.0" prefWidth="1000.0" styleClass="root-pane" stylesheets="@/css/estiloHoja.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.NuevoPacienteController">
 
     <!-- HEADER FIJO: Siempre visible -->
     <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="panel-blanco-redondeado">
@@ -53,13 +55,17 @@
 
                             <TextField fx:id="txtTelefonos" promptText="Teléfonos" styleClass="text-field-form" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                             <TextField fx:id="txtOcupacion" promptText="Ocupación" styleClass="text-field-form" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                            <TextField fx:id="txtSeguro" promptText="Seguro Médico (ARS)" styleClass="text-field-form" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-
+                            <Label text="Seguro:" />
+                            <ComboBox fx:id="cmbSeguro" editable="true" promptText="ARS..." maxWidth="Infinity" />
                             <TextField fx:id="txtDireccion" promptText="Dirección completa" styleClass="text-field-form" GridPane.columnSpan="3" GridPane.rowIndex="2" />
                         </children>
+                  <rowConstraints>
+                     <RowConstraints />
+                     <RowConstraints />
+                     <RowConstraints />
+                  </rowConstraints>
                     </GridPane>
                 </VBox>
-
 
 
                 <!-- SECCIÓN 3: ANTECEDENTES -->
@@ -70,13 +76,18 @@
                             <ColumnConstraints percentWidth="50.0" />
                             <ColumnConstraints percentWidth="50.0" />
                         </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints /> <RowConstraints /> <RowConstraints /> <RowConstraints /> </rowConstraints>
                         <children>
                             <TextArea fx:id="txtAntecedentesFam" prefHeight="80.0" promptText="Heredo-Familiares (Ej. Padre hipertenso...)" styleClass="text-area-form" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                             <TextArea fx:id="txtAntecedentesPers" prefHeight="80.0" promptText="Personales Patológicos (Ej. Asma, Diabetes...)" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                            <TextArea fx:id="txtAlergias" prefHeight="60.0" promptText="Alergias conocidas" styleClass="text-area-form" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                            <TextArea fx:id="txtCirugias" prefHeight="60.0" promptText="Cirugías previas" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                            <TextArea fx:id="txtPersonalesNoPatologicos" prefHeight="60.0" promptText="Antecedentes no patologicos" styleClass="text-area-form" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                            <TextArea fx:id="txtTransfusiones" prefHeight="60.0" promptText="Transfusiones" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                            <Label text="Antecedentes No Patológicos:" style="-fx-font-weight: bold; -fx-text-fill: #475569; -fx-padding: 10 0 0 0;" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2" />
+
+                            <TextArea fx:id="txtAlergias" prefHeight="60.0" promptText="Alergias conocidas" styleClass="text-area-form" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                            <TextArea fx:id="txtCirugias" prefHeight="60.0" promptText="Cirugías previas" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                            <TextArea fx:id="txtTransfusiones" prefHeight="60.0" promptText="Transfusiones" styleClass="text-area-form" GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2" />
                         </children>
                     </GridPane>
                 </VBox>
@@ -125,6 +136,9 @@
                             <TextField fx:id="txtFR" promptText="FR (rpm)" styleClass="text-field-form" GridPane.columnIndex="4" />
                             <TextField fx:id="txtTemp" promptText="Temp (°C)" styleClass="text-field-form" GridPane.columnIndex="5" />
                         </children>
+                  <rowConstraints>
+                     <RowConstraints />
+                  </rowConstraints>
                     </GridPane>
 
                     <GridPane hgap="15.0" vgap="15.0">
@@ -147,8 +161,14 @@
                             <TextArea fx:id="txtGenitales" prefHeight="50.0" promptText="Genitales Externos" styleClass="text-area-form" GridPane.columnIndex="2" GridPane.rowIndex="2" />
 
                             <TextArea fx:id="txtPiel" prefHeight="50.0" promptText="Piel y Faneras" styleClass="text-area-form" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                            <TextArea fx:id="txtHallazgosGen" prefHeight="50.0" promptText="Hallazgos Generales" styleClass="text-area-form" GridPane.columnSpan="2" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                            <TextArea fx:id="txtHallazgosGen" prefHeight="50.0" promptText="Hallazgos Generales" styleClass="text-area-form" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3" />
                         </children>
+                  <rowConstraints>
+                     <RowConstraints />
+                     <RowConstraints />
+                     <RowConstraints />
+                     <RowConstraints />
+                  </rowConstraints>
                     </GridPane>
                 </VBox>
 

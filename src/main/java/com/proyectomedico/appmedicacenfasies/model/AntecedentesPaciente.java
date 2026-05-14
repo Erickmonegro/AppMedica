@@ -23,9 +23,6 @@ public class AntecedentesPaciente {
     private String antecedentesPersonales;
 
     @Column(columnDefinition = "TEXT")
-    private String antecedentesPersonalesNoPatologicos;
-
-    @Column(columnDefinition = "TEXT")
     private String transfusion;
 
     @Column(columnDefinition = "TEXT")

@@ -2,17 +2,18 @@ package com.proyectomedico.appmedicacenfasies.controller;
 
 import com.proyectomedico.appmedicacenfasies.dto.*;
 import com.proyectomedico.appmedicacenfasies.service.PacienteService;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -21,47 +22,80 @@ public class NuevoPacienteController {
 
     // Solo inyectamos el PacienteService. ¡El controlador es flaco y limpio!
     private final PacienteService pacienteService;
+    @FXML
+    private ComboBox<String> cmbSeguro;
+
+    private final List<String> LISTADO_ARS = Arrays.asList(
+            "SENASA Contributivo", "SENASA Subsidiado", "Humano Seguros",
+            "Mapfre Salud ARS", "ARS Universal", "ARS Reservas",
+            "ARS Monumental", "ARS Sigma", "ARS Renacer", "Privado / Ninguno"
+    );
 
     // --- SECCIÓN 1: DATOS PERSONALES ---
-    @FXML private TextField txtNombre;
-    @FXML private TextField txtCedula;
-    @FXML private DatePicker dpFechaNacimiento;
-    @FXML private TextField txtTelefonos;
-    @FXML private TextField txtOcupacion;
-    @FXML private TextField txtSeguro;
-    @FXML private TextField txtDireccion;
+    @FXML
+    private TextField txtNombre;
+    @FXML
+    private TextField txtCedula;
+    @FXML
+    private DatePicker dpFechaNacimiento;
+    @FXML
+    private TextField txtTelefonos;
+    @FXML
+    private TextField txtOcupacion;
+
+
+    @FXML
+    private TextField txtDireccion;
 
     // --- SECCIÓN 2: ANTECEDENTES ---
-    @FXML private TextArea txtAntecedentesFam;
-    @FXML private TextArea txtAntecedentesPers;
-    @FXML private TextArea txtAlergias;
-    @FXML private TextArea txtCirugias;
-    @FXML private TextArea txtTransfusiones;
-    @FXML private TextArea txtPersonalesNoPatologicos;
+    @FXML
+    private TextArea txtAntecedentesFam;
+    @FXML
+    private TextArea txtAntecedentesPers;
+    @FXML
+    private TextArea txtAlergias;
+    @FXML
+    private TextArea txtCirugias;
+    @FXML
+    private TextArea txtTransfusiones;
+
 
     // --- SECCIÓN 3: HÁBITOS TÓXICOS ---
-    @FXML private CheckBox chkFuma;
-    @FXML private CheckBox chkAlcohol;
-    @FXML private CheckBox chkCafe;
-    @FXML private CheckBox chkHooka;
-    @FXML private CheckBox chkVape;
-    @FXML private CheckBox chkDrogas;
+    @FXML
+    private CheckBox chkFuma;
+    @FXML
+    private CheckBox chkAlcohol;
+    @FXML
+    private CheckBox chkCafe;
+    @FXML
+    private CheckBox chkHooka;
+    @FXML
+    private CheckBox chkVape;
+    @FXML
+    private CheckBox chkDrogas;
 
-    @FXML private TextField txtMotivoConsulta;
-    @FXML private TextArea txtHistoriaEnfermedad;
+    @FXML
+    private TextField txtMotivoConsulta;
+    @FXML
+    private TextArea txtHistoriaEnfermedad;
 
 
     // --- SECCIÓN 4: EXAMEN FÍSICO Y SIGNOS VITALES ---
-    @FXML private TextField txtPeso, txtTalla, txtTA, txtFC, txtFR, txtTemp;
-    @FXML private TextArea txtCabeza, txtCuello, txtTorax, txtCorazon, txtPulmones, txtAbdomen;
-    @FXML private TextArea txtMiembrosSup, txtMiembrosInf, txtGenitales, txtPiel, txtHallazgosGen;
+    @FXML
+    private TextField txtPeso, txtTalla, txtTA, txtFC, txtFR, txtTemp;
+    @FXML
+    private TextArea txtCabeza, txtCuello, txtTorax, txtCorazon, txtPulmones, txtAbdomen;
+    @FXML
+    private TextArea txtMiembrosSup, txtMiembrosInf, txtGenitales, txtPiel, txtHallazgosGen;
 
     // --- SECCIÓN 5: CONCLUSIÓN ---
-    @FXML private TextArea txtEstudios, txtDiagnostico, txtTratamiento;
+    @FXML
+    private TextArea txtEstudios, txtDiagnostico, txtTratamiento;
 
     @FXML
     public void initialize() {
         log.info("Pantalla de Registro cargada con todas las secciones.");
+        cmbSeguro.setItems(FXCollections.observableArrayList(LISTADO_ARS));
     }
 
     @FXML
@@ -80,11 +114,15 @@ public class NuevoPacienteController {
             // =====================================================================
 
             // Sección 1: Datos Personales
+            // Extraemos el texto del nuevo ComboBox
+            String seguroSeleccionado = cmbSeguro.getEditor().getText();
+
+            // Sección 1: Datos Personales
             DatosPersonalesDTO datosPersonales = new DatosPersonalesDTO(
                     txtNombre.getText(), txtCedula.getText(), dpFechaNacimiento.getValue(),
                     "", "", "", txtDireccion.getText(), txtTelefonos.getText(),
-                    "", txtSeguro.getText(), txtOcupacion.getText(),
-                    null // La ruta del PDF se llena más adelante en el Service
+                    "", seguroSeleccionado, txtOcupacion.getText(), // <--- CORREGIDO
+                    null
             );
 
             // Sección 2: Motivo y Enfermedad Actual (NUESTRO NUEVO BLOQUE)
@@ -96,7 +134,7 @@ public class NuevoPacienteController {
             // Sección 3: Antecedentes
             AntecedentesDTO antecedentes = new AntecedentesDTO(
                     txtAntecedentesFam.getText(), txtAntecedentesPers.getText(),
-                    txtPersonalesNoPatologicos.getText(), txtTransfusiones.getText(), txtCirugias.getText(), txtAlergias.getText()
+                    txtTransfusiones.getText(), txtCirugias.getText(), txtAlergias.getText()
             );
 
             // Sección 4: Hábitos Tóxicos
@@ -167,6 +205,35 @@ public class NuevoPacienteController {
         } catch (NumberFormatException e) {
             log.warn("No se pudo parsear el valor numérico: {}. Se asignará 0.0", valor);
             return 0.0;
+        }
+    }
+
+    /**
+     * Este método es llamado por el Dashboard del Médico cuando el paciente
+     * viene de la Sala de Espera (Recepción). Pre-llena los campos básicos.
+     */
+    /**
+     * Este método es llamado por el Dashboard del Médico cuando el paciente
+     * viene de la Sala de Espera (Recepción). Pre-llena los campos básicos.
+     */
+    public void cargarDatosPreliminares(com.proyectomedico.appmedicacenfasies.model.Paciente paciente) {
+        if (paciente != null) {
+            txtCedula.setText(paciente.getCedula());
+            txtNombre.setText(paciente.getNombreApellidos());
+
+            if (paciente.getTelefonos() != null) {
+                txtTelefonos.setText(paciente.getTelefonos());
+            }
+
+            // --- AQUÍ ESTÁ LA CORRECCIÓN ---
+            // Solo usamos el ComboBox (cmbSeguro), NUNCA txtSeguro
+            if (paciente.getSeguro() != null) {
+                cmbSeguro.getEditor().setText(paciente.getSeguro());
+            }
+
+            // Bloqueamos la cédula y nombre por seguridad
+            txtCedula.setEditable(false);
+            txtNombre.setEditable(false);
         }
     }
 }

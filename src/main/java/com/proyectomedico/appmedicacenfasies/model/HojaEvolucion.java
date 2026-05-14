@@ -43,4 +43,8 @@ public class HojaEvolucion {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)
     private Paciente paciente;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "resultados_id")
+    private ResultadosHojaEvolucion resultadosLaboratorio;
 }
