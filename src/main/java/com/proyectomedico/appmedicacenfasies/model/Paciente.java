@@ -26,7 +26,7 @@ public class Paciente {
     @Column(nullable = false, length = 150)
     private String nombreApellidos;
 
-    @Column(unique = true, nullable = false, length = 20)
+    @Column(unique = true, length = 20)
     private String cedula;
 
     private LocalDate fechaNacimiento;

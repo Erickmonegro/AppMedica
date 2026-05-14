@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="15.0" style="-fx-background-color: #ffffff; -fx-padding: 20;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.AsignacionRapidaController">
+
+    <Label text="Asignar a Consultorio" textFill="#0b4a9e">
+        <font><Font name="System Bold" size="18.0" /></font>
+    </Label>
+    <Label fx:id="lblNombrePaciente" style="-fx-font-size: 14px; -fx-text-fill: #475569;" text="Paciente: Cargando..." />
+    <Separator />
+
+    <VBox spacing="5">
+        <Label text="Motivo de Visita:" style="-fx-font-weight: bold;" />
+        <ComboBox fx:id="cmbMotivo" maxWidth="Infinity" promptText="Seleccione el motivo..." />
+    </VBox>
+
+    <HBox spacing="15">
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label text="Especialidad:" style="-fx-font-weight: bold;" />
+            <ComboBox fx:id="cmbEspecialidad" maxWidth="Infinity" promptText="Seleccione..." />
+        </VBox>
+        <VBox spacing="5" HBox.hgrow="ALWAYS">
+            <Label text="Médico:" style="-fx-font-weight: bold;" />
+            <ComboBox fx:id="cmbMedico" maxWidth="Infinity" promptText="Seleccione..." />
+        </VBox>
+    </HBox>
+
+    <Separator />
+
+    <HBox alignment="CENTER_RIGHT" spacing="10">
+        <Button text="Cancelar" onAction="#cerrarVentana" style="-fx-background-color: #e2e8f0; -fx-text-fill: #333;" />
+        <Button text="Enviar a Sala de Espera" onAction="#asignarTurno" style="-fx-background-color: #0b4a9e; -fx-text-fill: white; -fx-font-weight: bold;" />
+    </HBox>
+
+</VBox>

@@ -151,7 +151,7 @@ public class PacienteService {
         } else {
             List<Paciente> pacientes = pacienteRepository.findByNombreApellidosContainingIgnoreCaseOrCedulaContaining(filtro, filtro);
             return pacientes.stream()
-                    .map(p -> new PacienteResumenDTO(p.getId(), p.getNombreApellidos(), p.getCedula()))
+                    .map(p -> new PacienteResumenDTO(p.getId(), p.getNombreApellidos(), p.getCedula(), "reciente"))
                     .toList();
         }
     }
@@ -333,14 +333,25 @@ public class PacienteService {
      */
     @Transactional
     public Paciente obtenerOCrearPacienteBasico(String cedula, String nombre, String telefono, String seguro) {
-        return pacienteRepository.findByCedula(cedula).orElseGet(() -> {
+
             log.info("Creando nuevo paciente básico desde Recepción: {}", cedula);
-            Paciente nuevoPaciente = new Paciente();
-            nuevoPaciente.setCedula(cedula);
-            nuevoPaciente.setNombreApellidos(nombre);
-            nuevoPaciente.setTelefonos(telefono);
-            nuevoPaciente.setSeguro(seguro);
-            return pacienteRepository.save(nuevoPaciente);
+
+            if (cedula == null || cedula.isEmpty()){
+                Paciente nuevoPaciente = new Paciente();
+                nuevoPaciente.setNombreApellidos(nombre);
+                nuevoPaciente.setTelefonos(telefono);
+                nuevoPaciente.setSeguro(seguro);
+                return pacienteRepository.save(nuevoPaciente);
+            }
+
+            return pacienteRepository.findByCedula(cedula)
+                    .orElseGet(() -> {
+            Paciente p = new Paciente();
+            p.setCedula(cedula);
+            p.setNombreApellidos(nombre);
+            p.setTelefonos(telefono);
+            p.setSeguro(seguro);
+            return pacienteRepository.save(p);
         });
     }
     /**
@@ -360,7 +371,8 @@ public class PacienteService {
                 .map(p -> new PacienteResumenDTO(
                         p.getId(),
                         p.getNombreApellidos(),
-                        p.getCedula()
+                        p.getCedula(),
+                        "Reciente"
                 ))
                 .toList();
     }

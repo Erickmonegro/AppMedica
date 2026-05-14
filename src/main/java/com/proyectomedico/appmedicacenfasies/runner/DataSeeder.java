@@ -36,14 +36,14 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         // 2. Crear Médico si no existe
-        if (usuarioRepository.findByUsername("drYRodriguez").isEmpty()) {
+        if (usuarioRepository.findByUsername("drMorillo").isEmpty()) {
             Medico medico = new Medico();
-            medico.setUsername("drYRodriguez");
+            medico.setUsername("drMorillo");
             medico.setPassword("1234");
-            medico.setNombreCompleto("Yesenia Rodriguez");
+            medico.setNombreCompleto("Waldo Morillo");
             medico.setRol(Rol.MEDICO);
-            medico.setEspecialidad(Especialidad.MEDICOGENERAL); // Asegúrate de usar una especialidad de tu Enum
-            medico.setExequatur("12345-X");
+            medico.setEspecialidad(Especialidad.MEDICOFAMILIAR); // Asegúrate de usar una especialidad de tu Enum
+            medico.setExequatur("12346-X");
 
             medicoRepository.save(medico);
             log.info("✅ Usuario Médico creado exitosamente (User: drprueba | Pass: 1234)");

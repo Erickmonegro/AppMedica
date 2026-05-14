@@ -53,6 +53,9 @@ public class DashboardSecretariaController {
         colNombre.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(cellData.getValue().nombreApellidos())
         );
+        colUltimaVisita.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().ultimaVisita())
+        );
 
         // 2. Cargar datos iniciales
         cargarListaEspera();
@@ -64,6 +67,16 @@ public class DashboardSecretariaController {
                 cargarTablaPacientesGlobal(newValue);
             });
         }
+
+        // =====================================================================
+        // --- 4. NUEVO: EVENTO DOBLE CLIC EN LA TABLA ---
+        // =====================================================================
+        tablaPacientesGlobal.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2 && tablaPacientesGlobal.getSelectionModel().getSelectedItem() != null) {
+                PacienteResumenDTO pacienteSeleccionado = tablaPacientesGlobal.getSelectionModel().getSelectedItem();
+                abrirModalAsignacionRapida(pacienteSeleccionado.id(), pacienteSeleccionado.nombreApellidos());
+            }
+        });
     }
 
     @FXML
@@ -88,6 +101,34 @@ public class DashboardSecretariaController {
             // Cuando el modal se cierre, aquí actualizaremos la lista de "Sala de Espera"
 
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // =====================================================================
+    // --- NUEVO MÉTODO: ABRE EL MODAL CHIQUITO DEL DOBLE CLIC ---
+    // =====================================================================
+    private void abrirModalAsignacionRapida(java.util.UUID pacienteId, String nombreCompleto) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/asignacion_rapida.fxml"));
+            fxmlLoader.setControllerFactory(applicationContext::getBean);
+            Parent root = fxmlLoader.load();
+
+            // Pasamos los datos
+            AsignacionRapidaController controller = fxmlLoader.getController();
+            controller.cargarPaciente(pacienteId, nombreCompleto);
+
+            Stage stage = new Stage();
+            stage.setTitle("Asignar Turno Rápido");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            // Refrescar tu lista de turnos (sala de espera) al cerrar el modal
+            cargarListaEspera();
+
+        } catch (Exception e) {
+            System.err.println("Error al abrir modal de asignación rápida");
             e.printStackTrace();
         }
     }
