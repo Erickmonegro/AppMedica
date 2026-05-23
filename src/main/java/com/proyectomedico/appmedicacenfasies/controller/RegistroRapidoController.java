@@ -36,6 +36,10 @@ public class RegistroRapidoController {
     private TextField txtTelefono;
 
     @FXML
+    private ComboBox<String> cmbSexo;
+    @FXML
+    private DatePicker dpFechaNacimiento;
+    @FXML
     private ComboBox<Especialidad> cmbEspecialidad;
     @FXML
     private ComboBox<Medico> cmbMedico;
@@ -53,6 +57,13 @@ public class RegistroRapidoController {
     public void initialize() {
         // 1. Llenar el ComboBox del Seguro
         cmbSeguro.setItems(FXCollections.observableArrayList(LISTADO_ARS));
+
+        if (cmbSexo != null) {
+            cmbSexo.setItems(javafx.collections.FXCollections.observableArrayList(
+                    "Masculino",
+                    "Femenino"
+            ));
+        }
 
         // 2. Llenar el ComboBox de Especialidad con los valores de tu Enum
         cmbEspecialidad.setItems(FXCollections.observableArrayList(Especialidad.values()));
@@ -114,7 +125,8 @@ public class RegistroRapidoController {
 
             // 1. Guardar o recuperar al paciente (Datos básicos)
             Paciente paciente = pacienteService.obtenerOCrearPacienteBasico(
-                    txtCedula.getText(), txtNombre.getText(), txtTelefono.getText(), seguroSeleccionado
+                    txtCedula.getText(), txtNombre.getText(), txtTelefono.getText(), seguroSeleccionado, dpFechaNacimiento.getValue(), // Puede ser null, y está bien
+                    cmbSexo.getValue()
             );
             // 2. Mandarlo a la Sala de Espera (Crear Turno)
             turnoService.crearTurnoParaPaciente(
@@ -133,7 +145,6 @@ public class RegistroRapidoController {
     }
 
 
-
     @FXML
     public void cerrarVentana() {
         Stage stage = (Stage) txtCedula.getScene().getWindow();
@@ -147,6 +158,7 @@ public class RegistroRapidoController {
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
+
     /**
      * Auto-formatea la cédula a XXX-XXXXXXX-X si es dominicano.
      */

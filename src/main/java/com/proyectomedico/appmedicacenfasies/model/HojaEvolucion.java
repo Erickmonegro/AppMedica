@@ -34,6 +34,17 @@ public class HojaEvolucion {
     @Column(columnDefinition = "TEXT")
     private String plan; // [cite: 12]
 
+    // Para el nuevo campo en Resultados
+    @Column(name = "otros_resultados", columnDefinition = "TEXT")
+    private String otrosResultados;
+
+    // Para la Auditoría (Quién y Cuándo)
+    @Column(name = "medico_auditoria")
+    private String medicoAuditoria; // Aquí guardaremos "Dr. Juan Pérez"
+
+    // Asumo que ya tienes un campo de fecha (ej. LocalDateTime fechaCreacion),
+    // si no lo tienes, ¡hay que agregarlo!
+
 
     // NUEVO CAMPO: El "bolsillo" para guardar la dirección física del documento
     @Column(name = "ruta_pdf")

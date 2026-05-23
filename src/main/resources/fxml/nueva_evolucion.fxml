@@ -74,8 +74,9 @@
                     <TextField fx:id="txtHdl" promptText="HDL" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                     <TextField fx:id="txtLdl" promptText="LDL" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                     <TextField fx:id="txtTrig" promptText="Triglicéridos" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-
                     <TextField fx:id="txtSonografias" promptText="Reporte de Sonografías..." GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="3" />
+
+                    <TextArea fx:id="txtOtrosResultados" promptText="Otros resultados (Ej: Rayos X, Resonancia, etc.)..." prefRowCount="2" wrapText="true" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="3" />
                 </children>
             </GridPane>
         </VBox>

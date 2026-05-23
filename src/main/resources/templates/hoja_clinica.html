@@ -170,6 +170,16 @@
 
 <div class="seccion"><span class="label">CIRUGÍAS:</span> <span class="texto-largo" th:text="${cirugias}"></span></div>
 <div class="seccion"><span class="label">ALERGIAS:</span> <span class="texto-largo" th:text="${alergias}"></span></div>
+<div th:if="${sexo == 'Femenino'}">
+  <h4 style="text-decoration: underline; color: #333; margin-bottom: 5px;">ANTECEDENTES GINECO-OBSTÉTRICOS:</h4>
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px;">
+    <tr>
+      <td style="width: 33%;"><b>Menarquia:</b> <span th:text="${menarquia}"></span></td>
+      <td style="width: 33%;"><b>FUM:</b> <span th:text="${fum}"></span></td>
+      <td style="width: 33%;"><b>GPCA:</b> <span th:text="${gpca}"></span></td>
+    </tr>
+  </table>
+</div>
 
 <div class="seccion">
   <span class="label">HÁBITOS TÓXICOS:</span>
@@ -185,18 +195,28 @@
 <div class="seccion" style="margin-top: 10px;"><span class="label" style="text-decoration: underline;">EXAMEN FÍSICO:</span></div>
 
 <!-- Fila de Signos Vitales -->
-<table class="vitals-table">
+<table class="vitals-table" style="width: 100%; table-layout: fixed;">
   <tr>
-    <td width="16%"><span class="label">TA:</span> <span class="value" th:text="${ta}"></span></td>
-    <td width="16%"><span class="label">FC:</span> <span class="value" th:text="${fc}"></span></td>
-    <td width="16%"><span class="label">FR:</span> <span class="value" th:text="${fr}"></span></td>
-    <td width="16%"><span class="label">PESO:</span> <span class="value" th:text="${peso}"></span></td>
-    <td width="16%"><span class="label">TALLA:</span> <span class="value" th:text="${talla}"></span></td>
-    <td width="20%"><span class="label">IMC:</span> <span class="value" th:text="${imc}"></span></td>
+    <td style="width: 12.5%;"><span class="label">TA:</span> <span class="value" th:text="${ta}"></span></td>
+    <td style="width: 12.5%;"><span class="label">FC:</span> <span class="value" th:text="${fc}"></span></td>
+    <td style="width: 12.5%;"><span class="label">FR:</span> <span class="value" th:text="${fr}"></span></td>
+    <td style="width: 12.5%;"><span class="label">PESO:</span> <span class="value" th:text="${peso}"></span></td>
+    <td style="width: 12.5%;"><span class="label">TALLA:</span> <span class="value" th:text="${talla}"></span></td>
+    <td style="width: 12.5%;"><span class="label">IMC:</span> <span class="value" th:text="${imc}"></span></td>
+    <td style="width: 12.5%;"><span class="label">TEMP:</span> <span class="value" th:text="${temp}"></span></td>
+    <td style="width: 12.5%;"><span class="label">SPO2:</span> <span class="value" th:text="${spo2}"></span></td>
   </tr>
 </table>
 
 <!-- Evaluación por Sistemas -->
+<p th:if="${mamas != null && mamas != ''}"><b>Mamas:</b> <span th:text="${mamas}"></span></p>
+
+<div th:if="${sexo == 'Femenino' && (especuloscopia != '' || tactoVaginal != '')}"
+     style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+  <h4 style="color: #0b4a9e;">EXPLORACIÓN GINECOLÓGICA:</h4>
+  <p><b>Especuloscopía:</b> <span th:text="${especuloscopia}"></span></p>
+  <p><b>Tacto Vaginal:</b> <span th:text="${tactoVaginal}"></span></p>
+</div>
 <div class="seccion"><span class="label">CABEZA:</span> <span class="texto-largo" th:text="${cabeza}"></span></div>
 <div class="seccion"><span class="label">CUELLO:</span> <span class="texto-largo" th:text="${cuello}"></span></div>
 <div class="seccion"><span class="label">TÓRAX:</span> <span class="texto-largo" th:text="${torax}"></span></div>

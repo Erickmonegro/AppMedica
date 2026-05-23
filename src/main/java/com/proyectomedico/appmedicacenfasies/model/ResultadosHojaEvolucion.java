@@ -25,6 +25,8 @@ public class ResultadosHojaEvolucion {
 
     @Column(length = 500)      // Más largo por si describe la sonografía
     private String sonografias;
+    @Column(columnDefinition = "TEXT")
+    private String otrosResultados;
 
     // Relación Inversa (Una hoja de evolución tiene un resultado)
     @OneToOne(mappedBy = "resultadosLaboratorio")

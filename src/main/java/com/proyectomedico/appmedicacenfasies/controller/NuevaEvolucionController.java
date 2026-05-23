@@ -1,5 +1,6 @@
 package com.proyectomedico.appmedicacenfasies.controller;
 
+import com.proyectomedico.appmedicacenfasies.config.SesionGlobal;
 import com.proyectomedico.appmedicacenfasies.dto.HojaEvolucionDTO;
 import com.proyectomedico.appmedicacenfasies.dto.ResultadosEvolucionDTO;
 import com.proyectomedico.appmedicacenfasies.service.PacienteService;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class NuevaEvolucionController {
 
     private final PacienteService pacienteService;
+    private final SesionGlobal sesionGlobal;
 
     // Almacenamos el ID del paciente al que le vamos a agregar la nota
     private UUID pacienteId;
@@ -33,6 +35,7 @@ public class NuevaEvolucionController {
     // --- RESULTADOS DE LABORATORIO ---
     @FXML private TextField txtHb, txtHtco, txtPlaq, txtGlic, txtH1ac;
     @FXML private TextField txtColest, txtHdl, txtLdl, txtTrig, txtSonografias;
+    @FXML private TextArea txtOtrosResultados;
 
     /**
      * El VisorExpediente llamará a este método justo antes de mostrar la ventana.
@@ -47,12 +50,18 @@ public class NuevaEvolucionController {
         try {
             log.info("Empaquetando datos de la evolución...");
 
+            String medicoAuditoria = "Médico no identificado";
+            if (sesionGlobal.haySesionActiva() && sesionGlobal.getUsuarioLogueado() instanceof com.proyectomedico.appmedicacenfasies.model.Medico) {
+                com.proyectomedico.appmedicacenfasies.model.Medico doctor = (com.proyectomedico.appmedicacenfasies.model.Medico) sesionGlobal.getUsuarioLogueado();
+                medicoAuditoria = "Dr. " + doctor.getNombreCompleto();
+            }
+
             // 1. Armamos el sub-cajón de laboratorios
             ResultadosEvolucionDTO resultadosLab = new ResultadosEvolucionDTO(
                     txtHb.getText(), txtHtco.getText(), txtPlaq.getText(),
                     txtGlic.getText(), txtH1ac.getText(), txtColest.getText(),
                     txtHdl.getText(), txtLdl.getText(), txtTrig.getText(),
-                    txtSonografias.getText()
+                    txtSonografias.getText(), txtOtrosResultados.getText()
             );
 
             // 1. Armar el DTO de transporte (La fecha y el ID de la hoja se ignoran aquí, el Service los crea)
@@ -65,7 +74,8 @@ public class NuevaEvolucionController {
                     txtTratamiento.getText(),
                     txtPlan.getText(),
                     null,
-                    resultadosLab
+                    resultadosLab,
+                    medicoAuditoria
 
 
             );
@@ -86,7 +96,13 @@ public class NuevaEvolucionController {
 
     @FXML
     public void cerrarVentana(ActionEvent event) {
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        try{
+        Node source = (Node) event.getSource();
+        Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
+
+    } catch (Exception e) {
+        log.error("Error al cerrar ventana", e);
+    }
     }
 }

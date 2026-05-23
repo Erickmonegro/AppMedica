@@ -81,11 +81,23 @@ public class PdfService {
             // --- ZONA C: ANTECEDENTES Y HÁBITOS ---
             context.setVariable("antFamiliares", pacienteData.antecedentes().antecedentesFamiliares());
             context.setVariable("antPersonales", pacienteData.antecedentes().antecedentesPersonales());
-
-            context.setVariable("transfusion", pacienteData.antecedentes().transfusiones()); // Añadir a tu UI si es necesario
+            context.setVariable("transfusion", pacienteData.antecedentes().transfusiones());
             context.setVariable("cirugias", pacienteData.antecedentes().cirugias());
             context.setVariable("alergias", pacienteData.antecedentes().alergias());
 
+            // =========================================================
+            // NUEVO: DATOS GINECOLÓGICOS Y SEXO
+            // =========================================================
+            context.setVariable("sexo", pacienteData.datosPersonales().sexo() != null ? pacienteData.datosPersonales().sexo() : "");
+            context.setVariable("menarquia", pacienteData.antecedentes().menarquia() != null ? pacienteData.antecedentes().menarquia() : "");
+            context.setVariable("gpca", pacienteData.antecedentes().gpca() != null ? pacienteData.antecedentes().gpca() : "");
+
+            // Formatear la fecha FUM
+            String fumStr = "";
+            if (pacienteData.antecedentes().fum() != null) {
+                fumStr = pacienteData.antecedentes().fum().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            }
+            context.setVariable("fum", fumStr);
             // --- HÁBITOS TÓXICOS (Lista Dinámica Inteligente) ---
             java.util.List<String> habitosActivos = new java.util.ArrayList<>();
 
@@ -111,16 +123,31 @@ public class PdfService {
             context.setVariable("fc", pacienteData.examenFisico().frecuenciaCardiaca());
             context.setVariable("fr", pacienteData.examenFisico().frecuenciaRespiratoria());
             context.setVariable("temperatura", pacienteData.examenFisico().temperatura() + " °C"); // <--- NUEVO: Faltaba la temperatura
+            context.setVariable("spo2", pacienteData.examenFisico().spO2() != null ? pacienteData.examenFisico().spO2() + " %" : "N/A"); // <--- NUEVO
             context.setVariable("peso", pacienteData.examenFisico().peso() + " kg");
             context.setVariable("talla", pacienteData.examenFisico().talla() + " m");
 
-            // Cálculo rápido del IMC (Opcional, puedes quitarlo si prefieres hacerlo luego)
-            double imc = 0.0;
-            if (pacienteData.examenFisico().peso() > 0 && pacienteData.examenFisico().talla() > 0) {
-                imc = pacienteData.examenFisico().peso() / Math.pow(pacienteData.examenFisico().talla(), 2);
-            }
-            context.setVariable("imc", imc > 0 ? String.format("%.2f", imc) : "");
+            // --- ZONA D: EXAMEN FÍSICO ---
+            // Extraemos los valores limpios
+            double peso = pacienteData.examenFisico().peso();
+            double talla = pacienteData.examenFisico().talla();
 
+            // MAGIA: Autocorrección si el doctor ingresó centímetros (ej: 175) en lugar de metros (ej: 1.75)
+            if (talla > 3.0) {
+                talla = talla / 100.0;
+            }
+
+            // Cálculo del IMC
+            double imc = 0.0;
+            if (peso > 0 && talla > 0) {
+                imc = peso / Math.pow(talla, 2);
+            }
+
+            // Inyectamos las variables formateadas al PDF
+            context.setVariable("peso", peso > 0 ? peso + " kg" : "");
+            // Imprimimos la talla siempre en formato metros con 2 decimales (ej: 1.75 m)
+            context.setVariable("talla", talla > 0 ? String.format("%.2f m", talla) : "");
+            context.setVariable("imc", imc > 0 ? String.format("%.1f", imc) : "");
             context.setVariable("cabeza", pacienteData.examenFisico().cabeza());
             context.setVariable("cuello", pacienteData.examenFisico().cuello());
             context.setVariable("torax", pacienteData.examenFisico().torax());
@@ -241,6 +268,7 @@ public class PdfService {
                 context.setVariable("ldl", lab.getLdl() != null ? lab.getLdl() : "");
                 context.setVariable("trig", lab.getTrig() != null ? lab.getTrig() : "");
                 context.setVariable("sonografias", lab.getSonografias() != null ? lab.getSonografias() : "");
+                context.setVariable("otrosResultados", lab.getOtrosResultados() != null ? lab.getOtrosResultados() : "");
             } else {
                 // Si no hay laboratorios (evoluciones viejas), mandamos vacío para que no falle el HTML
                 context.setVariable("hb", "");
@@ -253,6 +281,7 @@ public class PdfService {
                 context.setVariable("ldl", "");
                 context.setVariable("trig", "");
                 context.setVariable("sonografias", "");
+                context.setVariable("otrosResultados", "");
             }
 
             // 4. Procesamiento y Renderizado (Asegúrate de que el nombre coincida con tu archivo HTML)

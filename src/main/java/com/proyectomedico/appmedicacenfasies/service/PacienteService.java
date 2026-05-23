@@ -23,6 +23,7 @@ public class PacienteService {
     private final AntecedentesPacienteRepository antecedentesRepository;
     private final HojaEvolucionRepository hojaEvolucionRepository;
     private final MotivoConsultaRepository motivoConsultaRepository;
+    private final NotaMedicaRepository notaMedicaRepository;
     // INYECTAMOS TU NUEVA TABLA
     private final DiagnosticoTratamientoRepository diagnosticoTratamientoRepository;
     private final PdfService pdfService;
@@ -51,6 +52,7 @@ public class PacienteService {
         paciente.setTelefonos(dto.datosPersonales().telefonos());
         paciente.setSeguro(dto.datosPersonales().seguro());
         paciente.setOcupacion(dto.datosPersonales().ocupacion());
+        paciente.setSexo(dto.datosPersonales().sexo());
 
         // Guardamos el paciente (Si ya tenía ID, JPA hará un UPDATE; si no, un INSERT)
         paciente = pacienteRepository.save(paciente);
@@ -65,6 +67,9 @@ public class PacienteService {
         antecedentes.setAlergias(dto.antecedentes().alergias());
         antecedentes.setCirugias(dto.antecedentes().cirugias());
         antecedentes.setTransfusion(dto.antecedentes().transfusiones());
+        antecedentes.setMenarquia(dto.antecedentes().menarquia());
+        antecedentes.setFum(dto.antecedentes().fum());
+        antecedentes.setGpca(dto.antecedentes().gpca());
         antecedentesRepository.save(antecedentes);
 
         // 3. HÁBITOS TÓXICOS
@@ -100,6 +105,7 @@ public class PacienteService {
         examen.setFrecuenciaCardiaca(dto.examenFisico().frecuenciaCardiaca());
         examen.setFrecuenciaRespiratoria(dto.examenFisico().frecuenciaRespiratoria());
         examen.setTemperatura(dto.examenFisico().temperatura());
+        examen.setSpO2(dto.examenFisico().spO2());
 
         if (examen.getPeso() != null && examen.getTalla() != null && examen.getTalla() > 0) {
             double imc = examen.getPeso() / Math.pow(examen.getTalla(), 2);
@@ -146,14 +152,37 @@ public class PacienteService {
     // ==========================================
 
     public List<PacienteResumenDTO> buscarPacientes(String filtro) {
+        List<Paciente> pacientes;
+
+        // 1. Decidimos qué lista de Entidades traer de la BD
         if (filtro == null || filtro.trim().isEmpty()) {
-            return pacienteRepository.obtenerTodosLosPacientesResumen();
+            // En lugar de traer DTOs incompletos, traemos las Entidades
+            pacientes = pacienteRepository.findAll();
         } else {
-            List<Paciente> pacientes = pacienteRepository.findByNombreApellidosContainingIgnoreCaseOrCedulaContaining(filtro, filtro);
-            return pacientes.stream()
-                    .map(p -> new PacienteResumenDTO(p.getId(), p.getNombreApellidos(), p.getCedula(), "reciente"))
-                    .toList();
+            pacientes = pacienteRepository.findByNombreApellidosContainingIgnoreCaseOrCedulaContaining(filtro, filtro);
         }
+
+        // 2. Definimos el formato de fecha para la tabla
+        java.time.format.DateTimeFormatter formato = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        // 3. Convertimos todas las entidades a DTOs con su fecha real
+        return pacientes.stream().map(p -> {
+            String fechaVisita = "Sin registro";
+
+            // Buscamos la última evolución de este paciente
+            List<HojaEvolucion> evoluciones = hojaEvolucionRepository.findByPacienteIdOrderByFechaDesc(p.getId());
+
+            if (!evoluciones.isEmpty() && evoluciones.get(0).getFecha() != null) {
+                fechaVisita = evoluciones.get(0).getFecha().format(formato);
+            }
+
+            return new PacienteResumenDTO(
+                    p.getId(),
+                    p.getNombreApellidos(),
+                    p.getCedula(),
+                    fechaVisita // <--- ¡Aquí inyectamos la realidad!
+            );
+        }).toList();
     }
 
     /**
@@ -168,9 +197,6 @@ public class PacienteService {
                 .orElseThrow(() -> new RuntimeException("No se encontró ningún paciente con la cédula exacta: " + cedula));
     }
 
-    public List<PacienteResumenDTO> obtenerPacientesParaDashboard() {
-        return pacienteRepository.obtenerTodosLosPacientesResumen();
-    }
 
     @Transactional(readOnly = true)
     public PacienteRegistroDTO obtenerExpedienteCompleto(UUID pacienteId) {
@@ -187,7 +213,10 @@ public class PacienteService {
 
         // 3. Buscar dependencias
         AntecedentesPaciente ant = antecedentesRepository.findByPacienteId(pacienteId).orElse(new AntecedentesPaciente());
-        AntecedentesDTO antDTO = new AntecedentesDTO(ant.getAntecedentesFamiliares(), ant.getAntecedentesPersonales(), "", ant.getCirugias(), ant.getAlergias());
+        AntecedentesDTO antDTO = new AntecedentesDTO(ant.getAntecedentesFamiliares(), ant.getAntecedentesPersonales(), "", ant.getCirugias(), ant.getAlergias(),
+                ant.getMenarquia(),     // <--- NUEVO
+                ant.getFum(),           // <--- NUEVO
+                ant.getGpca());
 
         HabitosToxicos hab = habitosToxicosRepository.findByPacienteId(pacienteId).orElse(new HabitosToxicos());
         HabitosToxicosDTO habDTO = new HabitosToxicosDTO(hab.isTabaco(), hab.isAlcohol(), hab.isHooka(), hab.isCigarroElectronico(), hab.isCafe(), hab.isDrogas());
@@ -205,10 +234,10 @@ public class PacienteService {
         );
         // Empaquetamos todo en el DTO como la UI lo espera
         ExamenFisicoDTO exDTO = new ExamenFisicoDTO(
-                ex.getPeso(), ex.getTalla(), ex.getTensionArterial(), ex.getFrecuenciaCardiaca(), ex.getFrecuenciaRespiratoria(), ex.getTemperatura(),
+                ex.getPeso(), ex.getTalla(), ex.getTensionArterial(), ex.getFrecuenciaCardiaca(), ex.getFrecuenciaRespiratoria(), ex.getTemperatura(), ex.getSpO2(),
                 ex.getCabeza(), ex.getCuello(), ex.getTorax(), ex.getCorazon(), ex.getPulmones(), ex.getAbdomen(), ex.getGenitalesExternos(),
                 ex.getMiembroSuperior(), ex.getMiembroInferior(), ex.getPielYFaneras(),
-                "", // Hallazgos generales (si lo tienes)
+                "", ex.getMamas(), ex.getEspeculoscopia(), ex.getTactoVaginal(), // Hallazgos generales (si lo tienes)
                 diag.getEstudioComplementario(), diag.getDiagnostico(), diag.getTratamiento() // Lo sacamos de la tabla diag!
         );
 
@@ -309,7 +338,7 @@ public class PacienteService {
                                 res.getHb(), res.getHtco(), res.getPlaq(),
                                 res.getGlic(), res.getH1ac(), res.getColest(),
                                 res.getHdl(), res.getLdl(), res.getTrig(),
-                                res.getSonografias()
+                                res.getSonografias(), res.getOtrosResultados()
                         );
                     }
 
@@ -323,7 +352,8 @@ public class PacienteService {
                             evo.getTratamiento(),
                             evo.getPlan(),
                             evo.getRutaPdf(),
-                            resultadosDTO // <--- El 9no parámetro (Laboratorios)
+                            resultadosDTO, // <--- El 9no parámetro (Laboratorios)
+                            evo.getMedicoAuditoria()
                     );
                 })
                 .toList();
@@ -332,7 +362,7 @@ public class PacienteService {
      * Módulo Secretaria: Registra a un paciente solo con sus datos básicos o lo recupera si ya existe.
      */
     @Transactional
-    public Paciente obtenerOCrearPacienteBasico(String cedula, String nombre, String telefono, String seguro) {
+    public Paciente obtenerOCrearPacienteBasico(String cedula, String nombre, String telefono, String seguro, LocalDate fechaNacimiento, String sexo) {
 
             log.info("Creando nuevo paciente básico desde Recepción: {}", cedula);
 
@@ -341,6 +371,8 @@ public class PacienteService {
                 nuevoPaciente.setNombreApellidos(nombre);
                 nuevoPaciente.setTelefonos(telefono);
                 nuevoPaciente.setSeguro(seguro);
+                nuevoPaciente.setFechaNacimiento(fechaNacimiento); // <--- NUEVO
+                nuevoPaciente.setSexo(sexo);                       // <--- NUEVO
                 return pacienteRepository.save(nuevoPaciente);
             }
 
@@ -351,6 +383,8 @@ public class PacienteService {
             p.setNombreApellidos(nombre);
             p.setTelefonos(telefono);
             p.setSeguro(seguro);
+            p.setFechaNacimiento(fechaNacimiento); // <--- NUEVO
+            p.setSexo(sexo);
             return pacienteRepository.save(p);
         });
     }
@@ -366,14 +400,48 @@ public class PacienteService {
     public List<PacienteResumenDTO> buscarPacientesDelMedico(String filtro, UUID medicoId) {
         String filtroLimpio = (filtro == null) ? "" : filtro.trim();
 
-        return pacienteRepository.findPacientesPorMedicoYFiltro(medicoId, filtroLimpio)
-                .stream()
-                .map(p -> new PacienteResumenDTO(
-                        p.getId(),
-                        p.getNombreApellidos(),
-                        p.getCedula(),
-                        "Reciente"
-                ))
-                .toList();
+        // 1. Obtenemos las entidades desde la base de datos
+        List<Paciente> pacientes = pacienteRepository.findPacientesPorMedicoYFiltro(medicoId, filtroLimpio);
+
+        // 2. Definimos el formato visual de la fecha
+        java.time.format.DateTimeFormatter formato = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        // 3. Mapeamos inyectando la fecha real de la última visita
+        return pacientes.stream().map(p -> {
+            String fechaVisita = "Sin registro";
+
+            // Buscamos el historial del paciente
+            List<HojaEvolucion> evoluciones = hojaEvolucionRepository.findByPacienteIdOrderByFechaDesc(p.getId());
+
+            // Si tiene historial, tomamos la fecha más nueva (la posición 0)
+            if (!evoluciones.isEmpty() && evoluciones.get(0).getFecha() != null) {
+                fechaVisita = evoluciones.get(0).getFecha().format(formato);
+            }
+
+            return new PacienteResumenDTO(
+                    p.getId(),
+                    p.getNombreApellidos(),
+                    p.getCedula(),
+                    fechaVisita // <--- ¡Ahora el doctor verá la fecha real!
+            );
+        }).toList();
+    }
+    // Inyectar NotaMedicaRepository arriba en la clase
+
+    public void agregarNota(UUID pacienteId, String contenido, String medicoAutor) {
+        Paciente paciente = pacienteRepository.findById(pacienteId)
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+
+        NotaMedica nota = new NotaMedica();
+        nota.setPaciente(paciente);
+        nota.setContenido(contenido);
+        nota.setMedicoAutor(medicoAutor);
+        // La fecha se pone sola por el @PrePersist
+
+        notaMedicaRepository.save(nota);
+    }
+
+    public List<NotaMedica> obtenerNotasDelPaciente(UUID pacienteId) {
+        return notaMedicaRepository.findByPacienteIdOrderByFechaCreacionDesc(pacienteId);
     }
 }

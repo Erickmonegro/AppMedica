@@ -49,34 +49,27 @@
                     <Label styleClass="texto-panel-oscuro" text="1. Datos Personales y Demográficos"/>
                     <GridPane hgap="15.0" vgap="15.0">
                         <columnConstraints>
-                            <ColumnConstraints percentWidth="33.3"/>
-                            <ColumnConstraints percentWidth="33.3"/>
-                            <ColumnConstraints percentWidth="33.3"/>
+                            <ColumnConstraints percentWidth="33.3" />
+                            <ColumnConstraints percentWidth="33.3" />
+                            <ColumnConstraints percentWidth="33.3" />
                         </columnConstraints>
                         <rowConstraints>
-                            <RowConstraints/>
-                            <RowConstraints/>
-                            <RowConstraints/>
+                            <RowConstraints />
+                            <RowConstraints />
+                            <RowConstraints />
                         </rowConstraints>
                         <children>
-                            <TextField fx:id="txtNombre" promptText="Nombre y Apellidos" styleClass="text-field-form"
-                                       GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                            <TextField fx:id="txtCedula" promptText="Cédula" styleClass="text-field-form"
-                                       GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                            <DatePicker fx:id="dpFechaNacimiento" maxWidth="1.7976931348623157E308"
-                                        promptText="Fecha de Nacimiento" styleClass="text-field-form"
-                                        GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                            <TextField fx:id="txtNombre" promptText="Nombre y Apellidos" styleClass="text-field-form" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                            <TextField fx:id="txtCedula" promptText="Cédula" styleClass="text-field-form" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                            <DatePicker fx:id="dpFechaNacimiento" maxWidth="Infinity" promptText="Fecha de Nacimiento" styleClass="text-field-form" GridPane.columnIndex="2" GridPane.rowIndex="0" />
 
-                            <TextField fx:id="txtTelefonos" promptText="Teléfonos" styleClass="text-field-form"
-                                       GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                            <TextField fx:id="txtOcupacion" promptText="Ocupación" styleClass="text-field-form"
-                                       GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                            <TextField fx:id="txtTelefonos" promptText="Teléfonos" styleClass="text-field-form" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                            <TextField fx:id="txtOcupacion" promptText="Ocupación" styleClass="text-field-form" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <ComboBox fx:id="cmbSeguro" editable="true" promptText="Seguro (ARS...)" maxWidth="Infinity" styleClass="text-field-form" GridPane.columnIndex="2" GridPane.rowIndex="1" />
 
-                            <ComboBox fx:id="cmbSeguro" editable="true" promptText="Seguro (ARS...)" maxWidth="Infinity"
-                                      styleClass="text-field-form" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                            <TextField fx:id="txtDireccion" promptText="Dirección completa" styleClass="text-field-form" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2" />
 
-                            <TextField fx:id="txtDireccion" promptText="Dirección completa" styleClass="text-field-form"
-                                       GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="2"/>
+                            <ComboBox fx:id="cmbSexo" promptText="Sexo" maxWidth="Infinity" styleClass="text-field-form" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                         </children>
                     </GridPane>
                 </VBox>
@@ -119,7 +112,40 @@
                         </children>
                     </GridPane>
                 </VBox>
-
+                <VBox fx:id="vboxGinecologia" spacing="15.0" styleClass="panel-blanco-redondeado" visible="false" managed="false">
+                    <Label styleClass="texto-panel-oscuro" text="Antecedentes Gineco-Obstétricos" />
+                    <GridPane hgap="15.0" vgap="15.0">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="33.3" />
+                            <ColumnConstraints percentWidth="33.3" />
+                            <ColumnConstraints percentWidth="33.3" />
+                        </columnConstraints>
+                        <children>
+                            <TextField fx:id="txtMenarquia" promptText="Menarquia (Edad, Ej: 12 años)" styleClass="text-field-form" GridPane.columnIndex="0" />
+                            <DatePicker fx:id="dpFUM" promptText="FUM (Fecha Última Menstruación)" maxWidth="Infinity" styleClass="text-field-form" GridPane.columnIndex="1" />
+                            <TextField fx:id="txtGPCA" promptText="GPCA (Ej: G:2 P:1 C:1 A:0)" styleClass="text-field-form" GridPane.columnIndex="2" />
+                        </children>
+                    </GridPane>
+                </VBox>
+                <VBox fx:id="vboxExploracionGineco" spacing="15.0" styleClass="panel-blanco-redondeado" visible="false" managed="false">
+                    <Label styleClass="texto-panel-oscuro" text="Exploración Ginecológica Especializada" />
+                    <GridPane hgap="15.0" vgap="15.0">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50.0" />
+                            <ColumnConstraints percentWidth="50.0" />
+                        </columnConstraints>
+                        <children>
+                            <VBox spacing="5.0" GridPane.columnIndex="0">
+                                <Label text="Especuloscopía:" style="-fx-font-weight: bold; -fx-text-fill: #475569;" />
+                                <TextArea fx:id="txtEspeculoscopia" text="Cervix eutrofico rosado epitelizado, sin lesiones, escaso flujo hialino." prefHeight="60.0" wrapText="true" styleClass="text-area-form" />
+                            </VBox>
+                            <VBox spacing="5.0" GridPane.columnIndex="1">
+                                <Label text="Tacto Vaginal:" style="-fx-font-weight: bold; -fx-text-fill: #475569;" />
+                                <TextArea fx:id="txtTactoVaginal" text="Vagina normotermica, cervix posterior cerrado, anexos libres, utero de tamañano adecuado." prefHeight="60.0" wrapText="true" styleClass="text-area-form" />
+                            </VBox>
+                        </children>
+                    </GridPane>
+                </VBox>
                 <!-- SECCIÓN 4: HÁBITOS TÓXICOS -->
                 <VBox spacing="15.0" styleClass="panel-blanco-redondeado">
                     <Label styleClass="texto-panel-oscuro" text="3. Hábitos Tóxicos"/>
@@ -150,35 +176,38 @@
 
                 <!-- SECCIÓN 5: EXAMEN FÍSICO Y SIGNOS VITALES -->
                 <VBox spacing="15.0" styleClass="panel-blanco-redondeado">
-                    <Label styleClass="texto-panel-oscuro" text="5. Examen Físico y Signos Vitales"/>
+                    <Label styleClass="texto-panel-oscuro" text="5. Hallazgos Generales, Signos Vitales y Examen Físico"/>
+
+                    <VBox spacing="5.0">
+                        <Label text="Hallazgos Generales (Aspecto):" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <TextArea fx:id="txtHallazgosGen" text="Paciente consciente, orientado en tiempo, espacio y persona. Aparente buen estado general." prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                    </VBox>
+
+                    <Label text="Signos Vitales:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
                     <GridPane hgap="10.0" vgap="10.0">
                         <columnConstraints>
-                            <ColumnConstraints percentWidth="16.6"/>
-                            <ColumnConstraints percentWidth="16.6"/>
-                            <ColumnConstraints percentWidth="16.6"/>
-                            <ColumnConstraints percentWidth="16.6"/>
-                            <ColumnConstraints percentWidth="16.6"/>
-                            <ColumnConstraints percentWidth="16.6"/>
-                        </columnConstraints>
+                            <ColumnConstraints percentWidth="12.5" />
+                            <ColumnConstraints percentWidth="12.5" />
+                            <ColumnConstraints percentWidth="12.5" />
+                            <ColumnConstraints percentWidth="12.5" />
+                            <ColumnConstraints percentWidth="12.5" />
+                            <ColumnConstraints percentWidth="12.5" />
+                            <ColumnConstraints percentWidth="12.5" />
+                            <ColumnConstraints percentWidth="12.5" /> </columnConstraints>
                         <children>
-                            <TextField fx:id="txtPeso" promptText="Peso (kg)" styleClass="text-field-form"
-                                       GridPane.columnIndex="0"/>
-                            <TextField fx:id="txtTalla" promptText="Talla (cm)" styleClass="text-field-form"
-                                       GridPane.columnIndex="1"/>
-                            <TextField fx:id="txtTA" promptText="TA (ej. 120/80)" styleClass="text-field-form"
-                                       GridPane.columnIndex="2"/>
-                            <TextField fx:id="txtFC" promptText="FC (lpm)" styleClass="text-field-form"
-                                       GridPane.columnIndex="3"/>
-                            <TextField fx:id="txtFR" promptText="FR (rpm)" styleClass="text-field-form"
-                                       GridPane.columnIndex="4"/>
-                            <TextField fx:id="txtTemp" promptText="Temp (°C)" styleClass="text-field-form"
-                                       GridPane.columnIndex="5"/>
+                            <TextField fx:id="txtPeso" promptText="Peso (kg)" styleClass="text-field-form" GridPane.columnIndex="0" />
+                            <TextField fx:id="txtTalla" promptText="Talla (m/cm)" styleClass="text-field-form" GridPane.columnIndex="1" />
+                            <TextField fx:id="txtIMC" promptText="IMC" editable="false" style="-fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-radius: 4; -fx-background-radius: 4;" GridPane.columnIndex="2" />
+                            <TextField fx:id="txtTA" promptText="TA (ej. 120/80)" styleClass="text-field-form" GridPane.columnIndex="3" />
+                            <TextField fx:id="txtFC" promptText="FC (lpm)" styleClass="text-field-form" GridPane.columnIndex="4" />
+                            <TextField fx:id="txtFR" promptText="FR (rpm)" styleClass="text-field-form" GridPane.columnIndex="5" />
+                            <TextField fx:id="txtTemp" promptText="Temp (°C)" styleClass="text-field-form" GridPane.columnIndex="6" />
+
+                            <TextField fx:id="txtSpO2" promptText="SpO2 (%)" styleClass="text-field-form" GridPane.columnIndex="7" />
                         </children>
-                        <rowConstraints>
-                            <RowConstraints/>
-                        </rowConstraints>
                     </GridPane>
 
+                    <Label text="Examen Físico Regional:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
                     <GridPane hgap="15.0" vgap="15.0">
                         <columnConstraints>
                             <ColumnConstraints percentWidth="33.3"/>
@@ -190,76 +219,49 @@
                                 <Label text="Cabeza:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
                                 <TextArea fx:id="txtCabeza" text="NORMOCÉFALA, NO MASAS, NO CICATRICES" prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
                             </VBox>
-
                             <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
                                 <Label text="Cuello:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                                <TextArea fx:id="txtCuello"
-                                          text="Cilíndrico, móvil, sin adenopatías palpables. Tiroides normal."
-                                          prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                                <TextArea fx:id="txtCuello" text="Cilíndrico, móvil, sin adenopatías palpables. Tiroides normal." prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
                             </VBox>
-
                             <VBox spacing="5.0" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                                <Label text="Tórax:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                                <TextArea fx:id="txtTorax" text="Simétrico, expansibilidad conservada, sin tiraje."
-                                          prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                                <Label text="Tórax:" style="-fx-font-weight: bold; -fx-text-fill: #475569;" />
+                                <TextArea fx:id="txtTorax" text="Simétrico, expansibilidad conservada, sin tiraje." prefHeight="60.0" wrapText="true" styleClass="text-area-form" />
                             </VBox>
 
                             <VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
                                 <Label text="Corazón:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                                <TextArea fx:id="txtCorazon"
-                                          text="Ruidos cardíacos rítmicos, de buen tono, sin soplos audibles."
-                                          prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                                <TextArea fx:id="txtCorazon" text="Ruidos cardíacos rítmicos, de buen tono, sin soplos audibles." prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
                             </VBox>
-
                             <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                 <Label text="Pulmones:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                                <TextArea fx:id="txtPulmones"
-                                          text="Murmullo vesicular conservado en ambos campos, sin ruidos agregados."
-                                          prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                                <TextArea fx:id="txtPulmones" text="Murmullo vesicular conservado en ambos campos, sin ruidos agregados." prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
                             </VBox>
-
                             <VBox spacing="5.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                 <Label text="Abdomen:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                                <TextArea fx:id="txtAbdomen"
-                                          text=" SEMIGLOBOSO A EXPENSA DE PANÍCULO ADIPOSO, NO MASAS PALPABLES, PERISTALSIS PRESENTE. NO CICATRICES. NO DOLOROSO A LA PALPACIÓN SUPERFICIAL NI A LA PROFUNDA.
-"
-                                          prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                                <TextArea fx:id="txtAbdomen" text="SEMIGLOBOSO A EXPENSA DE PANÍCULO ADIPOSO, PERISTALSIS PRESENTE, NO MASAS PALPABLES. NO CICATRICES. NO DOLOROSO A LA PALPACIÓN SUPERFICIAL NI A LA PROFUNDA." prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
                             </VBox>
 
                             <VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
                                 <Label text="Miembros Sup:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                                <TextArea fx:id="txtMiembrosSup"
-                                          text="Simétricos, móviles, sin edema, pulsos distales presentes."
-                                          prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                                <TextArea fx:id="txtMiembrosSup" text="Simétricos, móviles, sin edema, pulsos distales presentes." prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
                             </VBox>
-
                             <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                 <Label text="Miembros Inf:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                                <TextArea fx:id="txtMiembrosInf"
-                                          text="Simétricos, móviles, sin edema, pulsos pedios presentes."
-                                          prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                                <TextArea fx:id="txtMiembrosInf" text="Simétricos, móviles, sin edema, pulsos pedios presentes." prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
                             </VBox>
-
                             <VBox spacing="5.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
-                                <Label text="Genitales Externos:"
-                                       style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                                <TextArea fx:id="txtGenitales"
-                                          text="De aspecto y configuración normal para su edad y sexo."
-                                          prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                                <Label text="Genitales Externos:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                                <TextArea fx:id="txtGenitales" text="De aspecto y configuración normal para su edad y sexo." prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
                             </VBox>
 
                             <VBox spacing="5.0" GridPane.columnIndex="0" GridPane.rowIndex="3">
                                 <Label text="Piel y Faneras:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                                <TextArea fx:id="txtPiel" text="Normocoloreada, hidratada, sin lesiones evidentes."
-                                          prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                                <TextArea fx:id="txtPiel" text="Normocoloreada, hidratada, sin lesiones evidentes." prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
                             </VBox>
 
-                            <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="3">
-                                <Label text="Hallazgos Generales:"
-                                       style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                                <TextArea fx:id="txtHallazgosGen"
-                                          text="Paciente consciente, orientado en tiempo, espacio y persona. Aparente buen estado general."
-                                          prefHeight="60.0" wrapText="true" styleClass="text-area-form"/>
+                            <VBox fx:id="vboxMamas" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3" visible="false" managed="false">
+                                <Label text="Mamas:" style="-fx-font-weight: bold; -fx-text-fill: #475569;" />
+                                <TextArea fx:id="txtMamas" text="Simétricas, sin nódulos ni masas palpables, pezón bien implantado. Area xilar sin alteraciones ni adedonopatias palpables. " prefHeight="60.0" wrapText="true" styleClass="text-area-form" />
                             </VBox>
                         </children>
                     </GridPane>

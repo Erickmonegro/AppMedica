@@ -31,6 +31,15 @@ public class AntecedentesPaciente {
     @Column(columnDefinition = "TEXT")
     private String alergias;
 
+    @Column(name = "menarquia")
+    private String menarquia;
+
+    @Column(name = "fum")
+    private java.time.LocalDate fum;
+
+    @Column(name = "gpca")
+    private String gpca;
+
     // CONEXIÓN AISLADA
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "paciente_id", nullable = false)

@@ -2,11 +2,13 @@ package com.proyectomedico.appmedicacenfasies.controller;
 
 import com.proyectomedico.appmedicacenfasies.dto.*;
 import com.proyectomedico.appmedicacenfasies.service.PacienteService;
+import com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +60,13 @@ public class NuevoPacienteController {
     private TextArea txtCirugias;
     @FXML
     private TextArea txtTransfusiones;
-
+    @FXML private VBox vboxMamas, vboxExploracionGineco;
+    @FXML private TextArea txtMamas, txtEspeculoscopia, txtTactoVaginal;
+    // Nuevas variables inyectadas
+    @FXML private ComboBox<String> cmbSexo; // Asegúrate de añadir esto también a tus datos personales
+    @FXML private VBox vboxGinecologia;
+    @FXML private TextField txtMenarquia, txtGPCA;
+    @FXML private DatePicker dpFUM;
 
     // --- SECCIÓN 3: HÁBITOS TÓXICOS ---
     @FXML
@@ -82,7 +90,7 @@ public class NuevoPacienteController {
 
     // --- SECCIÓN 4: EXAMEN FÍSICO Y SIGNOS VITALES ---
     @FXML
-    private TextField txtPeso, txtTalla, txtTA, txtFC, txtFR, txtTemp;
+    private TextField txtPeso, txtTalla, txtTA, txtFC, txtFR, txtTemp, txtIMC, txtSpO2;
     @FXML
     private TextArea txtCabeza, txtCuello, txtTorax, txtCorazon, txtPulmones, txtAbdomen;
     @FXML
@@ -96,6 +104,49 @@ public class NuevoPacienteController {
     public void initialize() {
         log.info("Pantalla de Registro cargada con todas las secciones.");
         cmbSeguro.setItems(FXCollections.observableArrayList(LISTADO_ARS));
+
+        // Lógicas de auto-cálculo
+        FormatoClinicoUtil.configurarCalculoIMC(txtPeso, txtTalla, txtIMC);
+        FormatoClinicoUtil.configurarFormatoTA(txtTA);
+
+        // =========================================================================
+        // RUTA ESTRICTA DE TABULACIÓN (Todo el formulario conectado)
+        // =========================================================================
+        FormatoClinicoUtil.configurarTabulacionRapida(
+                // 1. Datos Personales
+                txtNombre, txtCedula, dpFechaNacimiento, txtTelefonos, txtOcupacion, cmbSeguro, txtDireccion,
+
+                // 2. Antecedentes
+                txtAntecedentesFam, txtAntecedentesPers, txtAlergias, txtCirugias, txtTransfusiones,
+
+                // 4. Motivo de Consulta
+                txtMotivoConsulta, txtHistoriaEnfermedad,
+
+                // --- NUEVO ORDEN AQUÍ ---
+                // 5. Hallazgos Generales (Pasó arriba)
+                txtHallazgosGen,
+
+                // 6. Signos Vitales
+                txtPeso, txtTalla, txtTA, txtFC, txtFR, txtTemp, txtSpO2,
+
+                // 7. Examen Físico
+                txtCabeza, txtCuello, txtTorax, txtCorazon, txtPulmones, txtAbdomen,
+                txtMiembrosSup, txtMiembrosInf, txtGenitales, txtPiel,
+
+                // Estos 3 saltarán solos si están visibles (Ginecología)
+                txtMamas, txtEspeculoscopia, txtTactoVaginal,
+
+                // 8. Conclusión
+                txtEstudios, txtDiagnostico, txtTratamiento
+        );
+        if(cmbSexo != null) {
+            cmbSexo.setItems(javafx.collections.FXCollections.observableArrayList("Masculino", "Femenino"));
+            cmbSexo.valueProperty().addListener((obs, oldVal, newVal) -> {
+                boolean esMujer = "Femenino".equalsIgnoreCase(newVal);
+                vboxGinecologia.setVisible(esMujer);
+                vboxGinecologia.setManaged(esMujer);
+            });
+        }
     }
 
     @FXML
@@ -114,27 +165,32 @@ public class NuevoPacienteController {
             // =====================================================================
 
             // Sección 1: Datos Personales
-            // Extraemos el texto del nuevo ComboBox
             String seguroSeleccionado = cmbSeguro.getEditor().getText();
+            String sexoSeleccionado = cmbSexo.getValue(); // <-- SOLUCIÓN 1: Declaramos la variable aquí
 
-            // Sección 1: Datos Personales
             DatosPersonalesDTO datosPersonales = new DatosPersonalesDTO(
                     txtNombre.getText(), txtCedula.getText(), dpFechaNacimiento.getValue(),
-                    "", "", "", txtDireccion.getText(), txtTelefonos.getText(),
-                    "", seguroSeleccionado, txtOcupacion.getText(), // <--- CORREGIDO
+                    sexoSeleccionado, "", "", txtDireccion.getText(), txtTelefonos.getText(),
+                    "", seguroSeleccionado, txtOcupacion.getText(),
                     null
             );
 
-            // Sección 2: Motivo y Enfermedad Actual (NUESTRO NUEVO BLOQUE)
+            // Sección 2: Motivo y Enfermedad Actual
             HistoriaEnfermedadDTO historia = new HistoriaEnfermedadDTO(
                     txtMotivoConsulta.getText(),
                     txtHistoriaEnfermedad.getText()
             );
 
             // Sección 3: Antecedentes
+            // <-- SOLUCIÓN 2: Declaramos las variables AFUERA del DTO
+            String menarquia = txtMenarquia != null ? txtMenarquia.getText() : "";
+            String gpca = txtGPCA != null ? txtGPCA.getText() : "";
+            java.time.LocalDate fum = dpFUM != null ? dpFUM.getValue() : null;
+
             AntecedentesDTO antecedentes = new AntecedentesDTO(
                     txtAntecedentesFam.getText(), txtAntecedentesPers.getText(),
-                    txtTransfusiones.getText(), txtCirugias.getText(), txtAlergias.getText()
+                    txtTransfusiones.getText(), txtCirugias.getText(), txtAlergias.getText(),
+                    menarquia, fum, gpca // <-- Y aquí simplemente las pasamos como parámetros
             );
 
             // Sección 4: Hábitos Tóxicos
@@ -147,9 +203,10 @@ public class NuevoPacienteController {
             ExamenFisicoDTO examenFisico = new ExamenFisicoDTO(
                     parsearDoble(txtPeso.getText()), parsearDoble(txtTalla.getText()), txtTA.getText(),
                     parsearDoble(txtFC.getText()), parsearDoble(txtFR.getText()), parsearDoble(txtTemp.getText()),
+                    parsearDoble(txtSpO2.getText()),
                     txtCabeza.getText(), txtCuello.getText(), txtTorax.getText(), txtCorazon.getText(),
                     txtPulmones.getText(), txtAbdomen.getText(), txtGenitales.getText(), txtMiembrosSup.getText(),
-                    txtMiembrosInf.getText(), txtPiel.getText(), txtHallazgosGen.getText(),
+                    txtMiembrosInf.getText(), txtPiel.getText(), txtHallazgosGen.getText(), txtMamas.getText(), txtEspeculoscopia.getText(), txtTactoVaginal.getText(),
                     txtEstudios.getText(), txtDiagnostico.getText(), txtTratamiento.getText()
             );
 
@@ -208,7 +265,9 @@ public class NuevoPacienteController {
         }
     }
 
-    /**
+
+
+    /*
      * Este método es llamado por el Dashboard del Médico cuando el paciente
      * viene de la Sala de Espera (Recepción). Pre-llena los campos básicos.
      */
@@ -216,7 +275,8 @@ public class NuevoPacienteController {
      * Este método es llamado por el Dashboard del Médico cuando el paciente
      * viene de la Sala de Espera (Recepción). Pre-llena los campos básicos.
      */
-    public void cargarDatosPreliminares(com.proyectomedico.appmedicacenfasies.model.Paciente paciente) {
+    // AÑADIMOS EL SEGUNDO PARÁMETRO AQUÍ ABAJO 👇
+    public void cargarDatosPreliminares(com.proyectomedico.appmedicacenfasies.model.Paciente paciente, String especialidadTurno) {
         if (paciente != null) {
             txtCedula.setText(paciente.getCedula());
             txtNombre.setText(paciente.getNombreApellidos());
@@ -225,15 +285,42 @@ public class NuevoPacienteController {
                 txtTelefonos.setText(paciente.getTelefonos());
             }
 
-            // --- AQUÍ ESTÁ LA CORRECCIÓN ---
-            // Solo usamos el ComboBox (cmbSeguro), NUNCA txtSeguro
             if (paciente.getSeguro() != null) {
                 cmbSeguro.getEditor().setText(paciente.getSeguro());
             }
 
-            // Bloqueamos la cédula y nombre por seguridad
+            // --- NUEVOS CAMPOS DESDE RECEPCIÓN ---
+            if (paciente.getFechaNacimiento() != null) {
+                dpFechaNacimiento.setValue(paciente.getFechaNacimiento());
+            }
+
+            if (paciente.getSexo() != null) {
+                cmbSexo.setValue(paciente.getSexo());
+            }
+
             txtCedula.setEditable(false);
             txtNombre.setEditable(false);
+            if(paciente.getSexo() != null) cmbSexo.setDisable(true);
         }
+
+        // ¡Ahora sí funciona porque especialidadTurno viene en los paréntesis!
+        if (especialidadTurno != null && especialidadTurno.toUpperCase().contains("GINECO")) {
+            activarModoGinecologia();
+        }
+    }
+    public void activarModoGinecologia() {
+        // 1. Forzamos Sexo Femenino
+        cmbSexo.setValue("Femenino");
+        cmbSexo.setDisable(true); // Bloqueado porque en esta especialidad es obligatorio
+
+        // 2. Mostramos los apartados ginecológicos de antecedentes (el que ya tenías)
+        vboxGinecologia.setVisible(true);
+        vboxGinecologia.setManaged(true);
+
+        // 3. Mostramos los nuevos apartados físicos
+        vboxMamas.setVisible(true);
+        vboxMamas.setManaged(true);
+        vboxExploracionGineco.setVisible(true);
+        vboxExploracionGineco.setManaged(true);
     }
 }

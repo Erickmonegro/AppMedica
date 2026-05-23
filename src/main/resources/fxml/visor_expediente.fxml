@@ -12,11 +12,9 @@
             <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
         </padding>
         <children>
-            <!-- Avatar Placeholder -->
             <Button text="⬅ Volver al Dashboard" onAction="#volverAlDashboard"
                     style="-fx-background-color: transparent; -fx-text-fill: #0b4a9e; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 0 0 15 0;"/>
 
-            <!-- Avatar Placeholder (Este ya lo tienes) -->
             <StackPane style="-fx-background-color: #cbd5e1; -fx-background-radius: 50%;" prefHeight="100.0" prefWidth="100.0" maxWidth="100.0">
                 <Label text="👤" style="-fx-font-size: 40px;"/>
             </StackPane>
@@ -36,8 +34,16 @@
                 <Label fx:id="lblTelefono" text="--" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
             </GridPane>
 
-            <Region VBox.vgrow="ALWAYS" /> <!-- Empuja el botón hacia abajo -->
+            <Region VBox.vgrow="ALWAYS" /> <VBox spacing="10.0" style="-fx-background-color: #fefce8; -fx-padding: 15; -fx-border-color: #fef08a; -fx-border-radius: 8; -fx-background-radius: 8;">
+            <Label text="📌 Notas Internas Privadas" style="-fx-font-weight: bold; -fx-text-fill: #854d0e;" />
 
+            <ListView fx:id="listaNotas" prefHeight="130.0" style="-fx-background-color: transparent;" />
+
+            <Separator />
+
+            <TextArea fx:id="txtNuevaNota" prefRowCount="2" promptText="Escriba un recordatorio aquí..." wrapText="true" />
+            <Button text="Guardar Nota" onAction="#guardarNotaRapida" maxWidth="Infinity" style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" />
+        </VBox>
             <Button text="Ver Historia Inicial (PDF)" styleClass="boton-principal" maxWidth="Infinity" onAction="#verHistoriaInicialPdf"/>
         </children>
     </VBox>

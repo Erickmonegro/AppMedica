@@ -48,7 +48,7 @@ public class LoginController {
 
         } catch (Exception e) {
             e.printStackTrace(); // <--- ESTA ES LA MAGIA: Nos dirá la verdad en la consola
-            lblError.setText("Error: Revisa la consola de IntelliJ");
+            lblError.setText("Usuario o Contraseña incorrecta");
         }
     }
 

@@ -31,6 +31,8 @@ public class Paciente {
 
     private LocalDate fechaNacimiento;
 
+    private String sexo;
+
     // Campo calculado o informativo según el formulario
     private Integer edad;
 

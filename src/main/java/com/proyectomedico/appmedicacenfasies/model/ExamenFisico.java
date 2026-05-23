@@ -26,6 +26,7 @@ public class ExamenFisico {
     private Double frecuenciaCardiaca; // Cámbialo a Double si lo tenías como String
     private Double frecuenciaRespiratoria; // Cámbialo a Double si lo tenías como String
     private Double temperatura; // ¡Asegúrate de agregar este!
+    private Double spO2;
     // ... (Y los demás campos de texto como cabeza, cuello, torax, etc.)
     // Evaluación por sistemas (Usamos TEXT por si el médico detalla mucho)
     @Column(columnDefinition = "TEXT")
@@ -48,6 +49,12 @@ public class ExamenFisico {
     private String miembroInferior;
     @Column(columnDefinition = "TEXT")
     private String pielYFaneras;
+    @Column(columnDefinition = "TEXT")
+    private String mamas;
+    @Column(columnDefinition = "TEXT")
+    private String especuloscopia;
+    @Column(columnDefinition = "TEXT")
+    private String tactoVaginal;
 
     // CONEXIÓN AISLADA
     @OneToOne(fetch = FetchType.LAZY)

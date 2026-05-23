@@ -1,25 +1,35 @@
 package com.proyectomedico.appmedicacenfasies.controller;
 
 import com.proyectomedico.appmedicacenfasies.dto.PacienteRegistroDTO;
+import com.proyectomedico.appmedicacenfasies.model.Medico;
+import com.proyectomedico.appmedicacenfasies.model.NotaMedica;
 import com.proyectomedico.appmedicacenfasies.service.PacienteService;
+import com.proyectomedico.appmedicacenfasies.config.SesionGlobal;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
 import java.time.Period;
 import java.time.LocalDate;
+
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.stage.Stage;
 import org.springframework.context.ApplicationContext;
 
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
+
 
 @Slf4j
 @Component
@@ -27,19 +37,31 @@ import java.util.UUID;
 public class VisorExpedienteController {
 
     private final PacienteService pacienteService;
+    private final SesionGlobal sesionGlobal;
     private UUID pacienteIdActual;
     private final ApplicationContext applicationContext;
     // Variable para almacenar la ruta del PDF principal
     private String rutaPdfHistoriaActual;
     // Aquí luego inyectaremos el PdfService también
+    private UUID pacienteSeleccionadoId;
 
     // --- PANEL IZQUIERDO (Perfil) ---
-    @FXML private Label lblNombrePerfil;
-    @FXML private Label lblCedulaPerfil;
-    @FXML private Label lblEdad;
-    @FXML private Label lblSeguro;
-    @FXML private Label lblTelefono;
-    @FXML private VBox vboxListaEvoluciones;
+    @FXML
+    private Label lblNombrePerfil;
+    @FXML
+    private Label lblCedulaPerfil;
+    @FXML
+    private Label lblEdad;
+    @FXML
+    private Label lblSeguro;
+    @FXML
+    private Label lblTelefono;
+    @FXML
+    private VBox vboxListaEvoluciones;
+    @FXML
+    private ListView<String> listaNotas;
+    @FXML
+    private TextArea txtNuevaNota;
 
     // Guardaremos el DTO maestro en memoria mientras la ventana esté abierta
     private PacienteRegistroDTO pacienteActual;
@@ -92,6 +114,7 @@ public class VisorExpedienteController {
             lblNombrePerfil.setText("Error al cargar paciente");
         }
         cargarEvolucionesEnPanelDerecho();
+        cargarHistorialNotas();
     }
 
     @FXML
@@ -285,6 +308,7 @@ public class VisorExpedienteController {
             log.error("Error crítico al intentar abrir el archivo PDF.", e);
         }
     }
+
     @FXML
     public void verHistoriaInicialPdf(javafx.event.ActionEvent event) {
         log.info("Botón de PDF Inicial presionado.");
@@ -311,5 +335,44 @@ public class VisorExpedienteController {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+
+    // Llama a esto dentro de tu método donde cargas los datos del paciente al abrir el visor
+    private void cargarHistorialNotas() {
+        listaNotas.getItems().clear();
+        List<NotaMedica> notas = pacienteService.obtenerNotasDelPaciente(pacienteIdActual);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a");
+
+        for (NotaMedica nota : notas) {
+            String encabezado = nota.getFechaCreacion().format(formatter) + " - " + nota.getMedicoAutor();
+            String item = encabezado + "\n" + nota.getContenido();
+            listaNotas.getItems().add(item);
+        }
+    }
+
+    @FXML
+    public void guardarNotaRapida() {
+
+        try {
+            String contenido = txtNuevaNota.getText().trim();
+            if (contenido.isEmpty()) return;
+
+
+            // Sacar el nombre del doctor de la sesión
+            String medico = "Médico";
+            if (sesionGlobal.haySesionActiva() && sesionGlobal.getUsuarioLogueado() instanceof Medico) {
+                medico = "Dr. " + ((Medico) sesionGlobal.getUsuarioLogueado()).getNombreCompleto();
+            }
+
+            // Guardar, limpiar y recargar
+            pacienteService.agregarNota(pacienteIdActual, contenido, medico);
+            txtNuevaNota.clear();
+            cargarHistorialNotas(); // Refrescar la lista en tiempo real
+            System.out.println("Funcionando");
+        } catch (Exception e) {
+            log.error("Hay un bobo, ta aqui", e);
+        }
     }
 }

@@ -253,27 +253,28 @@ public class DashboardMedicoController {
 
         if (yaTieneHistoria) {
             log.info("Paciente recurrente. Abriendo Visor de Expediente.");
-            abrirVisorExpediente(pacienteId); // Ahora esto bloqueará hasta que cierre
+            abrirVisorExpediente(pacienteId);
         } else {
             log.info("Paciente nuevo de recepción. Abriendo Formulario Inicial.");
-            abrirNuevoPacienteDesdeRecepcion(turno.getPaciente()); // Esto ya bloquea con showAndWait
+            // ==========================================
+            // MAGIA: Ahora le pasamos el paciente Y la especialidad (AreaDestino)
+            // ==========================================
+            abrirNuevoPacienteDesdeRecepcion(turno.getPaciente(), turno.getAreaDestino());
         }
 
-        // ==========================================
-        // MAGIA SENIOR: El código llega aquí SOLO CUANDO el doctor cierra la ventana del paciente.
-        // ==========================================
         log.info("Consulta terminada. Marcando turno como ATENDIDO...");
 
         turno.setEstado("ATENDIDO");
-        turnoRepository.save(turno); // Actualizamos en la Base de Datos
+        turnoRepository.save(turno);
 
-        // Recargamos la UI. ¡Como ya no está "EN_ESPERA", la tarjeta desaparecerá!
         Medico doctor = (Medico) sesionGlobal.getUsuarioLogueado();
         cargarSalaDeEspera(doctor);
     }
 
     // 2. EL MÉTODO PARA ABRIR FORMULARIO PRE-LLENADO
-    private void abrirNuevoPacienteDesdeRecepcion(com.proyectomedico.appmedicacenfasies.model.Paciente pacienteBasico) {
+    // 2. EL MÉTODO PARA ABRIR FORMULARIO PRE-LLENADO
+    // AÑADIMOS EL SEGUNDO PARÁMETRO EN LA FIRMA DEL MÉTODO 👇
+    private void abrirNuevoPacienteDesdeRecepcion(com.proyectomedico.appmedicacenfasies.model.Paciente pacienteBasico, String especialidadTurno) {
         try {
             log.info("Cargando vista de Nuevo Paciente para pre-llenado...");
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/nuevo_paciente.fxml"));
@@ -281,9 +282,9 @@ public class DashboardMedicoController {
 
             Parent root = fxmlLoader.load();
 
-            // --- MAGIA: Le pasamos los datos básicos al formulario ---
+            // --- MAGIA: Le pasamos los datos básicos Y LA ESPECIALIDAD al formulario ---
             NuevoPacienteController controller = fxmlLoader.getController();
-            controller.cargarDatosPreliminares(pacienteBasico);
+            controller.cargarDatosPreliminares(pacienteBasico, especialidadTurno); // <--- AQUÍ SE CONECTAN
 
             Scene scene = new Scene(root, 1000, 800);
             scene.getStylesheets().add(getClass().getResource("/css/estilos.css").toExternalForm());
