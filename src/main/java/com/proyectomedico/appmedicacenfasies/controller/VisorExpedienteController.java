@@ -1,10 +1,13 @@
 package com.proyectomedico.appmedicacenfasies.controller;
 
+import com.proyectomedico.appmedicacenfasies.controller.sonografia.NuevaSonografiaAbdominalController;
 import com.proyectomedico.appmedicacenfasies.dto.PacienteRegistroDTO;
 import com.proyectomedico.appmedicacenfasies.model.Medico;
 import com.proyectomedico.appmedicacenfasies.model.NotaMedica;
 import com.proyectomedico.appmedicacenfasies.service.PacienteService;
 import com.proyectomedico.appmedicacenfasies.config.SesionGlobal;
+import com.proyectomedico.appmedicacenfasies.service.SonografiaPdfService;
+import com.proyectomedico.appmedicacenfasies.service.SonografiaService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,6 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -43,7 +47,10 @@ public class VisorExpedienteController {
     // Variable para almacenar la ruta del PDF principal
     private String rutaPdfHistoriaActual;
     // Aquí luego inyectaremos el PdfService también
-    private UUID pacienteSeleccionadoId;
+    private final SonografiaService sonografiaService; // ¡AÑADIR ESTE!
+    private final SonografiaPdfService sonografiaPdfService;
+
+    @FXML private VBox vboxListaSonografias; // ¡AÑADIR ESTE (Debe coincidir con el fx:id de tu FXML)!
 
     // --- PANEL IZQUIERDO (Perfil) ---
     @FXML
@@ -115,6 +122,7 @@ public class VisorExpedienteController {
         }
         cargarEvolucionesEnPanelDerecho();
         cargarHistorialNotas();
+        cargarHistorialSonografias();
     }
 
     @FXML
@@ -311,20 +319,55 @@ public class VisorExpedienteController {
 
     @FXML
     public void verHistoriaInicialPdf(javafx.event.ActionEvent event) {
-        log.info("Botón de PDF Inicial presionado.");
+        log.info("Botón de Historia Inicial presionado.");
 
         if (this.rutaPdfHistoriaActual != null && !this.rutaPdfHistoriaActual.trim().isEmpty()) {
-            // El paciente tiene su archivo, lo abrimos.
+            // 1. EL PACIENTE TIENE HISTORIA: La abrimos como visor PDF
             abrirDocumentoPdf(this.rutaPdfHistoriaActual);
         } else {
-            // El paciente no tiene archivo (Registro antiguo o fallido). Avisamos al UI.
-            log.warn("Intento de abrir PDF fallido: La ruta es nula o vacía en la BD.");
-            mostrarAlerta(
-                    "Documento no disponible",
-                    "Este paciente no tiene una Historia Clínica en PDF generada. Es posible que sea un registro antiguo anterior a la actualización del sistema."
-            );
+            // 2. EL PACIENTE NO TIENE HISTORIA: Levantamos el formulario
+            log.info("El paciente no tiene historia clínica base. Abriendo formulario de creación...");
+            abrirFormularioHistoriaClinicaFaltante();
         }
     }
+
+    private void abrirFormularioHistoriaClinicaFaltante() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/nuevo_paciente.fxml"));
+            fxmlLoader.setControllerFactory(applicationContext::getBean);
+
+            Parent root = fxmlLoader.load();
+
+            // =========================================================
+            // ¡MAGIA!: Le pasamos los datos básicos que ya tenemos
+            // al controlador de Nuevo Paciente para que no empiece de cero.
+            // =========================================================
+            NuevoPacienteController controller = fxmlLoader.getController();
+
+            // Asumiendo que tu método cargarDatosPreliminares acepta un DTO o Entidad
+            // (Ajusta los parámetros según como tengas programado ese método)
+            com.proyectomedico.appmedicacenfasies.model.Paciente pBasico = new com.proyectomedico.appmedicacenfasies.model.Paciente();
+            pBasico.setId(this.pacienteIdActual);
+            pBasico.setNombreApellidos(this.pacienteActual.datosPersonales().nombreApellidos());
+            pBasico.setCedula(this.pacienteActual.datosPersonales().cedula());
+
+            controller.cargarDatosPreliminares(pBasico, "GENERAL");
+
+            Stage stage = new Stage();
+            stage.setTitle("Completar Historia Clínica - " + pBasico.getNombreApellidos());
+            stage.setScene(new Scene(root, 1000, 800));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            // Cuando cierre el modal, recargamos el visor entero para ver si ya generó el PDF
+            cargarDatosPaciente(this.pacienteIdActual);
+
+        } catch (Exception e) {
+            log.error("Error al abrir el formulario de historia clínica faltante", e);
+            mostrarAlerta("Error", "No se pudo abrir el formulario de historia clínica.");
+        }
+    }
+
 
     /**
      * Método utilitario de UI: Muestra un popup de advertencia en pantalla.
@@ -373,6 +416,145 @@ public class VisorExpedienteController {
             System.out.println("Funcionando");
         } catch (Exception e) {
             log.error("Hay un bobo, ta aqui", e);
+        }
+    }
+    @FXML
+    public void abrirModalSonografiaAbdominal() {
+        if (pacienteIdActual == null) {
+            log.warn("No se puede abrir la sonografía porque no hay un paciente seleccionado.");
+            return;
+        }
+
+        try {
+            log.info("Abriendo modal para Sonografía Abdominal...");
+
+            // 1. RUTA RELATIVA CORRECTA (Desde el Classpath)
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/nueva_sonografia_abdominal.fxml"));
+
+            // 2. DESCOMENTADO: Conectamos Spring Boot al modal para que los Servicios se inyecten
+            fxmlLoader.setControllerFactory(applicationContext::getBean);
+
+            Parent root = fxmlLoader.load();
+
+            // 3. Pasarle el ID del paciente al modal
+            // OJO: Usamos 'pacienteIdActual', que es la variable que tú usas para todo en este controlador
+            NuevaSonografiaAbdominalController modalController = fxmlLoader.getController();
+            modalController.inicializarParaPaciente(pacienteIdActual);
+
+            // 4. Mostrar la ventana emergente (Modal)
+            Stage stage = new Stage();
+            stage.setTitle("Nueva Sonografía Abdominal");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+
+            stage.showAndWait(); // Espera a que el doctor guarde y cierre la ventana
+            cargarHistorialSonografias();
+            // 5. ¡Próximamente! Refrescar la UI
+            log.info("Modal cerrado. (Aquí luego llamaremos a cargarHistorialSonografias())");
+
+        } catch (Exception e) {
+            log.error("Error crítico al abrir modal de sonografía abdominal", e);
+            mostrarAlerta("Error de Interfaz", "No se pudo cargar la pantalla de Sonografía: " + e.getMessage());
+        }
+
+    }
+    private void cargarHistorialSonografias() {
+        if (pacienteIdActual == null || vboxListaSonografias == null) return;
+
+        log.info("Renderizando tarjetas de sonografía en la UI...");
+        vboxListaSonografias.getChildren().clear(); // Limpiamos el panel
+
+        try {
+            // Asume que tienes un método en tu servicio que busca las sonografías de este paciente
+            var sonografias = sonografiaService.obtenerSonografiasPorPaciente(pacienteIdActual);
+
+            if (sonografias.isEmpty()) {
+                Label lblVacio = new Label("No hay reportes sonográficos registrados para este paciente.");
+                lblVacio.setStyle("-fx-text-fill: #94a3b8; -fx-font-style: italic;");
+                vboxListaSonografias.getChildren().add(lblVacio);
+                return;
+            }
+
+            java.time.format.DateTimeFormatter formatoFecha = java.time.format.DateTimeFormatter.ofPattern("dd 'de' MMMM, yyyy");
+
+            for (var sono : sonografias) {
+                VBox tarjeta = new VBox(8);
+                tarjeta.setStyle("-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 8px; -fx-background-radius: 8px;");
+                tarjeta.setPadding(new javafx.geometry.Insets(15));
+
+                javafx.scene.layout.HBox cabecera = new javafx.scene.layout.HBox();
+                cabecera.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                cabecera.setSpacing(10);
+
+                javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+                javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+                // ========================================================
+                // 1. BLINDAJE DE FECHA (Evita que la pantalla quede en blanco)
+                // ========================================================
+                String fechaTexto = "Fecha no registrada";
+                if (sono.getFechaCreacion() != null) {
+                    fechaTexto = sono.getFechaCreacion().format(formatoFecha);
+                }
+
+                Label lblTitulo = new Label("Ecografía Abdominal - " + fechaTexto);
+                lblTitulo.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+
+                cabecera.getChildren().addAll(lblTitulo, spacer);
+
+                // ========================================================
+                // 2. BLINDAJE DEL PDF
+                // ========================================================
+                if (sono.getRutaPdf() != null && !sono.getRutaPdf().trim().isEmpty()) {
+                    javafx.scene.control.Button btnVerPdf = new javafx.scene.control.Button("📄 Ver PDF");
+                    btnVerPdf.setStyle("-fx-background-color: #eff6ff; -fx-text-fill: #1d4ed8; -fx-border-color: #bfdbfe; -fx-border-radius: 4px; -fx-cursor: hand;");
+                    btnVerPdf.setOnAction(event -> abrirDocumentoPdf(sono.getRutaPdf()));
+                    cabecera.getChildren().add(btnVerPdf);
+                } else {
+                    Label lblSinPdf = new Label("Sin PDF generado");
+                    lblSinPdf.setStyle("-fx-text-fill: #ef4444; -fx-font-size: 11px; -fx-font-style: italic;");
+                    cabecera.getChildren().add(lblSinPdf);
+                }
+
+                tarjeta.getChildren().add(cabecera);
+                tarjeta.getChildren().add(new javafx.scene.control.Separator());
+
+                // --- DATOS RÁPIDOS EN LA TARJETA ---
+                agregarFilaATarjeta(tarjeta, "Médico encargado:", sono.getMedicoRealizador());
+                agregarFilaATarjeta(tarjeta, "Diagnóstico:", sono.getDiagnosticoConclusion());
+
+                vboxListaSonografias.getChildren().add(tarjeta);
+            }
+        } catch (Exception e) {
+            log.error("Error al cargar las sonografías en la UI", e);
+        }
+    }
+    public void ejecutarAutoAperturaSonografia(String tipoEstudio) {
+        log.info("Recibida orden de auto-apertura para el estudio: {}", tipoEstudio);
+
+        if (tipoEstudio == null) {
+            log.warn("El tipo de estudio es nulo. No se puede abrir la plantilla automática.");
+            return;
+        }
+
+        switch (tipoEstudio.toUpperCase()) {
+            case "ABDOMINAL":
+                abrirModalSonografiaAbdominal();
+                break;
+            case "OBSTETRICA":
+                mostrarAlerta("En Desarrollo", "La plantilla para Sonografía Obstétrica estará lista pronto.");
+                break;
+            case "MAMAS":
+                mostrarAlerta("En Desarrollo", "La plantilla para Sonografía de Mamas estará lista pronto.");
+                break;
+            case "PELVICA_FEMENINA":
+            case "PELVICA_MASCULINA":
+                mostrarAlerta("En Desarrollo", "La plantilla para Sonografía Pélvica estará lista pronto.");
+                break;
+            default:
+                log.warn("No hay una plantilla automática configurada para el estudio: {}", tipoEstudio);
+                mostrarAlerta("Atención", "No se encontró la plantilla para: " + tipoEstudio);
+                break;
         }
     }
 }

@@ -21,6 +21,12 @@
             <Label text="Especialidad:" style="-fx-font-weight: bold;" />
             <ComboBox fx:id="cmbEspecialidad" maxWidth="Infinity" promptText="Seleccione..." />
         </VBox>
+
+        <VBox fx:id="vboxTipoEstudio" spacing="5" HBox.hgrow="ALWAYS" visible="false" managed="false">
+            <Label text="Tipo de Estudio:" style="-fx-text-fill: #ea580c; -fx-font-weight: bold;"/>
+            <ComboBox fx:id="cmbTipoEstudio" maxWidth="Infinity" promptText="Seleccione Sonografía..." style="-fx-border-color: #ea580c; -fx-border-radius: 3;"/>
+        </VBox>
+
         <VBox spacing="5" HBox.hgrow="ALWAYS">
             <Label text="Médico:" style="-fx-font-weight: bold;" />
             <ComboBox fx:id="cmbMedico" maxWidth="Infinity" promptText="Seleccione..." />

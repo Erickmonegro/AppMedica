@@ -1,14 +1,17 @@
 package com.proyectomedico.appmedicacenfasies.model.sonografias;
 
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
+
 
 @Getter
 @Setter
 @Entity
 @Table(name = "sonografias_pelvica_fem")
 @PrimaryKeyJoinColumn(name = "sonografia_base_id")
+
 public class SonografiaPelvicaFemenina extends SonografiaBase {
 
     @Column(columnDefinition = "TEXT")

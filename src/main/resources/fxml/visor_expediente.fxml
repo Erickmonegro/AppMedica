@@ -6,7 +6,6 @@
 
 <HBox prefHeight="700.0" prefWidth="1000.0" stylesheets="@../css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.VisorExpedienteController">
 
-    <!-- PANEL IZQUIERDO: 30% - Perfil del Paciente y PDF Inicial -->
     <VBox prefWidth="300.0" style="-fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-width: 0 1 0 0;" spacing="15.0">
         <padding>
             <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
@@ -34,43 +33,78 @@
                 <Label fx:id="lblTelefono" text="--" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
             </GridPane>
 
-            <Region VBox.vgrow="ALWAYS" /> <VBox spacing="10.0" style="-fx-background-color: #fefce8; -fx-padding: 15; -fx-border-color: #fef08a; -fx-border-radius: 8; -fx-background-radius: 8;">
-            <Label text="📌 Notas Internas Privadas" style="-fx-font-weight: bold; -fx-text-fill: #854d0e;" />
+            <Region VBox.vgrow="ALWAYS" />
 
-            <ListView fx:id="listaNotas" prefHeight="130.0" style="-fx-background-color: transparent;" />
+            <VBox spacing="10.0" style="-fx-background-color: #fefce8; -fx-padding: 15; -fx-border-color: #fef08a; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <Label text="📌 Notas Internas Privadas" style="-fx-font-weight: bold; -fx-text-fill: #854d0e;" />
+                <ListView fx:id="listaNotas" prefHeight="130.0" style="-fx-background-color: transparent;" />
+                <Separator />
+                <TextArea fx:id="txtNuevaNota" prefRowCount="2" promptText="Escriba un recordatorio aquí..." wrapText="true" />
+                <Button text="Guardar Nota" onAction="#guardarNotaRapida" maxWidth="Infinity" style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" />
+            </VBox>
 
-            <Separator />
-
-            <TextArea fx:id="txtNuevaNota" prefRowCount="2" promptText="Escriba un recordatorio aquí..." wrapText="true" />
-            <Button text="Guardar Nota" onAction="#guardarNotaRapida" maxWidth="Infinity" style="-fx-background-color: #ca8a04; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;" />
-        </VBox>
             <Button text="Ver Historia Inicial (PDF)" styleClass="boton-principal" maxWidth="Infinity" onAction="#verHistoriaInicialPdf"/>
         </children>
     </VBox>
 
-    <!-- PANEL DERECHO: 70% - Motor de Evolución -->
-    <VBox prefWidth="700.0" HBox.hgrow="ALWAYS" spacing="15.0" style="-fx-background-color: #ffffff;">
-        <padding>
-            <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
-        </padding>
+    <VBox prefWidth="700.0" HBox.hgrow="ALWAYS" spacing="0" style="-fx-background-color: #ffffff;">
         <children>
-            <HBox alignment="CENTER_LEFT">
-                <Label text="Historial de Evolución" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #334155;"/>
-                <Region HBox.hgrow="ALWAYS" />
-                <Button text="+ Añadir Evolución" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 8 15;" onAction="#abrirModalNuevaEvolucion"/>
-            </HBox>
+            <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+                <tabs>
+                    <Tab text="📈 Evoluciones Clínicas">
+                        <content>
+                            <VBox spacing="15.0" style="-fx-padding: 20;">
+                                <HBox alignment="CENTER_LEFT">
+                                    <Label text="Historial de Evolución" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #334155;"/>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Button text="+ Añadir Evolución" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 5px; -fx-padding: 8 15; -fx-cursor: hand;" onAction="#abrirModalNuevaEvolucion"/>
+                                </HBox>
 
-            <Separator />
+                                <Separator />
 
-            <!-- Aquí se cargarán dinámicamente las tarjetas de las visitas anteriores -->
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
-                <VBox fx:id="vboxListaEvoluciones" spacing="10.0">
-                    <padding>
-                        <Insets right="10.0"/>
-                    </padding>
-                    <!-- Las tarjetas se inyectarán desde el controlador -->
-                </VBox>
-            </ScrollPane>
+                                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                                    <VBox fx:id="vboxListaEvoluciones" spacing="10.0">
+                                        <padding>
+                                            <Insets right="10.0"/>
+                                        </padding>
+                                    </VBox>
+                                </ScrollPane>
+                            </VBox>
+                        </content>
+                    </Tab>
+
+                    <Tab text="🔬 Reportes de Sonografía">
+                        <content>
+                            <VBox spacing="15.0" style="-fx-padding: 20;">
+                                <HBox alignment="CENTER_LEFT">
+                                    <Label text="Historial Sonográfico" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #334155;"/>
+                                    <Region HBox.hgrow="ALWAYS" />
+
+                                    <MenuButton text="+ Añadir Sonografía" style="-fx-background-color: #0b4a9e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 5 15; -fx-background-radius: 5px;">
+                                        <items>
+                                            <MenuItem text="Ecografía Abdominal" onAction="#abrirModalSonografiaAbdominal" />
+                                            <MenuItem text="Ecografía Obstétrica" disable="true" />
+                                            <MenuItem text="Ecografía Pélvica Femenina" disable="true" />
+                                            <MenuItem text="Ecografía de Mamas" disable="true" />
+                                            <MenuItem text="Ecografía Pélvica Masculina" disable="true" />
+                                        </items>
+                                    </MenuButton>
+                                </HBox>
+
+                                <Separator />
+
+                                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                                    <VBox fx:id="vboxListaSonografias" spacing="10.0">
+                                        <padding>
+                                            <Insets right="10.0"/>
+                                        </padding>
+                                    </VBox>
+                                </ScrollPane>
+                            </VBox>
+                        </content>
+                    </Tab>
+                </tabs>
+            </TabPane>
         </children>
     </VBox>
 

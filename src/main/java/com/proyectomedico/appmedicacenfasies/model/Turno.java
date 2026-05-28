@@ -39,6 +39,9 @@ public class Turno {
     @Column(name = "area_destino")
     private String areaDestino; // Ej: "Sonografía", "Pediatría", "Medicina General"
 
+    @Column(name = "tipo_estudio")
+    private String tipoEstudio; // Ej: "ABDOMINAL", "OBSTETRICA", "MAMAS", "CONSULTA_ESTANDAR"
+
     // El sistema registrará esto automáticamente antes de guardar
     @PrePersist
     protected void onCreate() {

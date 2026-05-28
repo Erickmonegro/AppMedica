@@ -48,6 +48,7 @@ public class DashboardMedicoController {
     @FXML private ListView<PacienteResumenDTO> listaPacientes; // Recuperamos tu lista original
     @FXML private VBox vboxCitasDashboard;
     @FXML private Label lblBienvenidaDoctor;
+    @FXML private SplitMenuButton btnNuevoRegistro;
 
     @FXML
     public void initialize() {
@@ -58,6 +59,20 @@ public class DashboardMedicoController {
             Medico doctor = (Medico) sesionGlobal.getUsuarioLogueado();
             lblBienvenidaDoctor.setText("Dr. " + doctor.getNombreCompleto());
             cargarSalaDeEspera(doctor);
+
+            // ==========================================
+            // ¡NUEVO!: LÓGICA DEL BOTÓN DESPLEGABLE
+            // ==========================================
+            if (btnNuevoRegistro != null) {
+                // Buscamos si ALGUNA de sus especialidades contiene la palabra "SONOGRAF"
+                boolean esSonografista = doctor.getEspecialidades().stream()
+                        .anyMatch(esp -> esp.name().toUpperCase().contains("SONOGRAF"));
+
+                if (!esSonografista) {
+                    btnNuevoRegistro.getItems().clear(); // Quitamos las opciones
+                    btnNuevoRegistro.setDisable(false);  // Aseguramos que funcione como botón normal
+                }
+            }
         }
 
         // 2. Panel Izquierdo: Configurar lista y cargar pacientes
@@ -249,21 +264,34 @@ public class DashboardMedicoController {
     private void decidirRutaAtencion(Turno turno) {
         UUID pacienteId = turno.getPaciente().getId();
 
-        boolean yaTieneHistoria = pacienteService.tieneHistoriaClinicaCompleta(pacienteId);
+        log.info("Iniciando Smart Routing para el turno: {}", turno.getId());
 
-        if (yaTieneHistoria) {
-            log.info("Paciente recurrente. Abriendo Visor de Expediente.");
-            abrirVisorExpediente(pacienteId);
+        // 1. EVALUAR EL ADN DEL TURNO (¿Para dónde va?)
+        String area = turno.getAreaDestino() != null ? turno.getAreaDestino().toUpperCase() : "GENERAL";
+        String estudio = turno.getTipoEstudio(); // Ej: ABDOMINAL
+
+        if (area.contains("SONOGRAF")) {
+            // ========================================================
+            // RUTA A: Es una Sonografía (Abrir Visor directamente en el modal del reporte)
+            // ========================================================
+            log.info("Detectada Sonografía [{}]. Enrutando a plantilla específica...", estudio);
+            abrirVisorExpedienteYAutoLanzarSonografia(pacienteId, estudio);
+
         } else {
-            log.info("Paciente nuevo de recepción. Abriendo Formulario Inicial.");
-            // ==========================================
-            // MAGIA: Ahora le pasamos el paciente Y la especialidad (AreaDestino)
-            // ==========================================
-            abrirNuevoPacienteDesdeRecepcion(turno.getPaciente(), turno.getAreaDestino());
+            // ========================================================
+            // RUTA B: Es Medicina General (Tu flujo original)
+            // ========================================================
+            boolean yaTieneHistoria = pacienteService.tieneHistoriaClinicaCompleta(pacienteId);
+            if (yaTieneHistoria) {
+                log.info("Paciente recurrente (General). Abriendo Visor de Expediente.");
+                abrirVisorExpediente(pacienteId);
+            } else {
+                log.info("Paciente nuevo (General). Abriendo Formulario Inicial.");
+                abrirNuevoPacienteDesdeRecepcion(turno.getPaciente(), turno.getAreaDestino());
+            }
         }
 
-        log.info("Consulta terminada. Marcando turno como ATENDIDO...");
-
+        // 3. Finalizar
         turno.setEstado("ATENDIDO");
         turnoRepository.save(turno);
 
@@ -301,6 +329,82 @@ public class DashboardMedicoController {
         } catch (Exception e) {
             log.error("Error al abrir la ventana de Nuevo Paciente desde recepción", e);
         }
+    }
+    @FXML
+    public void abrirMenuRapidoSonografia() {
+        log.info("Médico inicia creación directa de Sonografía...");
+
+        List<String> estudios = java.util.Arrays.asList("ABDOMINAL", "OBSTETRICA", "MAMAS", "PELVICA_FEMENINA", "PELVICA_MASCULINA");
+        ChoiceDialog<String> dialog = new ChoiceDialog<>("ABDOMINAL", estudios);
+        dialog.setTitle("Seleccionar Estudio");
+        dialog.setHeaderText("Creación Directa de Reporte");
+        dialog.setContentText("Estudio a realizar:");
+
+        java.util.Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(tipoEstudio -> {
+            try {
+                String rutaFxml = "";
+                // 1. Elegimos qué plantilla abrir
+                switch (tipoEstudio) {
+                    case "ABDOMINAL": rutaFxml = "/fxml/nueva_sonografia_abdominal.fxml"; break;
+                    // case "OBSTETRICA": rutaFxml = "/fxml/nueva_sonografia_obstetrica.fxml"; break;
+                    default:
+                        mostrarAlerta("En Desarrollo", "La plantilla directa para " + tipoEstudio + " aún no está conectada.");
+                        return;
+                }
+
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFxml));
+                loader.setControllerFactory(applicationContext::getBean);
+                Parent root = loader.load();
+
+                // 2. ¡EL TRUCO ARQUITECTÓNICO!
+                // Le pasamos 'NULL' al controlador. Esto le dirá a la pantalla:
+                // "Oye, este es un paciente nuevo, habilita los campos para que el doctor escriba el nombre".
+                if (tipoEstudio.equals("ABDOMINAL")) {
+                    com.proyectomedico.appmedicacenfasies.controller.sonografia.NuevaSonografiaAbdominalController controller = loader.getController();
+                    controller.inicializarParaPaciente(null);
+                }
+
+                Stage stage = new Stage();
+                stage.setTitle("Reporte Sonográfico - " + tipoEstudio);
+                stage.setScene(new Scene(root));
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.showAndWait();
+
+            } catch (Exception e) {
+                log.error("Error al abrir formulario directo de sonografía", e);
+            }
+        });
+    }
+    private void abrirVisorExpedienteYAutoLanzarSonografia(UUID pacienteId, String tipoEstudio) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/visor_expediente.fxml"));
+            loader.setControllerFactory(applicationContext::getBean);
+            Parent root = loader.load();
+
+            VisorExpedienteController visorController = loader.getController();
+            visorController.cargarDatosPaciente(pacienteId);
+
+            // ¡EL COMANDO MÁGICO!
+            visorController.ejecutarAutoAperturaSonografia(tipoEstudio);
+
+            Stage stage = new Stage();
+            stage.setTitle("Expediente Médico - Sonografía");
+            stage.setScene(new Scene(root, 1000, 700));
+            stage.setResizable(false);
+            stage.showAndWait();
+
+        } catch (Exception e) {
+            log.error("Error crítico al enrutar hacia el Visor de Expediente para Sonografía", e);
+        }
+    }
+    private void mostrarAlerta(String titulo, String mensaje) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 
 }

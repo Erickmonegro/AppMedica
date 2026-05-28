@@ -9,6 +9,7 @@ import com.proyectomedico.appmedicacenfasies.service.TurnoService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,11 @@ public class RegistroRapidoController {
     @FXML
     private ComboBox<String> cmbSeguro;
 
+    @FXML private VBox vboxTipoEstudio;
+    @FXML private ComboBox<String> cmbTipoEstudio;
+
+
+
     private final List<String> LISTADO_ARS = Arrays.asList(
             "SENASA Contributivo", "SENASA Subsidiado", "Humano Seguros",
             "Mapfre Salud ARS", "ARS Universal", "ARS Reservas",
@@ -55,6 +61,33 @@ public class RegistroRapidoController {
 
     @FXML
     public void initialize() {
+
+        cmbTipoEstudio.getItems().addAll(
+                "ABDOMINAL",
+                "OBSTETRICA",
+                "MAMAS",
+                "PELVICA_FEMENINA",
+                "PELVICA_MASCULINA"
+        );
+
+        // B. EL ESCUCHADOR MÁGICO (Listener) para el combobox de especialidad
+        cmbEspecialidad.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                String especialidadSeleccionada = newValue.toString().toUpperCase();
+
+                // Si la secretaria eligió algo que contiene "SONOGRAF"
+                if (especialidadSeleccionada.contains("SONOGRAF")) {
+                    // Mostrar menú de estudios
+                    vboxTipoEstudio.setVisible(true);
+                    vboxTipoEstudio.setManaged(true);
+                } else {
+                    // Ocultar menú y limpiar selección
+                    vboxTipoEstudio.setVisible(false);
+                    vboxTipoEstudio.setManaged(false);
+                    cmbTipoEstudio.getSelectionModel().clearSelection();
+                }
+            }
+        });
         // 1. Llenar el ComboBox del Seguro
         cmbSeguro.setItems(FXCollections.observableArrayList(LISTADO_ARS));
 
@@ -101,9 +134,11 @@ public class RegistroRapidoController {
     }
 
     private void cargarMedicosPorEspecialidad(Especialidad especialidad) {
+        log.info("Buscando médicos para la especialidad: {}", especialidad);
         var medicos = medicoRepository.findByEspecialidad(especialidad);
+        log.info("Médicos encontrados: {}", medicos.size());
         cmbMedico.setItems(FXCollections.observableArrayList(medicos));
-        cmbMedico.getSelectionModel().clearSelection(); // Limpiar selección anterior
+        cmbMedico.getSelectionModel().clearSelection();
     }
 
     @FXML
@@ -113,26 +148,46 @@ public class RegistroRapidoController {
             if (txtNombre.getText().isEmpty() || cmbMedico.getValue() == null) {
                 mostrarAlerta(Alert.AlertType.WARNING, "Campos Incompletos", "Debe ingresar Cédula, Nombre y seleccionar un Médico.");
                 return;
-            }// 2. PREPARACIÓN DE CÉDULA:
-            // Si está vacía, debemos enviar 'null' para que PostgreSQL no choque
-            // intentando guardar varios pacientes con cédula "" (vacía).
+            }
+
+            // =====================================================================
+            // NUEVA VALIDACIÓN: CAPTURAR EL TIPO DE ESTUDIO (Si es Sonografía)
+            // =====================================================================
+            String tipoDeEstudio = "CONSULTA_ESTANDAR";
+
+            if (vboxTipoEstudio != null && vboxTipoEstudio.isVisible()) {
+                if (cmbTipoEstudio.getValue() == null) {
+                    mostrarAlerta(Alert.AlertType.WARNING, "Atención", "Debe seleccionar el tipo exacto de Sonografía.");
+                    return;
+                }
+                tipoDeEstudio = cmbTipoEstudio.getValue();
+            }
+
+            // 2. PREPARACIÓN DE CÉDULA:
             String cedulaFinal = txtCedula.getText().trim();
             if (cedulaFinal.isEmpty()) {
                 cedulaFinal = null;
             }
-            //Extraemos el texto del ComboBox
+
+            // Extraemos el texto del ComboBox
             String seguroSeleccionado = cmbSeguro.getEditor().getText();
 
             // 1. Guardar o recuperar al paciente (Datos básicos)
             Paciente paciente = pacienteService.obtenerOCrearPacienteBasico(
-                    txtCedula.getText(), txtNombre.getText(), txtTelefono.getText(), seguroSeleccionado, dpFechaNacimiento.getValue(), // Puede ser null, y está bien
+                    cedulaFinal, // ¡Corregido! Usamos la cédula procesada para evitar errores en BD
+                    txtNombre.getText(),
+                    txtTelefono.getText(),
+                    seguroSeleccionado,
+                    dpFechaNacimiento.getValue(),
                     cmbSexo.getValue()
             );
-            // 2. Mandarlo a la Sala de Espera (Crear Turno)
+
+            // 2. Mandarlo a la Sala de Espera (Crear Turno con 4 parámetros)
             turnoService.crearTurnoParaPaciente(
                     paciente.getId(),
                     cmbMedico.getValue().getId(),
-                    cmbEspecialidad.getValue().name() // Guardamos el nombre del área
+                    cmbEspecialidad.getValue().name(), // Guardamos el nombre del área
+                    tipoDeEstudio // <--- EL CUARTO PARÁMETRO ESPERADO POR EL SERVICIO
             );
 
             mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Paciente enviado a sala de espera correctamente.");

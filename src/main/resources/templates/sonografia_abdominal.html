@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Reporte de Sonografía Abdominal</title>
+  <style>
+    /* =========================================
+       ESTILOS CORPORATIVOS CENFASIES
+    ========================================= */
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      font-size: 13px;
+      color: #333333;
+      line-height: 1.5;
+      margin: 20px 40px;
+    }
+
+    .header-logo {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .header-logo img {
+      max-width: 150px;
+    }
+
+    /* La famosa línea azul divisoria */
+    .divider {
+      border-top: 2px solid #0b4a9e;
+      margin: 15px 0;
+    }
+
+    /* =========================================
+       NUEVO ENCABEZADO DE PACIENTE (Sin Tabla)
+    ========================================= */
+    .patient-info {
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .patient-info p {
+      margin: 3px 0;
+    }
+
+    .patient-info b {
+      color: #0b4a9e; /* Azul oscuro corporativo para las etiquetas */
+    }
+
+    /* =========================================
+       CUERPO DEL REPORTE
+    ========================================= */
+    .content-block {
+      margin-bottom: 12px;
+      text-align: justify;
+    }
+
+    .content-block b {
+      color: #000000;
+    }
+
+    .diagnostico-block {
+      margin-top: 30px;
+      text-transform: uppercase;
+    }
+
+    /* =========================================
+       FIRMA DEL DOCTOR
+    ========================================= */
+    .signature-container {
+      margin-top: 60px;
+      text-align: right; /* Alineado a la derecha como en tu PDF original */
+      page-break-inside: avoid;
+    }
+
+    .signature-line {
+      display: inline-block;
+      text-align: left;
+    }
+
+    .signature-line b {
+      display: block;
+      margin-bottom: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<table class="header-table" style="width: 100%; border-bottom: 2px solid #0b4a9e; padding-bottom: 15px; margin-bottom: 25px;">
+  <tr>
+    <!-- COLUMNA IZQUIERDA: Logo incrustado en Base64 (20%) -->
+    <td width="20%" style="text-align: left; vertical-align: middle;">
+      <!-- Thymeleaf inyectará la imagen aquí. Si la imagen falla, no dibujará un cuadro roto gracias al th:if -->
+      <img th:if="${!logoBase64.isEmpty()}" th:src="${logoBase64}" alt="Logo CENFASIES" style="max-width: 110px; height: auto;" />
+    </td>
+
+    <!-- COLUMNA CENTRAL: Datos de la clínica perfectamente centrados (60%) -->
+    <td width="60%" style="text-align: center; vertical-align: middle;">
+      <h1 class="clinica-titulo" style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 24px; margin: 0; text-transform: uppercase;">
+        CENFASIES
+      </h1>
+      <div class="clinica-info" style="font-size: 14px; color: #555; margin-top: 5px;">
+        Av. Sanchez 5, Santo Domingo
+      </div>
+      <div class="clinica-info" style="font-size: 14px; color: #555; margin-top: 3px; font-weight: bold;">
+        TELÉFONO 829-405-5486
+      </div>
+    </td>
+
+    <!-- COLUMNA DERECHA: Contrapeso invisible (20%) -->
+    <td width="20%">
+      <!-- Se deja vacía intencionalmente para balancear el logo y centrar el texto -->
+    </td>
+  </tr>
+</table>
+
+
+<div class="patient-info">
+  <p><b>Nombre paciente:</b> <span th:text="${nombrePaciente}">Auris Sanchez</span></p>
+  <p><b>Edad:</b> <span th:text="${edadPaciente}">14 años</span></p>
+  <p><b>Fecha:</b> <span th:text="${fechaEstudio}">23 / 03 / 2026</span></p>
+  <p><b>Estudio:</b> Sonografía Abdominal.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="content-block">
+  Se realiza exploración con transductor convexo de 3,5 MHz, observándose:
+</div>
+
+<div class="content-block" th:if="${higado != null && higado != ''}">
+  <b>Hígado:</b> <span th:text="${higado}"></span>
+</div>
+
+<div class="content-block" th:if="${lhd != null && lhd != ''}">
+  LHD: <span th:text="${lhd}"></span>
+</div>
+
+<div class="content-block" th:if="${conductoColedoco != null && conductoColedoco != ''}">
+  <b>Conducto colédoco y Vena porta:</b> <span th:text="${conductoColedoco}"></span>
+</div>
+
+<div class="content-block" th:if="${vesicula != null && vesicula != ''}">
+  <b>Vesícula biliar:</b> <span th:text="${vesicula}"></span>
+</div>
+
+<div class="content-block" th:if="${pancreas != null && pancreas != ''}">
+  <b>Páncreas:</b> <span th:text="${pancreas}"></span>
+</div>
+
+<div class="content-block" th:if="${bazo != null && bazo != ''}">
+  <b>Bazo:</b> <span th:text="${bazo}"></span>
+</div>
+
+<div class="content-block" th:if="${rinonDerecho != null && rinonDerecho != ''}">
+  <b>Riñón Derecho:</b> <span th:text="${rinonDerecho}"></span>
+</div>
+
+<div class="content-block" th:if="${rinonIzquierdo != null && rinonIzquierdo != ''}">
+  <b>Riñón Izquierdo:</b> <span th:text="${rinonIzquierdo}"></span>
+</div>
+
+<div class="content-block diagnostico-block" th:if="${diagnostico != null && diagnostico != ''}">
+  DIAGNOSTICO: <span th:text="${diagnostico}"></span>
+</div>
+
+<div class="signature-container">
+  <div class="signature-line">
+    <b th:text="${medicoRealizador}">[Nombre del Doctor]</b>
+    <span>Médico Sonografista</span>
+  </div>
+</div>
+
+</body>
+</html>

@@ -26,7 +26,7 @@ public class TurnoService {
      * Módulo Secretaria: Registra la llegada de un paciente y lo pone en la sala de espera de un médico.
      */
     @Transactional
-    public Turno crearTurnoParaPaciente(UUID pacienteId, UUID medicoId, String areaDestino) {
+    public Turno crearTurnoParaPaciente(UUID pacienteId, UUID medicoId, String areaDestino, String tipoEstudio) {
         log.info("Creando nuevo turno para paciente ID: {} con Médico ID: {}", pacienteId, medicoId);
 
         Paciente paciente = pacienteRepository.findById(pacienteId)
@@ -38,7 +38,11 @@ public class TurnoService {
         Turno nuevoTurno = new Turno();
         nuevoTurno.setPaciente(paciente);
         nuevoTurno.setMedicoAsignado(medico);
+
+        // Asignaciones del enrutamiento
         nuevoTurno.setAreaDestino(areaDestino);
+        nuevoTurno.setTipoEstudio(tipoEstudio); // <--- ¡LA MAGIA OCURRE AQUÍ!
+
         // Nota: La fechaEntrada y el estado "EN_ESPERA" se ponen solos gracias al @PrePersist en la Entidad.
 
         return turnoRepository.save(nuevoTurno);

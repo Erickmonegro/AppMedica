@@ -23,8 +23,7 @@ public interface PacienteRepository extends JpaRepository<Paciente, UUID> {
 
   List<Paciente> findByNombreApellidosContainingIgnoreCaseOrCedulaContaining(String nombre, String cedula);
 
-    // Importa tu DTO arriba
-    // import com.proyectomedico.appmedicacenfasies.dto.PacienteResumenDTO;
+
 
     @Query("SELECT new com.proyectomedico.appmedicacenfasies.dto.PacienteResumenDTO(p.id, p.nombreApellidos, p.cedula) FROM Paciente p ORDER BY p.nombreApellidos ASC")
     List<PacienteResumenDTO> obtenerTodosLosPacientesResumen();
