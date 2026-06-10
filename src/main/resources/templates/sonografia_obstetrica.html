@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Reporte de Sonografía Obstétrica</title>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 13px; color: #333333; line-height: 1.5; margin: 20px 40px; text-transform: uppercase;}
+        .divider { border-top: 2px solid #0b4a9e; margin: 15px 0; }
+        .patient-info { margin-bottom: 20px; font-size: 14px; }
+        .patient-info p { margin: 3px 0; }
+        .patient-info b { color: #0b4a9e; }
+        .content-block { margin-bottom: 12px; text-align: justify; }
+        .content-block b { color: #000000; }
+
+        .diagnostico-block { margin-top: 30px; text-transform: uppercase; font-weight: bold; }
+        .signature-container { margin-top: 60px; text-align: right; page-break-inside: avoid; }
+        .signature-line { display: inline-block; text-align: left; }
+        .signature-line b { display: block; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+
+<table style="width: 100%; border-bottom: 2px solid #0b4a9e; padding-bottom: 15px; margin-bottom: 25px;">
+    <tr>
+        <td width="20%" style="text-align: left; vertical-align: middle;">
+            <img th:if="${!logoBase64.isEmpty()}" th:src="${logoBase64}" alt="Logo CENFASIES" style="max-width: 110px; height: auto;" />
+        </td>
+        <td width="60%" style="text-align: center; vertical-align: middle;">
+            <h1 style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 24px; margin: 0; text-transform: uppercase;">
+                CENFASIES
+            </h1>
+            <div style="font-size: 14px; color: #555; margin-top: 5px;">Av. Sanchez 5, Santo Domingo</div>
+            <div style="font-size: 14px; color: #555; margin-top: 3px; font-weight: bold;">TELÉFONO 829-405-5486</div>
+        </td>
+        <td width="20%"></td>
+    </tr>
+</table>
+
+<div class="patient-info">
+    <p><b>Nombre paciente:</b> <span th:text="${nombrePaciente}"></span></p>
+    <p><b>Edad:</b> <span th:text="${edadPaciente}"></span></p>
+    <p><b>Fecha:</b> <span th:text="${fechaEstudio}"></span></p>
+    <p><b>Estudio:</b> Sonografía Obstétrica</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="content-block">
+    Se realiza evaluación ecográfica observándose los siguientes hallazgos:
+</div>
+
+<div class="content-block" style="margin-top: 25px;">
+    <b>ESTADO FETAL</b>
+</div>
+
+<div class="content-block" th:if="${fetoResumen != null && fetoResumen != ''}">
+    <b>Descripción Fetal:</b> <span th:text="${fetoResumen}"></span>
+</div>
+<div class="content-block" th:if="${fcf != null && fcf != ''}">
+    <b>Frecuencia Cardíaca Fetal (FCF):</b> <span th:text="${fcf}"></span>
+</div>
+
+<div class="content-block" style="margin-top: 25px;">
+    <b>BIOMETRÍA FETAL</b>
+</div>
+
+<div class="content-block">
+    <div th:if="${bpd != null && bpd != ''}">
+        <b>BPD:</b> <span th:text="${bpd}"></span>
+    </div>
+    <div th:if="${hc != null && hc != ''}" style="margin-top: 3px;">
+        <b>HC:</b> <span th:text="${hc}"></span>
+    </div>
+    <div th:if="${ac != null && ac != ''}" style="margin-top: 3px;">
+        <b>AC:</b> <span th:text="${ac}"></span>
+    </div>
+    <div th:if="${fl != null && fl != ''}" style="margin-top: 3px;">
+        <b>FL:</b> <span th:text="${fl}"></span>
+    </div>
+    <div th:if="${pesoEstimado != null && pesoEstimado != ''}" style="margin-top: 3px;">
+        <b>Peso Estimado:</b> <span th:text="${pesoEstimado}"></span>
+    </div>
+</div>
+
+<div class="content-block" th:if="${extremidades != null && extremidades != ''}">
+    <b>Extremidades:</b> <span th:text="${extremidades}"></span>
+</div>
+
+<div class="content-block" style="margin-top: 25px;">
+    <b>ANEXOS OVULARES</b>
+</div>
+
+<div class="content-block" th:if="${placenta != null && placenta != ''}">
+    <b>Placenta:</b> <span th:text="${placenta}"></span>
+</div>
+<div class="content-block" th:if="${liquidoAmniotico != null && liquidoAmniotico != ''}">
+    <b>Líquido Amniótico:</b> <span th:text="${liquidoAmniotico}"></span>
+</div>
+<div class="content-block" th:if="${cordonUmbilical != null && cordonUmbilical != ''}">
+    <b>Cordón Umbilical:</b> <span th:text="${cordonUmbilical}"></span>
+</div>
+
+<div class="diagnostico-block" th:if="${diagnostico != null && diagnostico != ''}">
+    DIAGNÓSTICO: <span th:text="${diagnostico}"></span>
+</div>
+
+<div class="signature-container">
+    <div class="signature-line">
+        <b>
+            <span th:text="${prefijoMedico}">Dr.</span> <span th:text="${firmaMedico}">[Nombre del Doctor]</span>
+        </b>
+        <span>Médico Sonografista</span>
+    </div>
+</div>
+
+</body>
+</html>

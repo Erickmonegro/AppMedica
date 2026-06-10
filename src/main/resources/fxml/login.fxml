@@ -1,21 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: #f8fafc; -fx-padding: 40;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.LoginController">
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.effect.DropShadow?>
 
-    <Label text="CENFASIES" textFill="#0b4a9e">
-        <font><Font name="System Bold" size="28.0" /></font>
-    </Label>
+<StackPane style="-fx-background-color: #f1f5f9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.LoginController">
 
-    <VBox spacing="10">
-        <TextField fx:id="txtUsername" promptText="Usuario" style="-fx-pref-width: 250; -fx-padding: 10;" />
-        <PasswordField fx:id="txtPassword" promptText="Contraseña" style="-fx-pref-width: 250; -fx-padding: 10;" />
+    <VBox alignment="CENTER" maxWidth="400" maxHeight="520" spacing="15.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-padding: 40;">
+
+        <effect>
+            <DropShadow color="#cbd5e1" radius="15" spread="0.05" offsetY="5"/>
+        </effect>
+
+        <ImageView fitHeight="130.0" fitWidth="130.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@../img/image_3ba2fd.png" />
+            </image>
+        </ImageView>
+
+        <VBox alignment="CENTER" spacing="2.0">
+            <Label text="CENFASIES" style="-fx-text-fill: #0b4a9e; -fx-font-weight: bold; -fx-font-size: 26px; -fx-font-family: 'Arial';" />
+            <Label text="Sistema de Gestión Médica" style="-fx-text-fill: #64748b; -fx-font-size: 14px;" />
+        </VBox>
+
+        <Separator style="-fx-padding: 10 0 10 0;" />
+
+        <VBox spacing="15" style="-fx-padding: 5 0 15 0;">
+            <VBox spacing="5">
+                <Label text="Usuario:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                <TextField fx:id="txtUsername" promptText="Ej: admin" style="-fx-pref-width: 300; -fx-pref-height: 40; -fx-background-radius: 6; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-color: #f8fafc;" />
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Contraseña:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                <PasswordField fx:id="txtPassword" promptText="••••••••" style="-fx-pref-width: 300; -fx-pref-height: 40; -fx-background-radius: 6; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-color: #f8fafc;" />
+            </VBox>
+        </VBox>
+
+        <Button onAction="#handleLogin" text="Ingresar" style="-fx-background-color: #0b4a9e; -fx-text-fill: white; -fx-pref-width: 300; -fx-pref-height: 45; -fx-background-radius: 6; -fx-font-weight: bold; -fx-font-size: 15px; -fx-cursor: hand;" />
+
+        <Label fx:id="lblError" textFill="#ef4444" style="-fx-font-weight: bold; -fx-wrap-text: true; -fx-padding: 10 0 0 0;" textAlignment="CENTER" />
+
     </VBox>
-
-    <Button onAction="#handleLogin" text="Iniciar Sesión" style="-fx-background-color: #0b4a9e; -fx-text-fill: white; -fx-pref-width: 250; -fx-padding: 12; -fx-font-weight: bold;" />
-
-    <Label fx:id="lblError" textFill="RED" />
-</VBox>
+</StackPane>

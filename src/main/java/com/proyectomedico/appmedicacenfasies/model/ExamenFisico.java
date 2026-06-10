@@ -55,6 +55,8 @@ public class ExamenFisico {
     private String especuloscopia;
     @Column(columnDefinition = "TEXT")
     private String tactoVaginal;
+    @Column(columnDefinition = "TEXT")
+    private String hallazgosExamenFisico;
 
     // CONEXIÓN AISLADA
     @OneToOne(fetch = FetchType.LAZY)

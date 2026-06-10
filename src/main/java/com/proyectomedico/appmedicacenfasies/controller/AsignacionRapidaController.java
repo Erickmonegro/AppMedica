@@ -39,6 +39,7 @@ public class AsignacionRapidaController {
         cmbMotivo.setItems(FXCollections.observableArrayList(
                 "Consulta de Rutina",
                 "Entrega de Resultados",
+                "Sonografía",
                 "Chequeo de Presión/Azúcar",
                 "Procedimiento Menor",
                 "Emergencia"

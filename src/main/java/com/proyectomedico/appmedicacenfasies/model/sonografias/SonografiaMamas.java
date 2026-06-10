@@ -25,6 +25,6 @@ public class SonografiaMamas extends SonografiaBase {
 
     @Column(columnDefinition = "TEXT")
     private String regionesAxilares;
-
+    @Column(columnDefinition = "TEXT")
     private String biRads; // Nivel de Bi-rads
 }

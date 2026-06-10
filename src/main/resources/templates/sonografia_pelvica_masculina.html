@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Reporte de Sonografía Pélvica Masculina</title>
+  <style>
+    body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 13px; color: #333333; line-height: 1.5; margin: 20px 40px; text-transform: uppercase;}
+    .divider { border-top: 2px solid #0b4a9e; margin: 15px 0; }
+    .patient-info { margin-bottom: 20px; font-size: 14px; }
+    .patient-info p { margin: 3px 0; }
+    .patient-info b { color: #0b4a9e; }
+    .content-block { margin-bottom: 12px; text-align: justify; }
+    .content-block b { color: #000000; }
+
+    .diagnostico-block { margin-top: 30px; text-transform: uppercase; font-weight: bold; }
+    .signature-container { margin-top: 60px; text-align: right; page-break-inside: avoid; }
+    .signature-line { display: inline-block; text-align: left; }
+    .signature-line b { display: block; margin-bottom: 2px; }
+  </style>
+</head>
+<body>
+
+<table style="width: 100%; border-bottom: 2px solid #0b4a9e; padding-bottom: 15px; margin-bottom: 25px;">
+  <tr>
+    <td width="20%" style="text-align: left; vertical-align: middle;">
+      <img th:if="${!logoBase64.isEmpty()}" th:src="${logoBase64}" alt="Logo CENFASIES" style="max-width: 110px; height: auto;" />
+    </td>
+    <td width="60%" style="text-align: center; vertical-align: middle;">
+      <h1 style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 24px; margin: 0; text-transform: uppercase;">
+        CENFASIES
+      </h1>
+      <div style="font-size: 14px; color: #555; margin-top: 5px;">Av. Sanchez 5, Santo Domingo</div>
+      <div style="font-size: 14px; color: #555; margin-top: 3px; font-weight: bold;">TELÉFONO 829-405-5486</div>
+    </td>
+    <td width="20%"></td>
+  </tr>
+</table>
+
+<div class="patient-info">
+  <p><b>Nombre paciente:</b> <span th:text="${nombrePaciente}"></span></p>
+  <p><b>Edad:</b> <span th:text="${edadPaciente}"></span></p>
+  <p><b>Fecha:</b> <span th:text="${fechaEstudio}"></span></p>
+  <p><b>Estudio:</b> Sonografía Pélvica</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="content-block">
+  Se realiza exploración pélvica y prostática observándose los siguientes hallazgos:
+</div>
+
+<div class="content-block" style="margin-top: 25px;">
+  <b>EVALUACIÓN VESICAL</b>
+</div>
+
+<div class="content-block" th:if="${vejiga != null && vejiga != ''}">
+  <b>Vejiga:</b> <span th:text="${vejiga}"></span>
+</div>
+
+<div class="content-block">
+  <div th:if="${volumenPremiccion != null && volumenPremiccion != ''}">
+    <b>Volumen Pre-Miccional:</b> <span th:text="${volumenPremiccion}"></span>
+  </div>
+  <div th:if="${volumenPostmicion != null && volumenPostmicion != ''}" style="margin-top: 3px;">
+    <b>Volumen Post-Miccional:</b> <span th:text="${volumenPostmicion}"></span>
+  </div>
+</div>
+
+<div class="content-block" style="margin-top: 25px;">
+  <b>EVALUACIÓN PROSTÁTICA</b>
+</div>
+
+<div class="content-block" th:if="${prostata != null && prostata != ''}">
+  <b>Próstata:</b> <span th:text="${prostata}"></span>
+</div>
+
+<div class="content-block" th:if="${volumenProstatico != null && volumenProstatico != ''}">
+  <b>Volumen Prostático:</b> <span th:text="${volumenProstatico}"></span>
+</div>
+
+<div class="diagnostico-block" th:if="${diagnostico != null && diagnostico != ''}">
+  DIAGNÓSTICO: <span th:text="${diagnostico}"></span>
+</div>
+
+<div class="signature-container">
+  <div class="signature-line">
+    <b>
+      <span th:text="${prefijoMedico}">Dr.</span> <span th:text="${firmaMedico}">[Nombre del Doctor]</span>
+    </b>
+    <span>Médico Sonografista</span>
+  </div>
+</div>
+
+</body>
+</html>

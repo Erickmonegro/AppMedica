@@ -1,6 +1,6 @@
 package com.proyectomedico.appmedicacenfasies.controller;
 
-import com.proyectomedico.appmedicacenfasies.controller.sonografia.NuevaSonografiaAbdominalController;
+import com.proyectomedico.appmedicacenfasies.controller.sonografia.*;
 import com.proyectomedico.appmedicacenfasies.dto.PacienteRegistroDTO;
 import com.proyectomedico.appmedicacenfasies.model.Medico;
 import com.proyectomedico.appmedicacenfasies.model.NotaMedica;
@@ -8,6 +8,7 @@ import com.proyectomedico.appmedicacenfasies.service.PacienteService;
 import com.proyectomedico.appmedicacenfasies.config.SesionGlobal;
 import com.proyectomedico.appmedicacenfasies.service.SonografiaPdfService;
 import com.proyectomedico.appmedicacenfasies.service.SonografiaService;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -29,11 +30,9 @@ import javafx.scene.Node;
 import javafx.stage.Stage;
 import org.springframework.context.ApplicationContext;
 
-
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
-
 
 @Slf4j
 @Component
@@ -44,57 +43,75 @@ public class VisorExpedienteController {
     private final SesionGlobal sesionGlobal;
     private UUID pacienteIdActual;
     private final ApplicationContext applicationContext;
-    // Variable para almacenar la ruta del PDF principal
     private String rutaPdfHistoriaActual;
-    // Aquí luego inyectaremos el PdfService también
-    private final SonografiaService sonografiaService; // ¡AÑADIR ESTE!
+
+    private final SonografiaService sonografiaService;
     private final SonografiaPdfService sonografiaPdfService;
 
-    @FXML private VBox vboxListaSonografias; // ¡AÑADIR ESTE (Debe coincidir con el fx:id de tu FXML)!
+    @FXML private VBox vboxListaSonografias;
+
+    // =========================================================
+    // NUEVO: Nodo genérico para el botón/menú de Sonografías
+    // ¡Asegúrate de ponerle fx:id="btnNuevaSonografia" en tu FXML!
+    // =========================================================
+    @FXML private Node btnNuevaSonografia;
 
     // --- PANEL IZQUIERDO (Perfil) ---
-    @FXML
-    private Label lblNombrePerfil;
-    @FXML
-    private Label lblCedulaPerfil;
-    @FXML
-    private Label lblEdad;
-    @FXML
-    private Label lblSeguro;
-    @FXML
-    private Label lblTelefono;
-    @FXML
-    private VBox vboxListaEvoluciones;
-    @FXML
-    private ListView<String> listaNotas;
-    @FXML
-    private TextArea txtNuevaNota;
+    @FXML private Label lblNombrePerfil;
+    @FXML private Label lblCedulaPerfil;
+    @FXML private Label lblEdad;
+    @FXML private Label lblSeguro;
+    @FXML private Label lblTelefono;
+    @FXML private VBox vboxListaEvoluciones;
+    @FXML private ListView<String> listaNotas;
+    @FXML private TextArea txtNuevaNota;
 
-    // Guardaremos el DTO maestro en memoria mientras la ventana esté abierta
     private PacienteRegistroDTO pacienteActual;
 
     @FXML
     public void initialize() {
         log.info("Ventana de Visor de Expediente inicializada.");
+
+        // =========================================================================
+        // 1. RBAC (Control de Roles): Ocultar sonografía si no es especialista
+        // =========================================================================
+        if (sesionGlobal.haySesionActiva() && sesionGlobal.getUsuarioLogueado() instanceof Medico doctor) {
+
+            // MAGIA SENIOR (Java Streams): Revisamos si en su SET de especialidades hay alguna de Sonografía
+            boolean esSonografista = doctor.getEspecialidades() != null &&
+                    doctor.getEspecialidades().stream()
+                            .anyMatch(esp -> esp.name().toUpperCase().contains("SONOGRAF"));
+
+            // Si NO es sonografista, desaparecemos el botón
+            if (!esSonografista) {
+                if (btnNuevaSonografia != null) {
+                    btnNuevaSonografia.setVisible(false);
+                    btnNuevaSonografia.setManaged(false); // Libera el espacio en la interfaz
+                }
+            }
+        }
+
+        // =========================================================================
+        // 2. UX: Truco para Maximizar la Ventana desde su propio controlador
+        // =========================================================================
+        Platform.runLater(() -> {
+            if (lblNombrePerfil != null && lblNombrePerfil.getScene() != null) {
+                Stage stage = (Stage) lblNombrePerfil.getScene().getWindow();
+                if (stage != null) {
+                    stage.setMaximized(true); // ¡Pone la pantalla en gigante automáticamente!
+                }
+            }
+        });
     }
 
-    /**
-     * Este método es llamado desde el Dashboard inmediatamente después de abrir la ventana.
-     */
     public void cargarDatosPaciente(UUID pacienteId) {
         this.pacienteIdActual = pacienteId;
         log.info("Descargando historial completo de BD para el paciente: {}", pacienteId);
 
         try {
-            // 1. Descargamos el DTO de la base de datos
             this.pacienteActual = pacienteService.obtenerExpedienteCompleto(pacienteId);
-
-            // ==========================================
-            // 2. ¡AQUÍ VA LA MAGIA DE LA RUTA DEL PDF!
-            // ==========================================
             this.rutaPdfHistoriaActual = this.pacienteActual.datosPersonales().rutaPdfHistoria();
 
-            // 3. Evitamos errores de NullPointerException con validaciones ternarias (Buena práctica Senior)
             String nombre = pacienteActual.datosPersonales().nombreApellidos();
             lblNombrePerfil.setText(nombre != null ? nombre : "Nombre no registrado");
 
@@ -107,7 +124,6 @@ public class VisorExpedienteController {
             String telefono = pacienteActual.datosPersonales().telefonos();
             lblTelefono.setText(telefono != null && !telefono.isEmpty() ? telefono : "No registrado");
 
-            // --- MAGIA SENIOR: CÁLCULO DE EDAD REAL ---
             LocalDate fechaNac = pacienteActual.datosPersonales().fechaNacimiento();
             if (fechaNac != null) {
                 int edadCalculada = Period.between(fechaNac, LocalDate.now()).getYears();
@@ -127,46 +143,35 @@ public class VisorExpedienteController {
 
     @FXML
     public void generarPdfInicial() {
-        // Aquí conectaremos el PdfService en el próximo paso
         log.info("Botón de PDF Inicial presionado.");
     }
 
-
     @FXML
     public void abrirModalNuevaEvolucion() {
-        if (pacienteIdActual == null) return; // Validación de seguridad
+        if (pacienteIdActual == null) return;
 
         try {
             log.info("Abriendo modal para nueva evolución...");
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/nueva_evolucion.fxml"));
             fxmlLoader.setControllerFactory(applicationContext::getBean);
 
-
-
             Parent root = fxmlLoader.load();
-
-            // Le pasamos el ID del paciente al modal antes de mostrarlo
             NuevaEvolucionController modalController = fxmlLoader.getController();
             modalController.inicializarParaPaciente(pacienteIdActual);
 
+            // 1. PRIMERO: Instanciamos el Stage
             Stage stage = new Stage();
             stage.setTitle("Nueva Evolución Médica");
-            stage.setScene(new Scene(root));
-
-            // Modalidad que bloquea la ventana de atrás hasta que el médico guarde o cancele
             stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
 
-            // showAndWait detiene el código aquí hasta que la ventana se cierre
+            // 2. SEGUNDO: Aplicamos la magia responsiva con el nombre correcto de tu clase
+            com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.configurarVentanaResponsiva(stage, root, 900, 650);
+
+            // 3. FINALMENTE: Mostramos la ventana
             stage.showAndWait();
 
-            // ¡MAGIA SENIOR! Cuando la ventana se cierra, recargamos el panel derecho para mostrar la nota recién creada
             log.info("Modal cerrado. Refrescando lista de evoluciones...");
-            // showAndWait detiene el código aquí hasta que la ventana se cierre
-            stage.showAndWait();
-
-            // Cuando la ventana se cierra, recargamos el panel derecho para mostrar la nota recién creada
-            log.info("Modal cerrado. Refrescando lista de evoluciones...");
-            cargarEvolucionesEnPanelDerecho(); // ¡LLAMADA MÁGICA AQUÍ!
+            cargarEvolucionesEnPanelDerecho();
 
         } catch (Exception e) {
             log.error("Error al abrir el modal de evolución", e);
@@ -175,24 +180,16 @@ public class VisorExpedienteController {
 
     @FXML
     public void volverAlDashboard(ActionEvent event) {
-        // Obtenemos la ventana actual y la cerramos suavemente
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.close();
     }
 
-    /**
-     * Motor de renderizado dinámico. Construye la interfaz visual basándose en los datos.
-     */
     private void cargarEvolucionesEnPanelDerecho() {
         if (pacienteIdActual == null) return;
-
         log.info("Renderizando tarjetas de evolución en la UI...");
-
-        // 1. Limpiamos el panel por si ya tenía tarjetas viejas
         vboxListaEvoluciones.getChildren().clear();
 
         try {
-            // 2. Traemos la lista de la Base de Datos (ordenada desde la más nueva a la más vieja)
             var evoluciones = pacienteService.obtenerEvolucionesPorPaciente(pacienteIdActual);
 
             if (evoluciones.isEmpty()) {
@@ -202,21 +199,17 @@ public class VisorExpedienteController {
                 return;
             }
 
-            // 3. Iteramos y creamos una "Tarjeta" visual por cada evolución
             java.time.format.DateTimeFormatter formatoFecha = java.time.format.DateTimeFormatter.ofPattern("dd 'de' MMMM, yyyy");
 
             for (var evo : evoluciones) {
-                VBox tarjeta = new VBox(8); // VBox con 8px de separación interna
+                VBox tarjeta = new VBox(8);
                 tarjeta.setStyle("-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 8px; -fx-background-radius: 8px;");
                 tarjeta.setPadding(new javafx.geometry.Insets(15));
 
-                // --- CABECERA DE LA TARJETA (FECHA Y BOTÓN PDF) ---
-                // Usamos un HBox para poner la fecha a la izquierda y el botón a la derecha
                 javafx.scene.layout.HBox cabecera = new javafx.scene.layout.HBox();
                 cabecera.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                 cabecera.setSpacing(10);
 
-                // Un "Region" vacío que empuja el botón hacia la derecha (truco Senior de UI)
                 javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
                 javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
@@ -225,29 +218,22 @@ public class VisorExpedienteController {
 
                 cabecera.getChildren().addAll(lblFecha, spacer);
 
-                // --- LÓGICA DEL BOTÓN "VER PDF" ---
                 if (evo.rutaPdf() != null && !evo.rutaPdf().trim().isEmpty()) {
                     javafx.scene.control.Button btnVerPdf = new javafx.scene.control.Button("📄 Ver PDF");
                     btnVerPdf.setStyle("-fx-background-color: #eff6ff; -fx-text-fill: #1d4ed8; -fx-border-color: #bfdbfe; -fx-border-radius: 4px; -fx-cursor: hand;");
-
-                    // Acción al hacer clic
                     btnVerPdf.setOnAction(event -> abrirDocumentoPdf(evo.rutaPdf()));
-
                     cabecera.getChildren().add(btnVerPdf);
                 }
 
-                // Agregamos la cabecera y el separador a la tarjeta
                 tarjeta.getChildren().add(cabecera);
                 tarjeta.getChildren().add(new javafx.scene.control.Separator());
 
-                // Agregamos los bloques de texto
                 agregarFilaATarjeta(tarjeta, "Motivo:", evo.motivoSeguimiento());
                 agregarFilaATarjeta(tarjeta, "Historia Actual:", evo.historiaEnfermedadActual());
                 agregarFilaATarjeta(tarjeta, "Diagnóstico:", evo.diagnostico());
                 agregarFilaATarjeta(tarjeta, "Tratamiento:", evo.tratamiento());
                 agregarFilaATarjeta(tarjeta, "Plan:", evo.plan());
 
-                // Insertamos la tarjeta terminada en el contenedor principal
                 vboxListaEvoluciones.getChildren().add(tarjeta);
             }
 
@@ -256,9 +242,6 @@ public class VisorExpedienteController {
         }
     }
 
-    /**
-     * Método utilitario de UI para no repetir código al construir las tarjetas.
-     */
     private void agregarFilaATarjeta(VBox tarjeta, String titulo, String contenido) {
         if (contenido != null && !contenido.trim().isEmpty()) {
             VBox fila = new VBox(2);
@@ -266,7 +249,7 @@ public class VisorExpedienteController {
             lblTitulo.setStyle("-fx-font-weight: bold; -fx-text-fill: #475569; -fx-font-size: 11px;");
 
             Label lblContenido = new Label(contenido);
-            lblContenido.setWrapText(true); // Muy importante para que el texto largo salte de línea
+            lblContenido.setWrapText(true);
             lblContenido.setStyle("-fx-text-fill: #334155; -fx-font-size: 13px;");
 
             fila.getChildren().addAll(lblTitulo, lblContenido);
@@ -274,39 +257,24 @@ public class VisorExpedienteController {
         }
     }
 
-    /*
-     * Método utilitario de Arquitectura: Abre un archivo físico utilizando el lector nativo del OS.
-     */
-    /*
-     * Método utilitario de Arquitectura: Abre un archivo físico utilizando el lector nativo del OS.
-     * Incluye contingencia para el modo Headless de Spring Boot.
-     */
     private void abrirDocumentoPdf(String rutaFisica) {
         try {
             java.io.File archivoPdf = new java.io.File(rutaFisica);
 
             if (!archivoPdf.exists()) {
                 log.error("El archivo no existe en la ruta especificada: {}", rutaFisica);
-                // TODO: Mostrar un Alert de JavaFX indicando que el archivo no se encontró
                 return;
             }
 
-            // INTENTO 1: Usar la vía tradicional de Java (AWT)
             if (java.awt.Desktop.isDesktopSupported() && !java.awt.GraphicsEnvironment.isHeadless()) {
                 log.info("Abriendo PDF nativamente vía Java AWT: {}", rutaFisica);
                 java.awt.Desktop.getDesktop().open(archivoPdf);
-
             } else {
-                // INTENTO 2: Plan de contingencia Senior (Comandos nativos del OS)
                 log.info("AWT bloqueado por Spring Boot. Invocando comandos nativos del Sistema Operativo...");
-
                 String os = System.getProperty("os.name").toLowerCase();
-
                 if (os.contains("win")) {
-                    // Hablamos directamente con el CMD de Windows
                     new ProcessBuilder("cmd", "/c", "start", "", archivoPdf.getAbsolutePath()).start();
                 } else if (os.contains("mac")) {
-                    // Hablamos directamente con la terminal de macOS
                     new ProcessBuilder("open", archivoPdf.getAbsolutePath()).start();
                 } else {
                     log.warn("Sistema operativo no reconocido. Abra el archivo manualmente: {}", rutaFisica);
@@ -322,10 +290,8 @@ public class VisorExpedienteController {
         log.info("Botón de Historia Inicial presionado.");
 
         if (this.rutaPdfHistoriaActual != null && !this.rutaPdfHistoriaActual.trim().isEmpty()) {
-            // 1. EL PACIENTE TIENE HISTORIA: La abrimos como visor PDF
             abrirDocumentoPdf(this.rutaPdfHistoriaActual);
         } else {
-            // 2. EL PACIENTE NO TIENE HISTORIA: Levantamos el formulario
             log.info("El paciente no tiene historia clínica base. Abriendo formulario de creación...");
             abrirFormularioHistoriaClinicaFaltante();
         }
@@ -337,15 +303,8 @@ public class VisorExpedienteController {
             fxmlLoader.setControllerFactory(applicationContext::getBean);
 
             Parent root = fxmlLoader.load();
-
-            // =========================================================
-            // ¡MAGIA!: Le pasamos los datos básicos que ya tenemos
-            // al controlador de Nuevo Paciente para que no empiece de cero.
-            // =========================================================
             NuevoPacienteController controller = fxmlLoader.getController();
 
-            // Asumiendo que tu método cargarDatosPreliminares acepta un DTO o Entidad
-            // (Ajusta los parámetros según como tengas programado ese método)
             com.proyectomedico.appmedicacenfasies.model.Paciente pBasico = new com.proyectomedico.appmedicacenfasies.model.Paciente();
             pBasico.setId(this.pacienteIdActual);
             pBasico.setNombreApellidos(this.pacienteActual.datosPersonales().nombreApellidos());
@@ -359,7 +318,6 @@ public class VisorExpedienteController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
-            // Cuando cierre el modal, recargamos el visor entero para ver si ya generó el PDF
             cargarDatosPaciente(this.pacienteIdActual);
 
         } catch (Exception e) {
@@ -368,10 +326,6 @@ public class VisorExpedienteController {
         }
     }
 
-
-    /**
-     * Método utilitario de UI: Muestra un popup de advertencia en pantalla.
-     */
     private void mostrarAlerta(String titulo, String mensaje) {
         javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);
@@ -380,8 +334,6 @@ public class VisorExpedienteController {
         alert.showAndWait();
     }
 
-
-    // Llama a esto dentro de tu método donde cargas los datos del paciente al abrir el visor
     private void cargarHistorialNotas() {
         listaNotas.getItems().clear();
         List<NotaMedica> notas = pacienteService.obtenerNotasDelPaciente(pacienteIdActual);
@@ -397,76 +349,53 @@ public class VisorExpedienteController {
 
     @FXML
     public void guardarNotaRapida() {
-
         try {
             String contenido = txtNuevaNota.getText().trim();
             if (contenido.isEmpty()) return;
 
-
-            // Sacar el nombre del doctor de la sesión
             String medico = "Médico";
             if (sesionGlobal.haySesionActiva() && sesionGlobal.getUsuarioLogueado() instanceof Medico) {
                 medico = "Dr. " + ((Medico) sesionGlobal.getUsuarioLogueado()).getNombreCompleto();
             }
 
-            // Guardar, limpiar y recargar
             pacienteService.agregarNota(pacienteIdActual, contenido, medico);
             txtNuevaNota.clear();
-            cargarHistorialNotas(); // Refrescar la lista en tiempo real
-            System.out.println("Funcionando");
+            cargarHistorialNotas();
         } catch (Exception e) {
-            log.error("Hay un bobo, ta aqui", e);
+            log.error("Error al guardar nota rápida", e);
         }
     }
+
     @FXML
     public void abrirModalSonografiaAbdominal() {
-        if (pacienteIdActual == null) {
-            log.warn("No se puede abrir la sonografía porque no hay un paciente seleccionado.");
-            return;
-        }
-
+        if (pacienteIdActual == null) return;
         try {
             log.info("Abriendo modal para Sonografía Abdominal...");
-
-            // 1. RUTA RELATIVA CORRECTA (Desde el Classpath)
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/nueva_sonografia_abdominal.fxml"));
-
-            // 2. DESCOMENTADO: Conectamos Spring Boot al modal para que los Servicios se inyecten
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/sonografias/nueva_sonografia_abdominal.fxml"));
             fxmlLoader.setControllerFactory(applicationContext::getBean);
-
             Parent root = fxmlLoader.load();
-
-            // 3. Pasarle el ID del paciente al modal
-            // OJO: Usamos 'pacienteIdActual', que es la variable que tú usas para todo en este controlador
             NuevaSonografiaAbdominalController modalController = fxmlLoader.getController();
             modalController.inicializarParaPaciente(pacienteIdActual);
-
-            // 4. Mostrar la ventana emergente (Modal)
             Stage stage = new Stage();
             stage.setTitle("Nueva Sonografía Abdominal");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
-
-            stage.showAndWait(); // Espera a que el doctor guarde y cierre la ventana
+            stage.showAndWait();
             cargarHistorialSonografias();
-            // 5. ¡Próximamente! Refrescar la UI
-            log.info("Modal cerrado. (Aquí luego llamaremos a cargarHistorialSonografias())");
-
         } catch (Exception e) {
             log.error("Error crítico al abrir modal de sonografía abdominal", e);
-            mostrarAlerta("Error de Interfaz", "No se pudo cargar la pantalla de Sonografía: " + e.getMessage());
+            mostrarAlerta("Error de Interfaz", "No se pudo cargar la pantalla: " + e.getMessage());
         }
-
     }
+
     private void cargarHistorialSonografias() {
         if (pacienteIdActual == null || vboxListaSonografias == null) return;
 
         log.info("Renderizando tarjetas de sonografía en la UI...");
-        vboxListaSonografias.getChildren().clear(); // Limpiamos el panel
+        vboxListaSonografias.getChildren().clear();
 
         try {
-            // Asume que tienes un método en tu servicio que busca las sonografías de este paciente
-            var sonografias = sonografiaService.obtenerSonografiasPorPaciente(pacienteIdActual);
+            var sonografias = sonografiaService.obtenerHistorialSonografias(pacienteIdActual);
 
             if (sonografias.isEmpty()) {
                 Label lblVacio = new Label("No hay reportes sonográficos registrados para este paciente.");
@@ -476,6 +405,14 @@ public class VisorExpedienteController {
             }
 
             java.time.format.DateTimeFormatter formatoFecha = java.time.format.DateTimeFormatter.ofPattern("dd 'de' MMMM, yyyy");
+
+            // --- MAGIA SENIOR: Determinamos el prefijo visual una sola vez fuera del bucle ---
+            String prefijoVisual = "Dr."; // Por defecto
+            if (sesionGlobal != null && sesionGlobal.haySesionActiva() && sesionGlobal.getUsuarioLogueado() instanceof com.proyectomedico.appmedicacenfasies.model.Medico doctor) {
+                if ("Femenino".equalsIgnoreCase(doctor.getSexo())) {
+                    prefijoVisual = "Dra.";
+                }
+            }
 
             for (var sono : sonografias) {
                 VBox tarjeta = new VBox(8);
@@ -489,22 +426,14 @@ public class VisorExpedienteController {
                 javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
                 javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-                // ========================================================
-                // 1. BLINDAJE DE FECHA (Evita que la pantalla quede en blanco)
-                // ========================================================
-                String fechaTexto = "Fecha no registrada";
-                if (sono.getFechaCreacion() != null) {
-                    fechaTexto = sono.getFechaCreacion().format(formatoFecha);
-                }
+                String fechaTexto = (sono.getFechaCreacion() != null) ? sono.getFechaCreacion().format(formatoFecha) : "Fecha no registrada";
+                String tipoEstudio = (sono.getTipoSonografia() != null) ? sono.getTipoSonografia() : "General";
 
-                Label lblTitulo = new Label("Ecografía Abdominal - " + fechaTexto);
+                Label lblTitulo = new Label("Ecografía " + tipoEstudio + " - " + fechaTexto);
                 lblTitulo.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
 
                 cabecera.getChildren().addAll(lblTitulo, spacer);
 
-                // ========================================================
-                // 2. BLINDAJE DEL PDF
-                // ========================================================
                 if (sono.getRutaPdf() != null && !sono.getRutaPdf().trim().isEmpty()) {
                     javafx.scene.control.Button btnVerPdf = new javafx.scene.control.Button("📄 Ver PDF");
                     btnVerPdf.setStyle("-fx-background-color: #eff6ff; -fx-text-fill: #1d4ed8; -fx-border-color: #bfdbfe; -fx-border-radius: 4px; -fx-cursor: hand;");
@@ -519,8 +448,12 @@ public class VisorExpedienteController {
                 tarjeta.getChildren().add(cabecera);
                 tarjeta.getChildren().add(new javafx.scene.control.Separator());
 
-                // --- DATOS RÁPIDOS EN LA TARJETA ---
-                agregarFilaATarjeta(tarjeta, "Médico encargado:", sono.getMedicoRealizador());
+                // --- APLICACIÓN DEL PREFIJO DINÁMICO ---
+                // Limpiamos la base de datos al vuelo por si el nombre guardado ya traía "Dra. " o "Dr. " escrito.
+                String nombreLimpio = sono.getMedicoRealizador() != null ? sono.getMedicoRealizador().replace("Dra. ", "").replace("Dr. ", "") : "Desconocido";
+                String medicoFormateado = prefijoVisual + " " + nombreLimpio;
+
+                agregarFilaATarjeta(tarjeta, "Médico encargado:", medicoFormateado);
                 agregarFilaATarjeta(tarjeta, "Diagnóstico:", sono.getDiagnosticoConclusion());
 
                 vboxListaSonografias.getChildren().add(tarjeta);
@@ -529,32 +462,119 @@ public class VisorExpedienteController {
             log.error("Error al cargar las sonografías en la UI", e);
         }
     }
+
     public void ejecutarAutoAperturaSonografia(String tipoEstudio) {
-        log.info("Recibida orden de auto-apertura para el estudio: {}", tipoEstudio);
-
-        if (tipoEstudio == null) {
-            log.warn("El tipo de estudio es nulo. No se puede abrir la plantilla automática.");
-            return;
-        }
-
+        if (tipoEstudio == null) return;
         switch (tipoEstudio.toUpperCase()) {
-            case "ABDOMINAL":
-                abrirModalSonografiaAbdominal();
-                break;
-            case "OBSTETRICA":
-                mostrarAlerta("En Desarrollo", "La plantilla para Sonografía Obstétrica estará lista pronto.");
-                break;
-            case "MAMAS":
-                mostrarAlerta("En Desarrollo", "La plantilla para Sonografía de Mamas estará lista pronto.");
-                break;
-            case "PELVICA_FEMENINA":
-            case "PELVICA_MASCULINA":
-                mostrarAlerta("En Desarrollo", "La plantilla para Sonografía Pélvica estará lista pronto.");
-                break;
-            default:
-                log.warn("No hay una plantilla automática configurada para el estudio: {}", tipoEstudio);
-                mostrarAlerta("Atención", "No se encontró la plantilla para: " + tipoEstudio);
-                break;
+            case "ABDOMINAL": abrirModalSonografiaAbdominal(); break;
+            case "OBSTETRICA": abrirModalSonografiaObstetrica(); break;
+            case "MAMAS": abrirModalSonografiaMamas(); break;
+            case "PELVICA_FEMENINA": abrirModalSonografiaPelvicaFemenina(); break;
+            case "PELVICA_MASCULINA": abrirModalSonografiaPelvicaMasculina(); break;
+            case "TIROIDES": abrirModalSonografiaTiroides(); break;
+        }
+    }
+
+    @FXML
+    public void abrirModalSonografiaMamas() {
+        if (pacienteIdActual == null) return;
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/sonografias/nueva_sonografia_mamas.fxml"));
+            fxmlLoader.setControllerFactory(applicationContext::getBean);
+            Parent root = fxmlLoader.load();
+            NuevaSonografiaMamasController modalController = fxmlLoader.getController();
+            modalController.inicializarParaPaciente(pacienteIdActual);
+            Stage stage = new Stage();
+            stage.setTitle("Nueva Sonografía de Mamas");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            cargarHistorialSonografias();
+        } catch (Exception e) {
+            log.error("Error crítico al abrir modal de sonografía de Mamas", e);
+        }
+    }
+
+    @FXML
+    public void abrirModalSonografiaPelvicaFemenina() {
+        if (pacienteIdActual == null) return;
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/sonografias/nueva_sonografia_pelvica_femenina.fxml"));
+            fxmlLoader.setControllerFactory(applicationContext::getBean);
+            Parent root = fxmlLoader.load();
+            NuevaSonografiaPelvicaFemeninaController modalController = fxmlLoader.getController();
+            modalController.inicializarParaPaciente(pacienteIdActual);
+            Stage stage = new Stage();
+            stage.setTitle("Nueva Sonografía Pélvica Femenina");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            cargarHistorialSonografias();
+        } catch (Exception e) {
+            log.error("Error crítico al abrir modal", e);
+        }
+    }
+
+    @FXML
+    public void abrirModalSonografiaObstetrica() {
+        if (pacienteIdActual == null) return;
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/sonografias/nueva_sonografia_obstetrica.fxml"));
+            fxmlLoader.setControllerFactory(applicationContext::getBean);
+            Parent root = fxmlLoader.load();
+            NuevaSonografiaObstetricaController modalController = fxmlLoader.getController();
+            modalController.inicializarParaPaciente(pacienteIdActual);
+            Stage stage = new Stage();
+            stage.setTitle("Nueva Sonografía Obstétrica");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            cargarHistorialSonografias();
+        } catch (Exception e) {
+            log.error("Error crítico al abrir modal", e);
+        }
+    }
+
+    @FXML
+    public void abrirModalSonografiaPelvicaMasculina() {
+        if (pacienteIdActual == null) return;
+        try {
+            // ==============================================================
+            // BUG CORREGIDO: Antes apuntaba a nueva_sonografia_obstetrica.fxml
+            // ==============================================================
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/sonografias/nueva_sonografia_pelvica_masculina.fxml"));
+            fxmlLoader.setControllerFactory(applicationContext::getBean);
+            Parent root = fxmlLoader.load();
+            NuevaSonografiaPelvicaMasculinaController modalController = fxmlLoader.getController();
+            modalController.inicializarParaPaciente(pacienteIdActual);
+            Stage stage = new Stage();
+            stage.setTitle("Nueva Sonografía Pélvica Masculina");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            cargarHistorialSonografias();
+        } catch (Exception e) {
+            log.error("Error crítico al abrir modal", e);
+        }
+    }
+
+    @FXML
+    public void abrirModalSonografiaTiroides() {
+        if (pacienteIdActual == null) return;
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/sonografias/nueva_sonografia_tiroides.fxml"));
+            fxmlLoader.setControllerFactory(applicationContext::getBean);
+            Parent root = fxmlLoader.load();
+            NuevaSonografiaTiroidesController modalController = fxmlLoader.getController();
+            modalController.inicializarParaPaciente(pacienteIdActual);
+            Stage stage = new Stage();
+            stage.setTitle("Nueva Sonografía de Tiroides");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+            cargarHistorialSonografias();
+        } catch (Exception e) {
+            log.error("Error crítico al abrir modal", e);
         }
     }
 }

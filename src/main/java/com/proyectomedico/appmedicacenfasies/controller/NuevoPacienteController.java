@@ -109,6 +109,9 @@ public class NuevoPacienteController {
         FormatoClinicoUtil.configurarCalculoIMC(txtPeso, txtTalla, txtIMC);
         FormatoClinicoUtil.configurarFormatoTA(txtTA);
 
+        com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.aplicarFormatoCedula(txtCedula, null);
+        com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.aplicarFormatoTelefono(txtTelefonos);
+
         // =========================================================================
         // RUTA ESTRICTA DE TABULACIÓN (Todo el formulario conectado)
         // =========================================================================
@@ -258,9 +261,12 @@ public class NuevoPacienteController {
             return 0.0;
         }
         try {
-            return Double.parseDouble(valor.trim());
+            // Borramos todo lo que NO sea un número, un punto o una coma.
+            // Y si el doctor usó una coma (37,5), la cambiamos por un punto (37.5)
+            String limpio = valor.replaceAll("[^0-9.,]", "").replace(",", ".");
+            return Double.parseDouble(limpio);
         } catch (NumberFormatException e) {
-            log.warn("No se pudo parsear el valor numérico: {}. Se asignará 0.0", valor);
+            log.warn("El valor no es numérico: {}. Se asignará 0.0", valor);
             return 0.0;
         }
     }

@@ -50,3 +50,16 @@
     -fx-padding: 5 15 5 15;
     -fx-cursor: hand;
 }
+
+/* Estilo moderno para las celdas de la lista al ser seleccionadas */
+.list-cell:filled:selected:focused, .list-cell:filled:selected {
+    -fx-background-color: #e0f2fe; /* Un azul muy clarito y elegante */
+    -fx-text-fill: #0b4a9e;        /* Texto en azul corporativo oscuro */
+    -fx-background-radius: 5px;    /* Bordes redondeados */
+    -fx-font-weight: bold;
+}
+
+/* Espaciado interno para que los nombres respiren */
+.list-cell {
+    -fx-padding: 8px;
+}

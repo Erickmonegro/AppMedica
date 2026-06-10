@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Reporte de Sonografía de Mamas</title>
+    <style>
+        /* ESTILOS CORPORATIVOS CENFASIES */
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 13px;
+            color: #333333;
+            line-height: 1.5;
+            margin: 20px 40px;
+            text-transform: uppercase;
+        }
+        .divider {
+            border-top: 2px solid #0b4a9e; /* Rosa corporativo para mamas, lo cambie a azul, lol */
+            margin: 15px 0;
+        }
+        .patient-info {
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .patient-info p {
+            margin: 3px 0;
+        }
+        .patient-info b {
+            color: #0b4a9e;
+        }
+        .content-block {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        .content-block b {
+            color: #000000;
+        }
+        .highlight-block {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fdf2f8;
+            border-left: 4px solid #0b4a9e;
+        }
+        .diagnostico-block {
+            margin-top: 30px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .signature-container {
+            margin-top: 60px;
+            text-align: right;
+            page-break-inside: avoid;
+        }
+        .signature-line {
+            display: inline-block;
+            text-align: left;
+        }
+        .signature-line b {
+            display: block;
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ENCABEZADO (Mismo estándar de la clínica) -->
+<table style="width: 100%; border-bottom: 2px solid #0b4a9e; padding-bottom: 15px; margin-bottom: 25px;">
+    <tr>
+        <td width="20%" style="text-align: left; vertical-align: middle;">
+            <img th:if="${!logoBase64.isEmpty()}" th:src="${logoBase64}" alt="Logo CENFASIES" style="max-width: 110px; height: auto;" />
+        </td>
+        <td width="60%" style="text-align: center; vertical-align: middle;">
+            <h1 style="color: #2c3e50; font-family: Arial, sans-serif; font-size: 24px; margin: 0; text-transform: uppercase;">
+                CENFASIES
+            </h1>
+            <div style="font-size: 14px; color: #555; margin-top: 5px;">Av. Sanchez 5, Santo Domingo</div>
+            <div style="font-size: 14px; color: #555; margin-top: 3px; font-weight: bold;">TELÉFONO 829-405-5486</div>
+        </td>
+        <td width="20%"></td>
+    </tr>
+</table>
+
+<!-- DATOS DE LA PACIENTE -->
+<div class="patient-info">
+    <p><b>Nombre paciente:</b> <span th:text="${nombrePaciente}"></span></p>
+    <p><b>Edad:</b> <span th:text="${edadPaciente}"></span></p>
+    <p><b>Fecha:</b> <span th:text="${fechaEstudio}"></span></p>
+    <p><b>Estudio:</b> Sonografía de Mamas.</p>
+</div>
+
+<div class="divider"></div>
+
+<div class="content-block">
+    Se realiza exploración sonográfica de mamas con transductor lineal de alta frecuencia, observándose:
+</div>
+
+<!-- DETALLES CLÍNICOS -->
+<div class="content-block" th:if="${superficieCutanea != null && superficieCutanea != ''}">
+    <b>Superficie cutánea:</b> <span th:text="${superficieCutanea}"></span>
+</div>
+
+<div class="content-block" th:if="${pezonAreola != null && pezonAreola != ''}">
+    <b>Pezón y areola:</b> <span th:text="${pezonAreola}"></span>
+</div>
+
+<div class="content-block" th:if="${mamaDerecha != null && mamaDerecha != ''}">
+    <b>Mama Derecha:</b> <span th:text="${mamaDerecha}"></span>
+</div>
+
+<div class="content-block" th:if="${mamaIzquierda != null && mamaIzquierda != ''}">
+    <b>Mama Izquierda:</b> <span th:text="${mamaIzquierda}"></span>
+</div>
+
+<div class="content-block" th:if="${regionesAxilares != null && regionesAxilares != ''}">
+    <b>Regiones Axilares:</b> <span th:text="${regionesAxilares}"></span>
+</div>
+
+<!-- CLASIFICACIÓN Y DIAGNÓSTICO --><div class="diagnostico-block" th:if="${diagnostico != null && diagnostico != ''}">
+    DIAGNÓSTICO: <span th:text="${diagnostico}"></span>
+</div>
+
+<div class="content-block" th:if="${biRads != null && biRads != ''}" style="margin-top: 20px;">
+    <div style="white-space: pre-wrap; font-weight: bold;" th:text="${biRads}"></div>
+</div>
+
+<!-- FIRMA -->
+<div class="signature-container">
+    <div class="signature-line">
+        <b>
+            <span th:text="${prefijoMedico}">Dr.</span> <span th:text="${firmaMedico}">[Nombre del Doctor]</span>
+        </b>
+        <span>Médico Sonografista</span>
+    </div>
+</div>
+
+</body>
+</html>

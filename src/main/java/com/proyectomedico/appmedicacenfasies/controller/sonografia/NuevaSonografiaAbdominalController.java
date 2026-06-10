@@ -3,6 +3,9 @@ package com.proyectomedico.appmedicacenfasies.controller.sonografia;
 import com.proyectomedico.appmedicacenfasies.config.SesionGlobal;
 import com.proyectomedico.appmedicacenfasies.dto.sonografias.SonografiaAbdominalDTO;
 import com.proyectomedico.appmedicacenfasies.model.Medico;
+import com.proyectomedico.appmedicacenfasies.model.Turno;
+import com.proyectomedico.appmedicacenfasies.repository.PacienteRepository;
+import com.proyectomedico.appmedicacenfasies.repository.TurnoRepository;
 import com.proyectomedico.appmedicacenfasies.service.PacienteService;
 import com.proyectomedico.appmedicacenfasies.service.SonografiaService;
 import com.proyectomedico.appmedicacenfasies.service.SonografiaPdfService; // Lo usaremos pronto
@@ -27,6 +30,8 @@ public class NuevaSonografiaAbdominalController {
     private final SonografiaPdfService sonografiaPdfService;
     private final SesionGlobal sesionGlobal;
     private final PacienteService pacienteService;
+    private final TurnoRepository turnoRepository; // Inyéctalo en el constructor
+    private final PacienteRepository pacienteRepository; // También lo necesitaremos para buscar la entidad
 
     private UUID pacienteId;
 
@@ -43,6 +48,7 @@ public class NuevaSonografiaAbdominalController {
      */
     public void inicializarParaPaciente(UUID pacienteId) {
         this.pacienteId = pacienteId;
+        com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.aplicarFormatoCedula(txtCedulaPaciente, null);
         if (pacienteId == null) {
             // MODO CREACIÓN DIRECTA: Es un paciente de la calle
             txtNombrePaciente.clear();
@@ -63,6 +69,9 @@ public class NuevaSonografiaAbdominalController {
 
                     String cedula = pacienteBD.datosPersonales().cedula();
                     txtCedulaPaciente.setText(cedula != null ? cedula : "N/A");
+                    txtEdadPaciente.setText(
+                            com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.calcularEdadDesdeFecha(pacienteBD.datosPersonales().fechaNacimiento())
+                    );
                 }
             } catch (Exception e) {
                 log.error("No se pudo auto-completar los datos del paciente", e);
@@ -95,10 +104,12 @@ public class NuevaSonografiaAbdominalController {
 
                 // Magia: Si la cédula está vacía, se vuelve null automáticamente para la BD
                 String cedulaSegura = (cedulaRaw != null && !cedulaRaw.trim().isEmpty()) ? cedulaRaw.trim() : null;
+                java.time.LocalDate fechaNacimientoAprox = com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.calcularFechaDesdeEdad(txtEdadPaciente.getText());
+
 
                 // Usamos el servicio para auto-crear al paciente básico usando la cédula y el nombre
                 com.proyectomedico.appmedicacenfasies.model.Paciente nuevoPaciente =
-                        pacienteService.obtenerOCrearPacienteBasico(cedulaSegura, nombre, null, null, null, null);
+                        pacienteService.obtenerOCrearPacienteBasico(cedulaSegura, nombre, null, null, fechaNacimientoAprox, null);
 
                 // Asignamos el ID recién creado a esta variable para que la sonografía se enlace a él
                 this.pacienteId = nuevoPaciente.getId();
@@ -133,6 +144,32 @@ public class NuevaSonografiaAbdominalController {
             // 4. GUARDAR EN BD Y CERRAR
             // =======================================================
             sonografiaService.guardarSonografiaAbdominal(pacienteId, dto);
+            // --- AUTO-TURNO PARA SONOGRAFÍA DIRECTA ---
+            if (sesionGlobal.haySesionActiva() && sesionGlobal.getUsuarioLogueado() instanceof Medico doctor) {
+                boolean necesitaTurno = true;
+                var ultimoTurno = turnoRepository.findFirstByPacienteIdOrderByFechaEntradaDesc(pacienteId);
+
+                if (ultimoTurno.isPresent() && ultimoTurno.get().getMedicoAsignado().getId().equals(doctor.getId())) {
+                    if (ultimoTurno.get().getFechaEntrada().toLocalDate().isEqual(java.time.LocalDate.now())) {
+                        necesitaTurno = false;
+                    }
+                }
+
+                if (necesitaTurno) {
+                    com.proyectomedico.appmedicacenfasies.model.Paciente pacienteEntity = pacienteRepository.findById(pacienteId).orElse(null);
+                    if (pacienteEntity != null) {
+                        Turno autoTurno = new Turno();
+                        autoTurno.setPaciente(pacienteEntity);
+                        autoTurno.setMedicoAsignado(doctor);
+                        autoTurno.setAreaDestino("SONOGRAFÍA DIRECTA");
+                        autoTurno.setTipoEstudio("ABDOMINAL");
+                        autoTurno.setEstado("ATENDIDO");
+                        autoTurno.setFechaEntrada(java.time.LocalDateTime.now());
+                        turnoRepository.save(autoTurno);
+                    }
+                }
+            }
+            // -------------------------------------------
 
             // (Opcional por ahora) Generación física del PDF
             // String rutaPdf = sonografiaPdfService.generarPdfAbdominal(pacienteId, dto);

@@ -50,7 +50,8 @@ public class RegistroRapidoController {
 
     @FXML private VBox vboxTipoEstudio;
     @FXML private ComboBox<String> cmbTipoEstudio;
-
+    @FXML
+    private ComboBox<String> cmbMotivo; // <--- NUEVA VARIABLE
 
 
     private final List<String> LISTADO_ARS = Arrays.asList(
@@ -61,6 +62,16 @@ public class RegistroRapidoController {
 
     @FXML
     public void initialize() {
+
+        // 1. Opciones Predefinidas de Motivo (Igual que Asignación Rápida)
+        cmbMotivo.setItems(FXCollections.observableArrayList(
+                "Consulta de Rutina",
+                "Entrega de Resultados",
+                "Sonografía",
+                "Chequeo de Presión/Azúcar",
+                "Procedimiento Menor",
+                "Emergencia"
+        ));
 
         cmbTipoEstudio.getItems().addAll(
                 "ABDOMINAL",
@@ -118,8 +129,9 @@ public class RegistroRapidoController {
         });
         cmbMedico.setButtonCell(cmbMedico.getCellFactory().call(null));
         // Activamos la magia de los guiones
-        configurarFormatoCedula();
-        configurarFormatoTelefono();
+        // Activamos la magia de los guiones (Llamando a la utilidad global)
+        com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.aplicarFormatoCedula(txtCedula, chkExtranjero);
+        com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.aplicarFormatoTelefono(txtTelefono);
 
         // Si marca "Extranjero", cambiamos el texto de ayuda visual
         if (chkExtranjero != null) {
@@ -144,15 +156,13 @@ public class RegistroRapidoController {
     @FXML
     public void registrarYAsignar() {
         try {
-            // Validaciones básicas
-            if (txtNombre.getText().isEmpty() || cmbMedico.getValue() == null) {
-                mostrarAlerta(Alert.AlertType.WARNING, "Campos Incompletos", "Debe ingresar Cédula, Nombre y seleccionar un Médico.");
+            // 1. Validaciones básicas incluyendo el NUEVO MOTIVO
+            if (txtNombre.getText().isEmpty() || cmbMedico.getValue() == null || cmbEspecialidad.getValue() == null || cmbMotivo.getValue() == null) {
+                mostrarAlerta(Alert.AlertType.WARNING, "Campos Incompletos", "Debe ingresar Cédula, Nombre, Especialidad, Motivo y Médico.");
                 return;
             }
 
-            // =====================================================================
-            // NUEVA VALIDACIÓN: CAPTURAR EL TIPO DE ESTUDIO (Si es Sonografía)
-            // =====================================================================
+            // 2. CAPTURAR EL TIPO DE ESTUDIO (Si es Sonografía)
             String tipoDeEstudio = "CONSULTA_ESTANDAR";
 
             if (vboxTipoEstudio != null && vboxTipoEstudio.isVisible()) {
@@ -163,18 +173,17 @@ public class RegistroRapidoController {
                 tipoDeEstudio = cmbTipoEstudio.getValue();
             }
 
-            // 2. PREPARACIÓN DE CÉDULA:
+            // 3. PREPARACIÓN DE CÉDULA:
             String cedulaFinal = txtCedula.getText().trim();
             if (cedulaFinal.isEmpty()) {
                 cedulaFinal = null;
             }
 
-            // Extraemos el texto del ComboBox
             String seguroSeleccionado = cmbSeguro.getEditor().getText();
 
-            // 1. Guardar o recuperar al paciente (Datos básicos)
+            // 4. Guardar o recuperar al paciente
             Paciente paciente = pacienteService.obtenerOCrearPacienteBasico(
-                    cedulaFinal, // ¡Corregido! Usamos la cédula procesada para evitar errores en BD
+                    cedulaFinal,
                     txtNombre.getText(),
                     txtTelefono.getText(),
                     seguroSeleccionado,
@@ -182,12 +191,17 @@ public class RegistroRapidoController {
                     cmbSexo.getValue()
             );
 
-            // 2. Mandarlo a la Sala de Espera (Crear Turno con 4 parámetros)
+            // =================================================================
+            // MAGIA: Unimos Especialidad + Motivo (Igual que Asignación Rápida)
+            // =================================================================
+            String areaYMotivo = cmbEspecialidad.getValue().name() + " - " + cmbMotivo.getValue();
+
+            // 5. Mandarlo a la Sala de Espera
             turnoService.crearTurnoParaPaciente(
                     paciente.getId(),
                     cmbMedico.getValue().getId(),
-                    cmbEspecialidad.getValue().name(), // Guardamos el nombre del área
-                    tipoDeEstudio // <--- EL CUARTO PARÁMETRO ESPERADO POR EL SERVICIO
+                    areaYMotivo, // <--- Mandamos el texto combinado a la BD
+                    tipoDeEstudio
             );
 
             mostrarAlerta(Alert.AlertType.INFORMATION, "Éxito", "Paciente enviado a sala de espera correctamente.");
@@ -217,51 +231,10 @@ public class RegistroRapidoController {
     /**
      * Auto-formatea la cédula a XXX-XXXXXXX-X si es dominicano.
      */
-    private void configurarFormatoCedula() {
-        txtCedula.textProperty().addListener((observable, oldValue, newValue) -> {
-            // Si es extranjero, le permitimos escribir libremente (pasaportes tienen letras)
-            if (chkExtranjero != null && chkExtranjero.isSelected()) return;
-            if (newValue == null) return;
 
-            // 1. Extraemos solo los números
-            String numeros = newValue.replaceAll("[^\\d]", "");
-
-            // 2. Limitamos a 11 dígitos máximo
-            if (numeros.length() > 11) numeros = numeros.substring(0, 11);
-
-            // 3. Ensamblamos con los guiones
-            StringBuilder formateado = new StringBuilder();
-            for (int i = 0; i < numeros.length(); i++) {
-                if (i == 3 || i == 10) formateado.append("-");
-                formateado.append(numeros.charAt(i));
-            }
-
-            // 4. Actualizamos el campo de texto (evitando loops infinitos)
-            if (!newValue.equals(formateado.toString())) {
-                txtCedula.setText(formateado.toString());
-            }
-        });
-    }
 
     /**
      * Auto-formatea el teléfono a XXX-XXX-XXXX
      */
-    private void configurarFormatoTelefono() {
-        txtTelefono.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null) return;
 
-            String numeros = newValue.replaceAll("[^\\d]", "");
-            if (numeros.length() > 10) numeros = numeros.substring(0, 10);
-
-            StringBuilder formateado = new StringBuilder();
-            for (int i = 0; i < numeros.length(); i++) {
-                if (i == 3 || i == 6) formateado.append("-");
-                formateado.append(numeros.charAt(i));
-            }
-
-            if (!newValue.equals(formateado.toString())) {
-                txtTelefono.setText(formateado.toString());
-            }
-        });
-    }
 }

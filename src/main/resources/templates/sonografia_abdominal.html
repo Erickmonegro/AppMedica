@@ -13,6 +13,7 @@
       color: #333333;
       line-height: 1.5;
       margin: 20px 40px;
+      text-transform: uppercase;
     }
 
     .header-logo {
@@ -165,7 +166,9 @@
 
 <div class="signature-container">
   <div class="signature-line">
-    <b th:text="${medicoRealizador}">[Nombre del Doctor]</b>
+    <b>
+      <span th:text="${prefijoMedico}">Dr.</span> <span th:text="${firmaMedico}">[Nombre del Doctor]</span>
+    </b>
     <span>Médico Sonografista</span>
   </div>
 </div>

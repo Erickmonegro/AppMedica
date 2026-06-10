@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox prefWidth="800.0" prefHeight="750.0" spacing="15.0" style="-fx-background-color: #ffffff;" stylesheets="/css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.sonografia.NuevaSonografiaPelvicaFemeninaController">
+
+    <padding>
+        <Insets top="25.0" right="30.0" bottom="25.0" left="30.0"/>
+    </padding>
+
+    <children>
+        <Label text="Reporte: Sonografía Pélvica Femenina / Transvaginal" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0b4a9e;"/>
+        <Separator />
+
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+
+            <VBox spacing="15.0">
+                <padding>
+                    <Insets right="10.0" bottom="10.0"/>
+                </padding>
+
+                <children>
+                    <!-- BLOQUE 1: DATOS DE LA PACIENTE -->
+                    <VBox spacing="10" style="-fx-background-color: #fcfdfd; -fx-padding: 15; -fx-background-radius: 5; -fx-border-color: #e2e8f0; -fx-border-radius: 5;">
+                        <Label text="Datos de la Paciente" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+
+                        <HBox spacing="15">
+                            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                <Label text="Nombre Completo:" />
+                                <TextField fx:id="txtNombrePaciente" promptText="Escriba el nombre de la paciente..." />
+                            </VBox>
+
+                            <VBox spacing="5" prefWidth="150">
+                                <Label text="Cédula (Opcional):" />
+                                <TextField fx:id="txtCedulaPaciente" promptText="Ej: 402-0000000-1"/>
+                            </VBox>
+
+                            <VBox spacing="5" prefWidth="80">
+                                <Label text="Edad:" />
+                                <TextField fx:id="txtEdadPaciente" promptText="Ej: 28"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <Separator />
+
+                    <!-- PANEL DE INSTRUCCIÓN (UX) -->
+                    <VBox spacing="5.0" style="-fx-background-color: #fffbeb; -fx-padding: 10; -fx-border-color: #fde68a; -fx-border-radius: 5; -fx-border-width: 2;">
+                        <Label text="💡 MODO PLANTILLA ACTIVO" style="-fx-font-weight: bold; -fx-text-fill: #d97706;"/>
+                        <Label text="Los campos contienen el texto de un estudio NORMAL. Modifique el texto únicamente si encuentra hallazgos patológicos (miomas, quistes, líquido libre, etc)." style="-fx-text-fill: #92400e;" wrapText="true"/>
+                    </VBox>
+
+                    <!-- BLOQUE 2: DATOS CLÍNICOS -->
+                    <HBox spacing="15.0">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Útero" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextArea fx:id="txtUtero" prefRowCount="2" text="En anteversoflexión (AVF), de contornos regulares y ecogenicidad miometrial homogénea, sin evidencia de miomas." wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="5.0" prefWidth="180.0">
+                            <Label text="Medidas Útero (mm)" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextField fx:id="txtMedidaUtero" promptText="Ej: 75 x 40 x 35 mm" style="-fx-pref-height: 40px;" />
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="15.0">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Cérvix" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextField fx:id="txtCervix" text="De características normales, cerrado, sin quistes de Naboth evidentes." style="-fx-pref-height: 40px;" />
+                        </VBox>
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Endometrio / Cavidad Uterina" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextField fx:id="txtEndometrio" text="Central, lineal, de grosor conservado." style="-fx-pref-height: 40px;" />
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="15.0">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Ovario Derecho" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextArea fx:id="txtOvarioDerecho" prefRowCount="3" text="De situación y tamaño habitual, ecotextura conservada, sin imágenes quísticas ni sólidas dominantes." wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Ovario Izquierdo" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextArea fx:id="txtOvarioIzquierdo" prefRowCount="3" text="De situación y tamaño habitual, ecotextura conservada, sin imágenes quísticas ni sólidas dominantes." wrapText="true"/>
+                        </VBox>
+                    </HBox>
+
+                    <VBox spacing="5.0">
+                        <Label text="Fondo de Saco de Douglas" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                        <TextField fx:id="txtDouglas" text="Libre, sin evidencia de líquido libre." style="-fx-pref-height: 40px;" />
+                    </VBox>
+
+                    <Separator />
+
+                    <VBox spacing="5.0" style="-fx-background-color: #f8fafc; -fx-padding: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 5;">
+                        <Label text="DIAGNÓSTICO / CONCLUSIÓN" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                        <TextArea fx:id="txtDiagnostico" text="SONOGRAFÍA PÉLVICA FEMENINA DENTRO DE LÍMITES NORMALES." prefRowCount="2" wrapText="true" style="-fx-font-weight: bold;"/>
+                    </VBox>
+                </children>
+            </VBox>
+        </ScrollPane>
+
+        <Separator />
+
+        <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 10 0 0 0;">
+            <Button text="Cancelar" onAction="#cerrarVentana" style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            <Button text="Guardar y Generar PDF 💾" onAction="#guardarSonografia" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+        </HBox>
+    </children>
+</VBox>

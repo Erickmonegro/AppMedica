@@ -1,67 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.effect.DropShadow?>
 
-<?import javafx.scene.control.SplitMenuButton?>
-<VBox spacing="20.0" styleClass="root-pane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.DashboardMedicoController">
+<BorderPane prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #f1f5f9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.DashboardMedicoController">
 
-    <HBox spacing="20.0" alignment="CENTER_LEFT">
-        <children>
-            <MenuButton mnemonicParsing="false" styleClass="boton-principal" text="Menú" prefWidth="150.0">
-                <items>
-                    <MenuItem text="Cerrar Sesión" onAction="#cerrarSesion" />
-                </items>
-            </MenuButton>
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #0b4a9e; -fx-padding: 15 25 15 25;">
+            <effect>
+                <DropShadow color="#00000033" radius="5" offsetY="2"/>
+            </effect>
+            <children>
+                <Label text="CENFASIES | Panel Médico" textFill="WHITE">
+                    <font><Font name="System Bold" size="20.0" /></font>
+                </Label>
 
-            <TextField fx:id="txtBuscar" promptText="Buscador..." styleClass="buscador-azul" HBox.hgrow="ALWAYS" />
+                <Region HBox.hgrow="ALWAYS" />
 
-            <SplitMenuButton fx:id="btnNuevoPaciente" text="+ Nuevo Paciente (Consulta)" onAction="#abrirNuevoPaciente" style="-fx-background-color: #0b4a9e; -fx-text-fill: white; -fx-font-weight: bold;">
-                <items>
-                    <MenuItem text="Nueva Sonografía..." onAction="#abrirMenuRapidoSonografia" />
-                </items>
-            </SplitMenuButton>        </children>
-    </HBox>
+                <TextField fx:id="txtBuscar" promptText="🔍 Buscar paciente..." style="-fx-pref-width: 280; -fx-background-radius: 20; -fx-padding: 8 15; -fx-border-color: transparent;" />
 
-    <HBox spacing="20.0" VBox.vgrow="ALWAYS">
-        <children>
+                <Button fx:id="btnNuevoPacienteNormal" text="+ Nuevo Paciente" onAction="#abrirNuevoPaciente" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 15; -fx-cursor: hand;"/>
 
-            <VBox styleClass="panel-azul" prefWidth="250.0">
-                <children>
-                    <Label text="Lista de pacientes" styleClass="texto-panel" />
-                    <ListView fx:id="listaPacientes" VBox.vgrow="ALWAYS" style="-fx-background-color: #0b4a9e; -fx-control-inner-background: transparent;" />
-                </children>
-            </VBox>
+                <SplitMenuButton fx:id="btnNuevoPaciente" text="Nuevo Paciente" onAction="#abrirNuevoPaciente" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;">
+                    <items>
+                        <MenuItem text="Nueva Sonografía..." onAction="#abrirMenuRapidoSonografia" />
+                    </items>
+                </SplitMenuButton>
 
-            <VBox styleClass="panel-azul" HBox.hgrow="ALWAYS" spacing="15.0">
-                <children>
-                    <HBox alignment="CENTER_LEFT">
-                        <Label text="⏱️ Sala de Espera" styleClass="texto-panel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: black;" />
+                <Separator orientation="VERTICAL" style="-fx-padding: 0 5 0 5;" />
 
-                        <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblBienvenidaDoctor" text="Dr. Usuario" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
 
-                        <Label fx:id="lblBienvenidaDoctor" styleClass="texto-panel" style="-fx-text-fill: #0b4a9e; -fx-padding: 0 20 0 0;" text="Dr. X" />
+                <!-- Menú de Salida minimalista y 100% visible -->
+                <MenuButton mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;">
+                    <graphic>
+                        <Label text="⚙ Opciones" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;" />
+                    </graphic>
+                    <items>
+                        <MenuItem text="Cerrar Sesión" onAction="#cerrarSesion" />
+                    </items>
+                </MenuButton>
+            </children>
+        </HBox>
+    </top>
 
-                    </HBox>
+    <left>
+        <VBox spacing="15" style="-fx-background-color: #ffffff; -fx-padding: 20; -fx-pref-width: 320; -fx-border-color: #e2e8f0; -fx-border-width: 0 1 0 0;">
+            <effect>
+                <DropShadow color="#0000001a" radius="8" offsetX="3" offsetY="0"/>
+            </effect>
+            <children>
+                <Label text="👥 Lista de pacientes" style="-fx-text-fill: #0b4a9e; -fx-font-weight: bold; -fx-font-size: 16px;"/>
 
-                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
-                        <content>
-                            <VBox fx:id="vboxCitasDashboard" spacing="12.0" style="-fx-padding: 5px 15px 15px 5px; -fx-background-color: transparent;" />
-                        </content>
-                    </ScrollPane>
+                <Separator style="-fx-background-color: #cbd5e1;" />
 
-                </children>
-            </VBox>
+                <ListView fx:id="listaPacientes" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-control-inner-background: transparent;" />
+            </children>
+        </VBox>
+    </left>
 
-        </children>
-    </HBox>
+    <center>
+        <VBox spacing="20" style="-fx-padding: 30;">
+            <children>
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="⏱Turnos de Hoy" style="-fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 24px;"/>
+                </HBox>
 
-</VBox>
+                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+                    <content>
+                        <VBox fx:id="vboxCitasDashboard" spacing="15.0" style="-fx-padding: 10px; -fx-background-color: transparent;" />
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -4,10 +4,12 @@ import com.proyectomedico.appmedicacenfasies.config.SesionGlobal;
 import com.proyectomedico.appmedicacenfasies.dto.PacienteResumenDTO;
 import com.proyectomedico.appmedicacenfasies.repository.TurnoRepository;
 import com.proyectomedico.appmedicacenfasies.service.PacienteService;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -15,37 +17,35 @@ import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
-
-
+@Slf4j // Agregado para logs de nivel empresarial
 @Component
 @RequiredArgsConstructor
 public class DashboardSecretariaController {
 
     private final SesionGlobal sesionGlobal;
-    private final ApplicationContext applicationContext; // Necesario para inyectar Spring en el modal
+    private final ApplicationContext applicationContext;
     private final TurnoRepository turnoRepository;
+    private final PacienteService pacienteService;
 
     @FXML private ListView<String> listaSalaEspera;
-
-    private final PacienteService pacienteService; // <--- Asegúrate de tener esto inyectado
-
     @FXML private TableView<PacienteResumenDTO> tablaPacientesGlobal;
     @FXML private TableColumn<PacienteResumenDTO, String> colCedula;
     @FXML private TableColumn<PacienteResumenDTO, String> colNombre;
-    @FXML private TableColumn<PacienteResumenDTO, String> colUltimaVisita; // Opcional por ahora
-    @FXML private TextField txtBuscador;// Luego definiremos el DTO para esta tabla
-
+    @FXML private TableColumn<PacienteResumenDTO, String> colUltimaVisita;
+    @FXML private TextField txtBuscador;
 
     @FXML
     public void initialize() {
-        System.out.println("Inicializando Dashboard de Secretaría...");
+        log.info("Inicializando Dashboard de Secretaría...");
 
-        // 1. FORMA A PRUEBA DE BALAS PARA JAVA RECORDS:
+        // 1. FORMA A PRUEBA DE BALAS PARA JAVA RECORDS
         colCedula.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(cellData.getValue().cedula())
         );
@@ -56,6 +56,25 @@ public class DashboardSecretariaController {
         colUltimaVisita.setCellValueFactory(cellData ->
                 new javafx.beans.property.SimpleStringProperty(cellData.getValue().ultimaVisita())
         );
+
+        // =====================================================================
+        // MAGIA UI: Arreglo del texto "Fantasma" en la lista de espera
+        // =====================================================================
+        listaSalaEspera.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("-fx-background-color: transparent;");
+                } else {
+                    setText(item);
+                    // Forzamos el color del texto a gris pizarra oscuro (#0f172a)
+                    // y añadimos un pequeño padding para que respire.
+                    setStyle("-fx-text-fill: #0f172a; -fx-font-size: 13px; -fx-padding: 8px; -fx-background-color: transparent; -fx-border-color: transparent transparent #e2e8f0 transparent; -fx-border-width: 1px;");
+                }
+            }
+        });
 
         // 2. Cargar datos iniciales
         cargarListaEspera();
@@ -68,53 +87,88 @@ public class DashboardSecretariaController {
             });
         }
 
-        // =====================================================================
-        // --- 4. NUEVO: EVENTO DOBLE CLIC EN LA TABLA ---
-        // =====================================================================
+        // 4. EVENTO: DOBLE CLIC EN LA TABLA
         tablaPacientesGlobal.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2 && tablaPacientesGlobal.getSelectionModel().getSelectedItem() != null) {
                 PacienteResumenDTO pacienteSeleccionado = tablaPacientesGlobal.getSelectionModel().getSelectedItem();
                 abrirModalAsignacionRapida(pacienteSeleccionado.id(), pacienteSeleccionado.nombreApellidos());
             }
         });
+        // =========================================================================
+        // MOTOR DE SINCRONIZACIÓN ASÍNCRONA EN TIEMPO REAL (Secretaría / Recepción)
+        // =========================================================================
+        javafx.animation.Timeline relojSincronizador = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(javafx.util.Duration.seconds(6), event -> {
+
+                    // Salvaguarda UX: Verificamos si la secretaria está buscando un paciente activo
+                    String filtroActual = txtBuscador.getText() != null ? txtBuscador.getText().trim() : "";
+
+                    // Hilo Secundario: Ejecuta las consultas pesadas a través del Wi-Fi en background
+                    java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+                        var turnosEnEspera = turnoRepository.findByEstadoOrderByFechaEntradaAsc("EN_ESPERA");
+                        List<String> itemsSalaEspera = turnosEnEspera.stream()
+                                .map(t -> "👤 " + t.getPaciente().getNombreApellidos() + "\n👨‍⚕️ Dr. " + t.getMedicoAsignado().getNombreCompleto())
+                                .toList();
+
+                        List<PacienteResumenDTO> pacientesGlobales = filtroActual.isEmpty() ?
+                                pacienteService.buscarPacientes("") : null;
+
+                        return new Object[]{itemsSalaEspera, pacientesGlobales};
+                    }).thenAcceptAsync(datos -> {
+
+                        // Hilo de la UI: Renderizado seguro en JavaFX
+                        Platform.runLater(() -> {
+                            List<String> espera = (List<String>) datos[0];
+                            List<PacienteResumenDTO> globales = (List<PacienteResumenDTO>) datos[1];
+
+                            // A. Sincronizar la Sala de Espera de Recepción
+                            listaSalaEspera.getItems().setAll(espera);
+
+                            // B. Sincronizar la Tabla Global (SOLO si no está usando el buscador)
+                            if (filtroActual.isEmpty() && globales != null) {
+                                tablaPacientesGlobal.getItems().setAll(globales);
+                            }
+                        });
+                    }).exceptionally(ex -> {
+                        log.error("Error en la sincronización en segundo plano de secretaría", ex);
+                        return null;
+                    });
+                })
+        );
+        relojSincronizador.setCycleCount(javafx.animation.Timeline.INDEFINITE);
+        relojSincronizador.play();
+
     }
 
     @FXML
     public void abrirVentanaIngresoRapido() {
         try {
-            // Cargamos la vista del registro rápido (Modal)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/registro_rapido_secretaria.fxml"));
-            loader.setControllerFactory(applicationContext::getBean); // Conectamos con Spring Boot
+            loader.setControllerFactory(applicationContext::getBean);
 
             Parent root = loader.load();
             Stage modalStage = new Stage();
             modalStage.setTitle("Ingreso Rápido - Triaje");
             modalStage.setScene(new Scene(root));
-
-            // Hacemos que la ventana sea un "Modal" (No puedes tocar el fondo hasta cerrarla)
             modalStage.initModality(Modality.APPLICATION_MODAL);
             modalStage.centerOnScreen();
+
             modalStage.showAndWait();
 
+            // Refrescamos la lista al cerrar el modal
             cargarListaEspera();
 
-            // Cuando el modal se cierre, aquí actualizaremos la lista de "Sala de Espera"
-
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error al abrir ventana de ingreso rápido", e);
         }
     }
 
-    // =====================================================================
-    // --- NUEVO MÉTODO: ABRE EL MODAL CHIQUITO DEL DOBLE CLIC ---
-    // =====================================================================
-    private void abrirModalAsignacionRapida(java.util.UUID pacienteId, String nombreCompleto) {
+    private void abrirModalAsignacionRapida(UUID pacienteId, String nombreCompleto) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/asignacion_rapida.fxml"));
             fxmlLoader.setControllerFactory(applicationContext::getBean);
             Parent root = fxmlLoader.load();
 
-            // Pasamos los datos
             AsignacionRapidaController controller = fxmlLoader.getController();
             controller.cargarPaciente(pacienteId, nombreCompleto);
 
@@ -122,23 +176,20 @@ public class DashboardSecretariaController {
             stage.setTitle("Asignar Turno Rápido");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
+
             stage.showAndWait();
 
-            // Refrescar tu lista de turnos (sala de espera) al cerrar el modal
             cargarListaEspera();
 
         } catch (Exception e) {
-            System.err.println("Error al abrir modal de asignación rápida");
-            e.printStackTrace();
+            log.error("Error al abrir modal de asignación rápida", e);
         }
     }
 
     @FXML
     public void cerrarSesion() {
         sesionGlobal.cerrarSesion();
-
         try {
-            // Volver al Login
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
             loader.setControllerFactory(applicationContext::getBean);
             Parent root = loader.load();
@@ -148,37 +199,33 @@ public class DashboardSecretariaController {
             stage.centerOnScreen();
             stage.setTitle("Login - CENFASIES");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error al cerrar sesión", e);
         }
     }
+
     private void cargarListaEspera() {
-        javafx.application.Platform.runLater(() -> {
-            // Buscamos todos los turnos que estén "EN_ESPERA"
-            var turnosEnEspera = turnoRepository.findByEstadoOrderByFechaEntradaAsc("EN_ESPERA");
+        Platform.runLater(() -> {
+            try {
+                var turnosEnEspera = turnoRepository.findByEstadoOrderByFechaEntradaAsc("EN_ESPERA");
+                var items = turnosEnEspera.stream()
+                        .map(t -> "👤 " + t.getPaciente().getNombreApellidos() + "\n👨‍⚕️ Dr. " + t.getMedicoAsignado().getNombreCompleto())
+                        .toList();
 
-            // Los transformamos a un texto bonito para la lista
-            var items = turnosEnEspera.stream()
-                    .map(t -> "👤 " + t.getPaciente().getNombreApellidos() + "\n👨‍⚕️ Dr. " + t.getMedicoAsignado().getNombreCompleto())
-                    .toList();
-
-            listaSalaEspera.getItems().setAll(items);
+                listaSalaEspera.getItems().setAll(items);
+            } catch (Exception e) {
+                log.error("Error al cargar la sala de espera", e);
+            }
         });
     }
+
     private void cargarTablaPacientesGlobal(String filtro) {
-        javafx.application.Platform.runLater(() -> {
+        Platform.runLater(() -> {
             try {
-                // Buscamos los pacientes
-                java.util.List<com.proyectomedico.appmedicacenfasies.dto.PacienteResumenDTO> pacientes =
-                        pacienteService.buscarPacientes(filtro);
-
-                // Imprimimos en consola para asegurarnos de que la BD sí está respondiendo
-                System.out.println("Pacientes encontrados para la tabla: " + pacientes.size());
-
-                // Llenamos la tabla
+                List<PacienteResumenDTO> pacientes = pacienteService.buscarPacientes(filtro);
+                log.info("Pacientes encontrados para la tabla global: {}", pacientes.size());
                 tablaPacientesGlobal.getItems().setAll(pacientes);
             } catch (Exception e) {
-                System.err.println("Error al cargar la tabla de pacientes: " + e.getMessage());
-                e.printStackTrace();
+                log.error("Error al cargar la tabla de pacientes", e);
             }
         });
     }

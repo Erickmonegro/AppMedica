@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -22,72 +23,53 @@ public class DataSeeder implements CommandLineRunner {
     private final MedicoRepository medicoRepository;
 
     @Override
+    @Transactional // IMPORTANTE: Garantiza que la inyección sea segura
     public void run(String... args) throws Exception {
-        log.info("Verificando usuarios de prueba en la base de datos...");
+        log.info("Verificando usuarios y médicos en la base de datos...");
 
-        // 1. Crear Secretaria si no existe
+        // 1. Crear Secretaria (Vital para probar el ingreso de pacientes)
         if (usuarioRepository.findByUsername("recepcion").isEmpty()) {
             Usuario secretaria = new Usuario();
             secretaria.setUsername("recepcion");
-            secretaria.setPassword("1234"); // Nota: En producción esto irá encriptado
-            secretaria.setNombreCompleto("Ana Pérez (Secretaria)");
+            secretaria.setPassword("1234"); // En producción irá encriptado
+            secretaria.setNombreCompleto("Erick Monegro");
             secretaria.setRol(Rol.SECRETARIO);
+            secretaria.setSexo("Masculino"); // Opcional para la secretaria
 
             usuarioRepository.save(secretaria);
             log.info("✅ Usuario de Recepción creado exitosamente (User: recepcion | Pass: 1234)");
         }
 
-        // 2. Crear Médico si no existe
-        if (usuarioRepository.findByUsername("draLluberes").isEmpty()) {
-            Medico medico1 = new Medico();
-            medico1.setUsername("draLluberes");
-            medico1.setPassword("1234");
-            medico1.setNombreCompleto("Rissy Lluberes");
-            medico1.setRol(Rol.MEDICO);
-            medico1.setExequatur("12349-X");
+        // 2. Inyección de todos los Médicos del Centro (Añadido el parámetro SEXO)
+        registrarMedico("draRodriguez", "1234", "Yesenia Rodriguez", "10001-X", Set.of(Especialidad.MEDICOFAMILIAR), "Femenino");
+        registrarMedico("drMorillo", "1234", "Waldo Morillo", "10002-X", Set.of(Especialidad.MEDICOFAMILIAR), "Masculino");
+        registrarMedico("draGonzalez", "1234", "Yuli Gonzalez", "10003-X", Set.of(Especialidad.GINECOLOGIA, Especialidad.MEDICOGENERAL), "Femenino");
+        registrarMedico("draSantiago", "1234", "Johanna Santiago", "10004-X", Set.of(Especialidad.SONOGRAFISTA, Especialidad.MEDICOGENERAL), "Femenino");
+        registrarMedico("draLluberes", "1234", "Rissy Lluberes", "10005-X", Set.of(Especialidad.SONOGRAFISTA, Especialidad.MEDICOGENERAL), "Femenino");
+        registrarMedico("drQuezada", "1234", "Calin Quezada", "10006-X", Set.of(Especialidad.SONOGRAFISTA, Especialidad.MEDICOGENERAL), "Masculino");
+        registrarMedico("drDaniel", "1234", "Jorge Daniel", "10007-X", Set.of(Especialidad.MEDICOGENERAL), "Masculino");
 
-            // =========================================================================
-            // ¡NUEVO!: ASIGNACIÓN DE MÚLTIPLES ESPECIALIDADES (EL SET)
-            // =========================================================================
-            // Asegúrate de usar los nombres exactos que tienes en tu Enum 'Especialidad'
-            medico1.setEspecialidades(Set.of(Especialidad.SONOGRAFISTA, Especialidad.MEDICOGENERAL));
+        log.info("🏁 Inyección de datos finalizada. El sistema está listo para operar.");
+    }
 
-            medicoRepository.save(medico1);
-            log.info("✅ Usuario Médico1 creado exitosamente.");
-        }
-        if (usuarioRepository.findByUsername("draRodriguez").isEmpty()) {
-            Medico medico2 = new Medico();
-            medico2.setUsername("draRodriguez");
-            medico2.setPassword("1234");
-            medico2.setNombreCompleto("Yesenia Rodriguez");
-            medico2.setRol(Rol.MEDICO);
-            medico2.setExequatur("123410-X");
+    /**
+     * Método Auxiliar para inyectar médicos sin repetir código (Principio DRY: Don't Repeat Yourself)
+     */
+    private void registrarMedico(String username, String password, String nombre, String exequatur, Set<Especialidad> especialidades, String sexo) {
+        if (usuarioRepository.findByUsername(username).isEmpty()) {
+            Medico medico = new Medico();
+            medico.setUsername(username);
+            medico.setPassword(password);
+            medico.setNombreCompleto(nombre);
+            medico.setRol(Rol.MEDICO);
+            medico.setExequatur(exequatur);
+            medico.setEspecialidades(especialidades);
 
-            // =========================================================================
-            // ¡NUEVO!: ASIGNACIÓN DE MÚLTIPLES ESPECIALIDADES (EL SET)
-            // =========================================================================
-            // Asegúrate de usar los nombres exactos que tienes en tu Enum 'Especialidad'
-            medico2.setEspecialidades(Set.of(Especialidad.MEDICOFAMILIAR));
+            // INYECTAMOS EL NUEVO CAMPO AQUÍ 👇
+            medico.setSexo(sexo);
 
-            medicoRepository.save(medico2);
-            log.info("✅ Usuario Médico2 creado exitosamente.");
-        }
-        if (usuarioRepository.findByUsername("draGonzalez").isEmpty()) {
-            Medico medico1 = new Medico();
-            medico1.setUsername("draGonzalez");
-            medico1.setPassword("1234");
-            medico1.setNombreCompleto("Yuli Gonzalez");
-            medico1.setRol(Rol.MEDICO);
-            medico1.setExequatur("123411-X");
-
-            // =========================================================================
-            // ¡NUEVO!: ASIGNACIÓN DE MÚLTIPLES ESPECIALIDADES (EL SET)
-            // =========================================================================
-            // Asegúrate de usar los nombres exactos que tienes en tu Enum 'Especialidad'
-            medico1.setEspecialidades(Set.of(Especialidad.GINECOLOGIA));
-
-            medicoRepository.save(medico1);
-            log.info("✅ Usuario Médico3 creado exitosamente.");
+            medicoRepository.save(medico);
+            log.info("✅ Médico insertado: {} (User: {})", nombre, username);
         }
     }
 }

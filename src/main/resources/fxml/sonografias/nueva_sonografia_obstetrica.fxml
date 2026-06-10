@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox prefWidth="850.0" prefHeight="800.0" spacing="15.0" style="-fx-background-color: #ffffff;" stylesheets="/css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.sonografia.NuevaSonografiaObstetricaController">
+
+    <padding>
+        <Insets top="25.0" right="30.0" bottom="25.0" left="30.0"/>
+    </padding>
+
+    <children>
+        <Label text="Reporte: Sonografía Obstétrica" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0b4a9e;"/>
+        <Separator />
+
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+
+            <VBox spacing="15.0">
+                <padding>
+                    <Insets right="10.0" bottom="10.0"/>
+                </padding>
+
+                <children>
+                    <VBox spacing="10" style="-fx-background-color: #fcfdfd; -fx-padding: 15; -fx-background-radius: 5; -fx-border-color: #e2e8f0; -fx-border-radius: 5;">
+                        <Label text="Datos de la Paciente" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+
+                        <HBox spacing="15">
+                            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                <Label text="Nombre Completo:" />
+                                <TextField fx:id="txtNombrePaciente" promptText="Escriba el nombre de la paciente..." />
+                            </VBox>
+
+                            <VBox spacing="5" prefWidth="150">
+                                <Label text="Cédula (Opcional):" />
+                                <TextField fx:id="txtCedulaPaciente" promptText="Ej: 402-0000000-1"/>
+                            </VBox>
+
+                            <VBox spacing="5" prefWidth="80">
+                                <Label text="Edad:" />
+                                <TextField fx:id="txtEdadPaciente" promptText="Ej: 28"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <Separator />
+
+                    <VBox spacing="5.0" style="-fx-background-color: #fffbeb; -fx-padding: 10; -fx-border-color: #fde68a; -fx-border-radius: 5; -fx-border-width: 2;">
+                        <Label text="💡 MODO PLANTILLA ACTIVO" style="-fx-font-weight: bold; -fx-text-fill: #d97706;"/>
+                        <Label text="Los textos descriptivos asumen un embarazo normal. Rellene manualmente los valores de la biometría (BPD, HC, etc.)." style="-fx-text-fill: #92400e;" wrapText="true"/>
+                    </VBox>
+
+                    <HBox spacing="15.0">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Descripción Fetal" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextArea fx:id="txtFetoResumen" prefRowCount="2" text="Se observa un (1) feto vivo, con movimientos somáticos y respiratorios presentes." wrapText="true"/>
+                        </VBox>
+                        <VBox spacing="5.0" prefWidth="180.0">
+                            <Label text="FCF (Latidos/min)" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextField fx:id="txtFcf" promptText="Ej: 145 lpm, rítmica" style="-fx-pref-height: 40px;" />
+                        </VBox>
+                    </HBox>
+
+                    <VBox spacing="10.0" style="-fx-background-color: #f1f5f9; -fx-padding: 10; -fx-border-radius: 5;">
+                        <Label text="Biometría Fetal" style="-fx-font-weight: bold; -fx-text-fill: #0b4a9e;"/>
+                        <HBox spacing="15.0">
+                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                <Label text="BPD (Diámetro Biparietal)" />
+                                <TextField fx:id="txtBpd" promptText="Ej: 45 mm" />
+                            </VBox>
+                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                <Label text="HC (Circunf. Cefálica)" />
+                                <TextField fx:id="txtHc" promptText="Ej: 165 mm" />
+                            </VBox>
+                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                <Label text="AC (Circunf. Abdominal)" />
+                                <TextField fx:id="txtAc" promptText="Ej: 140 mm" />
+                            </VBox>
+                        </HBox>
+                        <HBox spacing="15.0">
+                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                <Label text="FL (Longitud Femoral)" />
+                                <TextField fx:id="txtFl" promptText="Ej: 32 mm" />
+                            </VBox>
+                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                <Label text="Peso Fetal Estimado" style="-fx-font-weight: bold;" />
+                                <TextField fx:id="txtPeso" promptText="Ej: 850 g" />
+                            </VBox>
+                            <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                <Label text="Extremidades" />
+                                <TextField fx:id="txtExtremidades" text="Presentes, de ecoestructura normal." />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <HBox spacing="15.0">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Placenta" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextArea fx:id="txtPlacenta" prefRowCount="2" text="De inserción normal, sin zonas de desprendimiento ni alteraciones ecográficas." wrapText="true"/>
+                        </VBox>
+                    </HBox>
+
+                    <HBox spacing="15.0">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Líquido Amniótico" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextField fx:id="txtLiquido" text="Volumen adecuado (ILA conservado)." style="-fx-pref-height: 40px;" />
+                        </VBox>
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label text="Cordón Umbilical" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                            <TextField fx:id="txtCordon" text="Tres vasos. Sin circulares al cuello evidentes." style="-fx-pref-height: 40px;" />
+                        </VBox>
+                    </HBox>
+
+                    <Separator />
+
+                    <VBox spacing="5.0" style="-fx-background-color: #f8fafc; -fx-padding: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 5;">
+                        <Label text="DIAGNÓSTICO / CONCLUSIÓN" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                        <TextArea fx:id="txtDiagnostico" text="EMBARAZO EVOLUTIVO. BIOMETRÍA ACORDE A LA EDAD GESTACIONAL." prefRowCount="2" wrapText="true" style="-fx-font-weight: bold;"/>
+                    </VBox>
+                </children>
+            </VBox>
+        </ScrollPane>
+
+        <Separator />
+
+        <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 10 0 0 0;">
+            <Button text="Cancelar" onAction="#cerrarVentana" style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            <Button text="Guardar y Generar PDF 💾" onAction="#guardarSonografia" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+        </HBox>
+    </children>
+</VBox>

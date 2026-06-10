@@ -21,6 +21,7 @@ public class Usuario {
     private String password;
 
     private String nombreCompleto;
+    private String sexo;
 
     @Enumerated(EnumType.STRING)
     private Rol rol; // Aquí guardaremos si es SECRETARIA o MEDICO

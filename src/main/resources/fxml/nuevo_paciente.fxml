@@ -114,6 +114,7 @@
                 </VBox>
                 <VBox fx:id="vboxGinecologia" spacing="15.0" styleClass="panel-blanco-redondeado" visible="false" managed="false">
                     <Label styleClass="texto-panel-oscuro" text="Antecedentes Gineco-Obstétricos" />
+
                     <GridPane hgap="15.0" vgap="15.0">
                         <columnConstraints>
                             <ColumnConstraints percentWidth="33.3" />
@@ -121,9 +122,22 @@
                             <ColumnConstraints percentWidth="33.3" />
                         </columnConstraints>
                         <children>
-                            <TextField fx:id="txtMenarquia" promptText="Menarquia (Edad, Ej: 12 años)" styleClass="text-field-form" GridPane.columnIndex="0" />
-                            <DatePicker fx:id="dpFUM" promptText="FUM (Fecha Última Menstruación)" maxWidth="Infinity" styleClass="text-field-form" GridPane.columnIndex="1" />
-                            <TextField fx:id="txtGPCA" promptText="GPCA (Ej: G:2 P:1 C:1 A:0)" styleClass="text-field-form" GridPane.columnIndex="2" />
+
+                            <VBox spacing="5.0" GridPane.columnIndex="0">
+                                <Label text="Menarquia:" style="-fx-font-weight: bold; -fx-text-fill: #475569;" />
+                                <TextField fx:id="txtMenarquia" promptText="Edad (Ej: 12 años)" styleClass="text-field-form" />
+                            </VBox>
+
+                            <VBox spacing="5.0" GridPane.columnIndex="1">
+                                <Label text="FUM (Fecha Última Menstruación):" style="-fx-font-weight: bold; -fx-text-fill: #475569;" />
+                                <DatePicker fx:id="dpFUM" promptText="Seleccione fecha" maxWidth="Infinity" styleClass="text-field-form" />
+                            </VBox>
+
+                            <VBox spacing="5.0" GridPane.columnIndex="2">
+                                <Label text="GPCA (Gestas, Partos, Cesáreas, Abortos):" style="-fx-font-weight: bold; -fx-text-fill: #475569;" />
+                                <TextField fx:id="txtGPCA" promptText="Ej: G:2 P:1 C:1 A:0" styleClass="text-field-form" />
+                            </VBox>
+
                         </children>
                     </GridPane>
                 </VBox>

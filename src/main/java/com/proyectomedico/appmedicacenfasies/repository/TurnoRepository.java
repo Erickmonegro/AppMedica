@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -19,5 +20,7 @@ public interface TurnoRepository extends JpaRepository<Turno, UUID> {
     // 3. Para ver el historial de un paciente específico (Trazabilidad)
     List<Turno> findByPacienteIdOrderByFechaEntradaDesc(UUID pacienteId);
     // NUEVA: Para la Secretaria (Filtra solo por estado para ver a TODOS los que esperan)
+
+    Optional<Turno> findFirstByPacienteIdOrderByFechaEntradaDesc(UUID pacienteId);
 
 }

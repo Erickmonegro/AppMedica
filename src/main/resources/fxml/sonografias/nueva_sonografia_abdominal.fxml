@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox prefWidth="750.0" prefHeight="700.0" spacing="15.0" style="-fx-background-color: #ffffff;" stylesheets="@../css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.sonografia.NuevaSonografiaAbdominalController">
+<VBox prefWidth="750.0" prefHeight="700.0" spacing="15.0" style="-fx-background-color: #ffffff;" stylesheets="/css/estilos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.proyectomedico.appmedicacenfasies.controller.sonografia.NuevaSonografiaAbdominalController">
 
     <padding>
         <Insets top="25.0" right="30.0" bottom="25.0" left="30.0"/>
@@ -33,22 +33,27 @@
 
                             <VBox spacing="5" prefWidth="150">
                                 <Label text="Cédula (Opcional):" />
-                                <TextField fx:id="txtCedulaPaciente"/>
+                                <TextField fx:id="txtCedulaPaciente" promptText="Ej: 402-0000000-1"/>
                             </VBox>
 
                             <VBox spacing="5" prefWidth="80">
                                 <Label text="Edad:" />
-                                <TextField fx:id="txtEdadPaciente"/>
+                                <TextField fx:id="txtEdadPaciente" promptText="Ej: 25"/>
                             </VBox>
                         </HBox>
                     </VBox>
 
                     <Separator />
 
+                    <VBox spacing="5.0" style="-fx-background-color: #fffbeb; -fx-padding: 10; -fx-border-color: #fde68a; -fx-border-radius: 5; -fx-border-width: 2;">
+                        <Label text="💡 MODO PLANTILLA ACTIVO" style="-fx-font-weight: bold; -fx-text-fill: #d97706;"/>
+                        <Label text="Los campos a continuación contienen el texto de un estudio NORMAL. Modifique el texto únicamente en los órganos donde encuentre hallazgos patológicos." style="-fx-text-fill: #92400e;" wrapText="true"/>
+                    </VBox>
+
                     <HBox spacing="15.0">
                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                             <Label text="Hígado" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                            <TextArea fx:id="txtHigado" prefRowCount="2" promptText="Tamaño y textura conservada, bien delimitado..." wrapText="true"/>
+                            <TextArea fx:id="txtHigado" prefRowCount="3" text="De tamaño adecuado, de contornos regulares, con parénquima de ecogenicidad conservada, relación LHD\LHI conservada, mide: '' cm.  " wrapText="true"/>
                         </VBox>
                         <VBox spacing="5.0" prefWidth="150.0">
                             <Label text="LHD (mm)" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
@@ -59,38 +64,38 @@
                     <HBox spacing="15.0">
                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                             <Label text="Vesícula Biliar" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                            <TextArea fx:id="txtVesicula" prefRowCount="2" promptText="Paredes finas y regulares..." wrapText="true"/>
+                            <TextArea fx:id="txtVesicula" prefRowCount="2" text="5.5X3.6 CM, de contenido anecoico, pared fina, regular sin la presencia de litos o masas en su interior." wrapText="true"/>
                         </VBox>
                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                             <Label text="Páncreas" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                            <TextArea fx:id="txtPancreas" prefRowCount="2" promptText="Tamaño, textura y ecogenicidad normal..." wrapText="true"/>
+                            <TextArea fx:id="txtPancreas" prefRowCount="2" text="De eco textura homogénea, sin la presencia de imágenes sólidas ni quísticas." wrapText="true"/>
                         </VBox>
                     </HBox>
 
                     <VBox spacing="5.0">
                         <Label text="Conducto colédoco y Vena porta" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                        <TextField fx:id="txtColedocoPorta" promptText="De tamaño y calibre normal..." style="-fx-pref-height: 40px;" />
+                        <TextField fx:id="txtColedocoPorta" text="De tamaño y calibre normal." style="-fx-pref-height: 40px;" />
                     </VBox>
 
                     <HBox spacing="15.0">
                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                             <Label text="Riñón Derecho" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                            <TextArea fx:id="txtRinonDerecho" prefRowCount="3" promptText="Forma y tamaño normal..." wrapText="true"/>
+                            <TextArea fx:id="txtRinonDerecho" prefRowCount="3" text="Forma y tamaño normal, parénquima homogéneo, seno renal hiperecogénico con buena relación cortico medular. Sin cálculos ni otras lesiones patológicas. Mide: 10.6x5.8 cm" wrapText="true"/>
                         </VBox>
                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                             <Label text="Riñón Izquierdo" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                            <TextArea fx:id="txtRinonIzquierdo" prefRowCount="3" promptText="Forma y tamaño normal..." wrapText="true"/>
+                            <TextArea fx:id="txtRinonIzquierdo" prefRowCount="3" text="Forma y tamaño normal, parénquima homogéneo, seno renal hiperecogénico con buena relación cortico medular. Sin cálculos ni otras lesiones patológicas. Mide: 10.6x5.8 cm" wrapText="true"/>
                         </VBox>
                     </HBox>
 
                     <HBox spacing="15.0">
                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                             <Label text="Bazo" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                            <TextArea fx:id="txtBazo" prefRowCount="2" promptText="Forma y tamaño normal..." wrapText="true"/>
+                            <TextArea fx:id="txtBazo" prefRowCount="2" text="En forma y tamaño normal." wrapText="true"/>
                         </VBox>
                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                             <Label text="Intestinos (Opcional)" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
-                            <TextArea fx:id="txtIntestinos" prefRowCount="2" promptText="Observaciones adicionales..." wrapText="true"/>
+                            <TextArea fx:id="txtIntestinos" prefRowCount="2" promptText="Observaciones adicionales (Opcional)..." wrapText="true"/>
                         </VBox>
                     </HBox>
 
@@ -98,7 +103,7 @@
 
                     <VBox spacing="5.0" style="-fx-background-color: #f8fafc; -fx-padding: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 5;">
                         <Label text="DIAGNÓSTICO / CONCLUSIÓN" style="-fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
-                        <TextArea fx:id="txtDiagnostico" prefRowCount="2" wrapText="true" style="-fx-font-weight: bold;"/>
+                        <TextArea fx:id="txtDiagnostico" text="SONOGRAFÍA ABDOMINAL DENTRO DE LÍMITES NORMALES." prefRowCount="2" wrapText="true" style="-fx-font-weight: bold;"/>
                     </VBox>
                 </children>
             </VBox>
@@ -108,7 +113,7 @@
 
         <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 10 0 0 0;">
             <Button text="Cancelar" onAction="#cerrarVentana" style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-weight: bold; -fx-cursor: hand;"/>
-            <Button text="Guardar 💾" onAction="#guardarSonografia" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5px; -fx-cursor: hand;"/>
+            <Button text="Guardar y Generar PDF 💾" onAction="#guardarSonografia" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5px; -fx-cursor: hand;"/>
         </HBox>
     </children>
 </VBox>

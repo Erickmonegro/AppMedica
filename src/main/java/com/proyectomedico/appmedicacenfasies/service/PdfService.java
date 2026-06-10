@@ -1,5 +1,6 @@
 package com.proyectomedico.appmedicacenfasies.service;
 
+import com.proyectomedico.appmedicacenfasies.config.SesionGlobal;
 import com.proyectomedico.appmedicacenfasies.dto.PacienteRegistroDTO;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class PdfService {
     // Spring Boot inyecta mágicamente el motor de Thymeleaf que configuramos en el pom.xml
     private final TemplateEngine templateEngine;
     private final FileStorageService fileStorageService;
+    private final SesionGlobal sesionGlobal;
 
     /**
      * Genera un PDF en memoria basado en la plantilla hoja_clinica.html
@@ -63,17 +65,19 @@ public class PdfService {
             // --- ZONA A: INYECCIÓN MULTI-TENANT ---
             // (En el futuro, esto se extraerá del Login del usuario activo)
             // --- ZONA B: INYECCIÓN DE DATOS DEL PACIENTE ---
+            // =========================================================================
+            // MODIFICADO: Unificación del cálculo de Edad con FormatoUtil
+            // =========================================================================
             context.setVariable("fechaActual", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             context.setVariable("pacienteSeguro", pacienteData.datosPersonales().seguro());
             context.setVariable("pacienteNombre", pacienteData.datosPersonales().nombreApellidos());
             context.setVariable("pacienteFechaNac", pacienteData.datosPersonales().fechaNacimiento() != null ? pacienteData.datosPersonales().fechaNacimiento().toString() : "");
             context.setVariable("pacienteCedula", pacienteData.datosPersonales().cedula());
-            // --- CÁLCULO DINÁMICO DE LA EDAD ---
-            String edadStr = "";
-            if (pacienteData.datosPersonales().fechaNacimiento() != null) {
-                edadStr = String.valueOf(Period.between(pacienteData.datosPersonales().fechaNacimiento(), LocalDate.now()).getYears());
-            }
-            context.setVariable("pacienteEdad", edadStr);
+
+            // Usamos nuestra utilidad global para evitar discrepancias
+            String edadCalculada = com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.calcularEdadDesdeFecha(pacienteData.datosPersonales().fechaNacimiento());
+            context.setVariable("pacienteEdad", edadCalculada.isEmpty() ? "N/A" : edadCalculada);
+
             context.setVariable("pacienteTelefonos", pacienteData.datosPersonales().telefonos());
             context.setVariable("pacienteDireccion", pacienteData.datosPersonales().direccion());
             context.setVariable("pacienteOcupacion", pacienteData.datosPersonales().ocupacion());
@@ -105,7 +109,7 @@ public class PdfService {
             if (pacienteData.habitos().alcohol()) habitosActivos.add("Alcohol");
             if (pacienteData.habitos().cafe()) habitosActivos.add("Café");
             if (pacienteData.habitos().hooka()) habitosActivos.add("Hooka");
-            if (pacienteData.habitos().cigarrilloElectronico()) habitosActivos.add("Vape");
+            if (pacienteData.habitos().cigarrilloElectronico()) habitosActivos.add("Cigarrillo Electrónico");
             if (pacienteData.habitos().drogas()) habitosActivos.add("Drogas");
 
             // Si no hay ninguno marcado, ponemos "Ninguno". Si hay, los separamos por comas.
@@ -122,7 +126,7 @@ public class PdfService {
             context.setVariable("ta", pacienteData.examenFisico().tensionArterial());
             context.setVariable("fc", pacienteData.examenFisico().frecuenciaCardiaca());
             context.setVariable("fr", pacienteData.examenFisico().frecuenciaRespiratoria());
-            context.setVariable("temperatura", pacienteData.examenFisico().temperatura() + " °C"); // <--- NUEVO: Faltaba la temperatura
+            context.setVariable("temp", pacienteData.examenFisico().temperatura() + " °C"); // <--- NUEVO: Faltaba la temperatura
             context.setVariable("spo2", pacienteData.examenFisico().spO2() != null ? pacienteData.examenFisico().spO2() + " %" : "N/A"); // <--- NUEVO
             context.setVariable("peso", pacienteData.examenFisico().peso() + " kg");
             context.setVariable("talla", pacienteData.examenFisico().talla() + " m");
@@ -163,7 +167,30 @@ public class PdfService {
             context.setVariable("estudios", pacienteData.examenFisico().estudioComplementarios()); // Asegúrate de tener este campo en el DTO
             context.setVariable("diagnostico", pacienteData.examenFisico().diagnostico());
             context.setVariable("tratamiento", pacienteData.examenFisico().tratamiento());
+
+            // =========================================================
+            // ZONA F: FIRMA DINÁMICA DEL MÉDICO (DR. / DRA.)
+            // =========================================================
+            String tituloMedico = "Dr/Dra.";
+            String nombreMedico = "Médico Tratante";
+
+            // Verificamos quién está logueado en el sistema
+            if (sesionGlobal.haySesionActiva() && sesionGlobal.getUsuarioLogueado() instanceof com.proyectomedico.appmedicacenfasies.model.Medico doctor) {
+                // Asumiendo que el médico tiene un campo "sexo" en la base de datos
+                if (doctor.getSexo() != null && doctor.getSexo().equalsIgnoreCase("Femenino")) {
+                    tituloMedico = "Dra.";
+                } else {
+                    tituloMedico = "Dr.";
+                }
+                nombreMedico = doctor.getNombreCompleto();
+            }
+
+            // Enviamos las variables al HTML
+            context.setVariable("prefijoMedico", tituloMedico);
+            context.setVariable("firmaMedico", nombreMedico);
+
             // 2. Procesar la plantilla (Busca el archivo "hoja_clinica.html" en /templates/)
+
             String htmlProcesado = templateEngine.process("hoja_clinica", context);
 
             // 3. Configurar el motor de conversión a PDF
@@ -240,11 +267,8 @@ public class PdfService {
             context.setVariable("fechaEvolucion", evolucion.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
             // Cálculo dinámico de la edad
-            String edadStr = "N/A";
-            if (paciente.getFechaNacimiento() != null) {
-                edadStr = String.valueOf(Period.between(paciente.getFechaNacimiento(), LocalDate.now()).getYears());
-            }
-            context.setVariable("pacienteEdad", edadStr);
+            String edadStr = com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.calcularEdadDesdeFecha(paciente.getFechaNacimiento());
+            context.setVariable("pacienteEdad", edadStr.isEmpty() ? "N/A" : edadStr);
 
             // 2. Datos Clínicos
             context.setVariable("motivoSeguimiento", evolucion.getMotivoSeguimiento() != null ? evolucion.getMotivoSeguimiento() : "");

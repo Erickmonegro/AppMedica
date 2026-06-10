@@ -80,13 +80,14 @@
                                     <Label text="Historial Sonográfico" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #334155;"/>
                                     <Region HBox.hgrow="ALWAYS" />
 
-                                    <MenuButton text="+ Añadir Sonografía" style="-fx-background-color: #0b4a9e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 5 15; -fx-background-radius: 5px;">
+                                    <MenuButton fx:id="btnNuevaSonografia" text="+ Añadir Sonografía" style="-fx-background-color: #0b4a9e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 5 15; -fx-background-radius: 5px;">
                                         <items>
                                             <MenuItem text="Ecografía Abdominal" onAction="#abrirModalSonografiaAbdominal" />
-                                            <MenuItem text="Ecografía Obstétrica" disable="true" />
-                                            <MenuItem text="Ecografía Pélvica Femenina" disable="true" />
-                                            <MenuItem text="Ecografía de Mamas" disable="true" />
-                                            <MenuItem text="Ecografía Pélvica Masculina" disable="true" />
+                                            <MenuItem text="Ecografía Obstétrica" onAction="#abrirModalSonografiaObstetrica" />
+                                            <MenuItem text="Ecografía Pélvica Femenina" onAction="#abrirModalSonografiaPelvicaFemenina" />
+                                            <MenuItem text="Ecografía de Mamas" onAction="#abrirModalSonografiaMamas" />
+                                            <MenuItem text="Ecografía Pélvica Masculina" onAction="#abrirModalSonografiaPelvicaMasculina" />
+                                            <MenuItem text="Ecografía de Tiroides" onAction="#abrirModalSonografiaTiroides" />
                                         </items>
                                     </MenuButton>
                                 </HBox>

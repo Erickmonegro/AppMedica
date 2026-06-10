@@ -26,5 +26,6 @@ public class Medico extends Usuario { // Extiende de la clase padre
     @Column(name = "especialidad")
     private Set<Especialidad> especialidades = new HashSet<>();
 
+
     private String exequatur; // Número de licencia médica (sugerencia)
 }

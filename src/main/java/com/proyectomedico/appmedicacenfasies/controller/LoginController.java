@@ -62,12 +62,20 @@ public class LoginController {
             Parent root = fxmlLoader.load();
 
             // Obtenemos la ventana (Stage) actual usando uno de los campos de texto
-            Stage stage = (Stage) txtUsername.getScene().getWindow();
+            // ... código donde cargas el fxml del dashboard ...
 
-            // Cambiamos la escena
-            stage.setTitle(titulo);
-            stage.setScene(new Scene(root));
-            stage.centerOnScreen();
+            Stage stage = (Stage) txtUsername.getScene().getWindow(); // o como tengas tu variable stage
+
+            // 1. Quitamos cualquier candado de maximización obligatoria
+            stage.setMaximized(false);
+
+            // 2. Aplicamos la magia responsiva al Dashboard (1200 x 800 es un tamaño ideal de escritorio)
+            com.proyectomedico.appmedicacenfasies.util.FormatoClinicoUtil.configurarVentanaResponsiva(stage, root, 1200, 800);
+
+            // 3. Permitimos que el usuario lo maximice manualmente si lo desea
+            stage.setResizable(true);
+
+            stage.setTitle("CENFASIES - Panel Principal");
             stage.show();
 
         } catch (IOException e) {
